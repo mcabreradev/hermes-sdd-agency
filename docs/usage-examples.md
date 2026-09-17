@@ -43,7 +43,7 @@ flowchart TD
 ```
 or, in natural language:
 ```
-hagamos SDD: add SSO login to the web app
+let's run SDD: add SSO login to the web app
 ```
 or:
 > *"Build a `search` capability that filters invoices by vendor, date range and amount,
