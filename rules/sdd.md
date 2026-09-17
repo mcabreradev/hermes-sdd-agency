@@ -33,7 +33,7 @@ Flow, unless the change is classified as minimal or cosmetic by `rules/openspec.
 - **Every workflow closes with a final report** in the project (`templates/final-report.md`),
   and a completed change is archived + specs synced as part of closure (never optional).
 
-A request that just says "run the workflow / /agencia / 'los agentes'" also enters this
+A request that just says "run the workflow / /agency / 'the agents'" also enters this
 flow; the trigger does not depend on the exact wording. Minimal and cosmetic changes
 follow the fast path in `rules/openspec.md`, not this full loop.
 

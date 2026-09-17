@@ -50,7 +50,7 @@ the repo wins and the divergence gets reported.
 
 ## When the answer is not TypeScript
 
-Install the persona before the first `/implementar`, in this order:
+Install the persona before the first `/implement`, in this order:
 
 1. `hermes-add-agent --search <lang>` to find the slug under `programming-languages/`.
 2. `hermes-add-agent <slug>` (add `--force` to re-sync after editing the source).

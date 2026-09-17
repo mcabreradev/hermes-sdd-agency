@@ -15,9 +15,9 @@ cp -R agents workflows rules templates docs ~/.hermes/
 cp -R skills ~/.hermes/
 
 # 3. Bundle installs — pick the ones you want
-#    (each is a slash command: /agencia /feature /bugfix /fix /idea /plan /implementar
-#     /arquitectura /review /qa /release /init-proyecto)
-hermes skills install skill-bundles/agencia.yaml
+#    (each is a slash command: /agency /feature /bugfix /fix /idea /plan /implement
+#     /architecture /review /qa /release /init-project)
+hermes skills install skill-bundles/agency.yaml
 hermes skills install skill-bundles/feature.yaml
 hermes skills install skill-bundles/bugfix.yaml
 hermes skills install skill-bundles/fix.yaml
@@ -25,7 +25,7 @@ hermes skills install skill-bundles/fix.yaml
 
 # 4. Restart the session, then in any project:
 cd <your-project>
-/agencia          # or /feature for a feature, /bugfix for a minimal fix, /fix for cosmetic
+/agency          # or /feature for a feature, /bugfix for a minimal fix, /fix for cosmetic
 ```
 
 ## Path B — a full profile copy
@@ -43,7 +43,7 @@ The install proves the files landed, not that the model sees them (skills load f
 per conversation). Sanity check:
 
 ```bash
-hermes bundles list | grep -E 'agencia|feature|bugfix|/fix'
+hermes bundles list | grep -E 'agency|feature|bugfix|/fix'
 ls ~/.hermes/skills/agents | wc -l             # expect 23 personas
 ls ~/.hermes/skills | grep openspec            # expect 14 (openspec-sdd + 12 CLI + ...)
 ```

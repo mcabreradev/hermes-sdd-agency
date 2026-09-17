@@ -13,7 +13,7 @@ your `PATH` (e.g. `~/.local/bin/openspec`). Hermes runs it from each project roo
 
 ### Do I need to install all 12 bundles?
 
-No. `/agencia` loads the orchestrator plus `openspec-sdd`. The per-stage commands are
+No. `/agency` loads the orchestrator plus `openspec-sdd`. The per-stage commands are
 convenience entry points. The task-level shortcuts are:
 
 - `/feature` → full loop, starting with analysis.

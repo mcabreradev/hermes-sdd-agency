@@ -22,9 +22,9 @@ Any request to plan, build, review, verify or ship a feature in a project; "run 
 workflow"; "initialize the project"; "the agency"; "los agentes". Also load it before
 editing anything under `~/.hermes/{agents,workflows,rules,templates}`.
 
-**Shortest invocation:** the `/agencia` slash command (a skill bundle that loads this skill
-plus `openspec-sdd` and injects the orchestrator protocol). Per stage: `/init-proyecto`,
-`/idea`, `/arquitectura`, `/plan`, `/implementar`, `/review`, `/qa`, `/release` —
+**Shortest invocation:** the `/agency` slash command (a skill bundle that loads this skill
+plus `openspec-sdd` and injects the orchestrator protocol). Per stage: `/init-project`,
+`/idea`, `/architecture`, `/plan`, `/implement`, `/review`, `/qa`, `/release` —
 `hermes bundles list` shows them all. If the bundle is not available, this skill still
 autoloads on the phrases above; the human-facing cheat sheet lives in
 `~/.hermes/HOW-TO-INVOKE-THE-AGENCY.md`.

@@ -129,7 +129,7 @@ behavior; behavior never goes straight to the tree.
 
 **Trigger:**
 ```
-/init-proyecto
+/init-project
 ```
 
 **What runs:** `initialize-project.md`. Creates `openspec/`, `openspec/project.md`
@@ -150,9 +150,9 @@ A request that names a stage directly jumps to it (`hermes bundles list`):
 
 ```
 /idea        # turn an idea into a validated change (proposal + specs + design + tasks)
-/arquitectura# design the change: boundaries, contracts, rejected alternatives, ADRs
+/architecture# design the change: boundaries, contracts, rejected alternatives, ADRs
 /plan        # break the change into granular tasks.md
-/implementar # write the code (the ONLY stage that writes code)
+/implement # write the code (the ONLY stage that writes code)
 /review      # adversarial review of the diff (can block)
 /qa          # validate real behavior against the spec scenarios (can block)
 /release     # close: release notes, archive, final repo state

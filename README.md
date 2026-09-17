@@ -26,7 +26,7 @@ rules/          orchestration · project-boundaries · openspec · sdd · qualit
 templates/      openspec-project · proposal · spec · tasks · architecture · adr ·
                 review-report · qa-report · initialize-project-report · final-report
 docs/           sdd-feature-lifecycle · usage-examples · FAQ
-skill-bundles/  /agencia /feature /bugfix /fix and per-stage slash commands
+skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```
 
@@ -67,7 +67,7 @@ the conversation with the user.
    ```
    and the personas into `~/.hermes/skills/agents/`.
 4. Restart the session (skills load fresh per conversation).
-5. In any project: run `/agencia` (or `/feature`, `/bugfix`, `/fix`) and go.
+5. In any project: run `/agency` (or `/feature`, `/bugfix`, `/fix`) and go.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see

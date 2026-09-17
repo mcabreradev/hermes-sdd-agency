@@ -22,8 +22,8 @@ public, installable kit.
   quality, coding, testing), `agents/` (8 role contracts + README entry point),
   `workflows/` (initialize → idea → architecture → plan → implement → review → qa →
   release), `templates/` (10 artifact templates).
-- **Skill bundles**: `/agencia` and the per-stage commands `/init-proyecto`, `/idea`,
-  `/arquitectura`, `/plan`, `/implementar`, `/review`, `/qa`, `/release`, plus the
+- **Skill bundles**: `/agency` and the per-stage commands `/init-project`, `/idea`,
+  `/architecture`, `/plan`, `/implement`, `/review`, `/qa`, `/release`, plus the
   task-level triggers `/feature`, `/bugfix`, `/fix`.
 - **Skills**: 23 domain personas under `skills/agents/`, the orchestration layer
   (`hermes-sdd-orchestration`, `openspec-sdd`), 11 per-role process skills, and the 12

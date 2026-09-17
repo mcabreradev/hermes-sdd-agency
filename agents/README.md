@@ -2,8 +2,8 @@
 
 Entry point. Hermes orchestrates; each project owns its specs.
 
-> **How to invoke it:** `/agencia` (or `/init-proyecto`, `/idea`, `/arquitectura`, `/plan`,
-> `/implementar`, `/review`, `/qa`, `/release`). Full guide: `~/.hermes/HOW-TO-INVOKE-THE-AGENCY.md`
+> **How to invoke it:** `/agency` (or `/init-project`, `/idea`, `/architecture`, `/plan`,
+> `/implement`, `/review`, `/qa`, `/release`). Full guide: `~/.hermes/HOW-TO-INVOKE-THE-AGENCY.md`
 > · `hermes bundles list`
 
 ## What this is
