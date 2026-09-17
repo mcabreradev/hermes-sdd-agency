@@ -16,6 +16,68 @@ task per agent, validates every output in the real repo, applies retries and blo
 asks the human on ambiguity, and closes with a final report. The user's only real input
 is a clear idea + the repo. This document is what runs internally.
 
+## Lifecycle at a glance
+
+```mermaid
+flowchart TD
+    U[User: a clear idea + the repo] --> INIT{openspec/project.md present?}
+    INIT -- no --> S0[Stage 0 initialize-project]
+    INIT -- yes --> S1
+    S0 --> S1[Stage 1 discovery - idea / PRD]
+
+    S1 --> S2[Stage 2 openspec - proposal + specs]
+    S2 --> V1{validate passes?<br/>no ERROR}
+    V1 -- no --> S2
+    V1 -- yes --> S3[Stage 3 architect - design + ADR]
+
+    S3 --> S4[Stage 4 planner - tasks.md]
+    S4 --> G{preflight: validate + project.md + root}
+
+    G -- ok --> S5[Stage 5 builder - code + tests]
+    S5 --> R[Stage 6 reviewer - adversarial diff]
+    R --> RD{review approved?}
+    RD -- no --> S5
+    RD -- yes --> Q[Stage 7 qa - execute scenarios]
+    Q --> QD{qa pass?}
+    QD -- no --> S5
+    QD -- yes --> S8[Stage 8 release - notes + archive + sync]
+
+    S8 --> D[archive + sync specs + final report]
+    D --> E[git status clean]
+```
+
+Key invariants on the path (see `rules/`):
+
+- **Hermes is the only bus.** Agents never talk to each other; every output returns to
+  Hermes in the mandatory envelope and is re-verified in the repo before the next stage.
+- **Only reviewer and qa may block.** Open BLOCKER/MAJOR, `qa: fail` or any `blocked`
+  halts progress.
+- **Two failures with the same error ⇒ the spec is wrong**, go back a stage, never in
+  circles.
+- **Ambiguity of business/architecture/security/scope ⇒ ask the human** (options +
+  impact + recommendation), and record the answer in the project.
+- **No code without a validated change; every workflow closes with a final report.**
+
+## Roles and the orchestration bus
+
+```mermaid
+flowchart LR
+    H[Hermes - sole orchestrator]
+    H --> A0[discovery]
+    H --> A1[openspec]
+    H --> A2[architect]
+    H --> A3[planner]
+    H --> A4[builder]
+    H --> A5[reviewer]
+    H --> A6[qa]
+    H --> A7[release]
+```
+
+Each agent answers **only to Hermes**, in the mandated envelope (`status / summary /
+projectRoot / filesCreated / filesModified / blockers / nextRecommendedStep / evidence /
+openQuestions`), and no agent sees or writes for another. Reviewer and qa are the only
+two that can block progress (`rules/orchestration.md`).
+
 ---
 
 ## Stage 0 — Initialize (first time only)

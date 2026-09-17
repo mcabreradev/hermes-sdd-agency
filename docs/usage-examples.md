@@ -15,6 +15,23 @@ If the project is not yet initialized for the loop, the first stage auto-runs
 `initialize-project` (no code is written — only the OpenSpec scaffolding),
 `rules/project-boundaries.md`.
 
+## Choosing the right trigger
+
+Hermes classifies every request into one of three task levels (`rules/openspec.md`
+"Task size and fast path"). Use the diagram to pick correctly:
+
+```mermaid
+flowchart TD
+    Q{Does it change observable behavior?}
+    Q -- no --> COS[Cosmetic - direct edit /fix]
+    Q -- yes --> B{Does it touch business rules,<br/>a contract, or architecture?}
+    B -- yes --> FEA[Feature - full loop /feature]
+    B -- no --> MIN[Minimal - bounded fix /bugfix<br/>with regression test]
+    COS --> D1[no OpenSpec change]
+    FEA --> D2[delta spec + personas + QA]
+    MIN --> D3[skip_specs - validated change]
+```
+
 ---
 
 ## Example 1 — Feature (full loop)
@@ -149,6 +166,50 @@ Several independent features can run as separate workflows in separate branches
 or worktrees, each with its own root, change and final report
 (`rules/project-boundaries.md`). Hermes runs independent stages in parallel via
 `delegate_task`; dependent stages wait on verified output.
+
+---
+
+## Example 7 — What an agent actually returns (the envelope)
+
+Every agent reply — builder, reviewer, qa, the rest — is a **structured envelope**
+(`rules/orchestration.md`). A sample builder response after one task of a change:
+
+```yaml
+status:              done
+summary:             Implemented the vendor filter with pagination and its unit tests.
+projectRoot:         /Users/alice/projects/invoice-search
+filesCreated:        [src/operators/vendor-filter.ts, src/__tests__/vendor-filter.test.ts]
+filesModified:       [src/index.ts, src/types.ts]
+blockers:            []
+nextRecommendedStep: proceed to review
+evidence:            'bun test src/__tests__/vendor-filter.test.ts -> 3 passed, 0 failed'
+openQuestions:       []
+```
+
+Hermes **re-verifies every claim** in the repo before advancing: it runs
+`git status --porcelain` to confirm `filesCreated`/`filesModified` match the real diff,
+and runs the gate itself. **An agent's output is a self-report, not a fact.**
+
+### The gate that stops implementation
+
+```mermaid
+flowchart LR
+    A[validate must pass - no ERROR] --> B{preflight ok?}
+    B -- project.md present --> C{root matches}
+    C -- yes --> D[implement]
+    B -- no --> E[block - run initialize-project]
+    C -- no --> F[block - ask human for root]
+```
+
+No implementation code exists before all of these pass from the project root
+(`rules/openspec.md`):
+
+```bash
+test -f openspec/project.md                        # else run initialize-project first
+openspec context --json                            # root.path == expected root
+openspec validate "<name>" --type change --json     # no ERROR
+openspec instructions apply --change "<name>" --json  # state: ready
+```
 
 ---
 
