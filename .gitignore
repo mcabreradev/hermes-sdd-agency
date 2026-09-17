@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Editor / OS cruft
+*.swp
+*~
+
+# Local state (never exported — machine-specific)
+.local/

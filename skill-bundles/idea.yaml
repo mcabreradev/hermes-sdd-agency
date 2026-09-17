@@ -1,0 +1,11 @@
+name: idea
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'Turn an idea into a validated OpenSpec change inside the project (proposal + specs + design
+  + tasks). Planning only: writes no code.'
+instruction: 'STAGE: idea-to-openspec. Read ~/.hermes/workflows/idea-to-openspec.md in full before acting
+  and run its preflight exactly as written. Resolve the project root (pwd -P + openspec context --json)
+  and compare it against the expected root; if ambiguous, stop and report. Load the agents/personas the
+  workflow names. Validate each agent''s output in the real repo before advancing. Close with templates/final-report.md.
+  Never improvise stages or skip the gate.'

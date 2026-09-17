@@ -1,0 +1,104 @@
+# Rule: Quality
+
+Quality is verifiability. A stage is closed when there is reproducible evidence,
+not when the agent reports that it finished.
+
+## Evidence > claim
+
+- Every agent output must cite **command + real output** (or path + exact fragment)
+  that proves what it claims.
+- A "ready", "done" or "verified" without evidence is treated as a failure: it goes back to the agent
+  with the same brief and the evidence requirement.
+- Hermes re-verifies in the real repo before accepting: an agent's output is a
+  self-report, not a fact.
+- Never fabricate output. If something could not be executed, the blocker is reported as is.
+
+## Output formats (contract of each agent)
+
+The mandatory envelope is defined in `rules/orchestration.md` (section "Mandatory output
+contract for agents"): it is the single source of truth for the format.
+
+```
+status:              done | blocked | failed | needs-context
+                     (+ approved | changes-requested in reviewer; pass | fail in qa)
+summary:             one line, without narrating the process
+projectRoot:         absolute path of the project
+filesCreated:        absolute paths created (or [])
+filesModified:       absolute paths modified (or [])
+blockers:            what prevents finishing + what decision is needed (or [])
+nextRecommendedStep: proposed next step (Hermes decides)
+evidence:            commands + relevant output; path:line
+openQuestions:       doubts that change design, scope or business (or [])
+```
+
+- `done` requires evidence for **each** objective of the brief. An objective without evidence
+  ⇒ the response is degraded to `blocked`.
+- `blocked` and `failed` must name the exact defect: command, output, `path:line`.
+- `needs-context` only when the lack of context prevents progress and cannot be resolved
+  by reading the repo.
+- No field is omitted: without it, the response is invalid and goes back to the agent with the
+  same brief and the format requirement.
+
+## Definition of Done by task type
+
+| Task | Done requires |
+|---|---|
+| discovery | inventory with evidence (paths, commands), without inventing behavior |
+| openspec (propose) | `validate` without ERROR + `ℹ INFO` read and reported |
+| architect | decisions with discarded alternatives and risks; ADR if applicable |
+| planner | granular `tasks.md` (steps of ≤1 day), each task verifiable |
+| builder | repo build/lint/tests green + only declared files touched |
+| reviewer | findings with `severity`, `path:line`, impact and proposed fix |
+| qa | executed cases, real result, failure evidence when it fails |
+| release | versioning and notes coherent with the diff; nothing that fails the repo gate |
+
+## Declared diff rule
+
+- The agent declares **beforehand** which files it is going to touch; any file touched outside
+  that list is a defect that the reviewer raises.
+- No silent collateral changes: no mass reformatting, version bumps or
+  "I took the opportunity and fixed it" in the same step.
+- The agent's work is verified with the real diff (`git diff`, `git status`), not with
+  its description of it.
+
+## Repository gate
+
+Before declaring something finished, the project's real gate is run, read from the repo
+(not invented):
+
+```bash
+cat package.json | jq '.scripts'          # or Makefile / justfile / pyproject.toml
+git diff --stat
+```
+
+- If the project declares git hooks (husky, pre-commit), run their equivalent **before**
+  committing, do not discover it in the hook.
+- A test that passes on retry is flaky: it is reported as a defect, not as green.
+- Never declare a gate green that was not run. If the gate cannot be run (environment,
+  credentials, time), the report is `blocked` with the reason.
+
+## Agent conduct rules
+
+- Agents do not communicate with each other; every output goes to Hermes with the format above.
+- Agents do not modify `~/.hermes/**` (workflows, rules, agents, templates,
+  global memory). If they detect that a rule is missing or incorrect, they report it to Hermes
+  as a finding; Hermes decides whether to update the global system.
+- Agents do not update global memory with project facts: what is specific to the
+  project is written in the project.
+- **Every report declares the `projectRoot` used in that run.** A report whose
+  `projectRoot` does not match the verified root (`openspec context --json` contrasted
+  against the expected one, `rules/project-boundaries.md`) is invalid and is returned to the agent.
+- Agents do not archive changes nor touch `openspec/specs/` unless the workflow explicitly
+  tells them to.
+
+## Severities
+
+```
+BLOCKER   prevents the specified functionality from existing or the gate from passing
+MAJOR     incorrect behavior or real risk, with a workaround
+MINOR     quality, maintainability, consistency
+NIT       style preference, does not block
+```
+
+`BLOCKER` and `MAJOR` block the stage's progress. `MINOR` and `NIT` are recorded and
+Hermes decides (fix now or leave it as declared debt in the final report).

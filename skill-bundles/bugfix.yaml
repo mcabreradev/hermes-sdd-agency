@@ -1,0 +1,15 @@
+name: bugfix
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'Minimal, bounded change with behavior: bug fix with its regression test, via the fast path (skip_specs).'
+instruction: 'LEVEL: MINIMAL. Follow rules/openspec.md "Task size and fast path" (the minimal level). Bounded
+  change WITH observable behavior: a bug fix that MUST carry its regression test (rules/testing.md). Protocol:
+  (1) resolve root with pwd -P + openspec context --json, contrast against expected root; (2) create an
+  OpenSpec change WITH skip_specs: true in .openspec.yaml (valid, no requirement deltas); (3) proposal +
+  task(s), then the fix; (4) regression test that FAILS without the fix; (5) validate the change and review
+  the diff; (6) re-verify in the repo (git status --porcelain, git diff --stat, run the gate) before advancing;
+  (7) close: archive the change + sync specs, then final report. The change is NOT skipped because it is small:
+  it exists, is validated, applied and archived; only the requirement deltas are omitted. This is never a
+  shortcut around evidence or verification, and never applied to feature/contract/architecture scope. If the
+  fix touches business rules or a contract, escalate to feature (full loop), do not take the fast path.'

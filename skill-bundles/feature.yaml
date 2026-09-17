@@ -1,0 +1,16 @@
+name: feature
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'Feature-level change: run the FULL SDD agency loop, starting from analysis of the problem/feature.'
+instruction: 'LEVEL: FEATURE. Follow rules/sdd.md in full. This is the full SDD agency loop over the cwd
+  project: analyze the problem/feature FIRST (discovery/openspec) before any planning or code. Protocol:
+  (1) resolve root with pwd -P + openspec context --json, contrast against expected root; (2) preflight
+  test -f openspec/project.md or run workflows/initialize-project.md; (3) read the stage workflow at
+  ~/.hermes/workflows/<stage>.md and the role at ~/.hermes/agents/<role>.md; (4) load personas the
+  workflow names; (5) delegate one bounded task per agent, self-contained brief; (6) validate every agent
+  output in the real repo before advancing; (7) full role set (discovery..release), independent stages
+  in parallel via delegate_task; (8) only reviewer and qa may block; (9) ask the human on ambiguity of
+  business/architecture/security/scope; (10) close with templates/final-report.md and archive+sync the
+  change. If the request does not name a stage, ask which one. This is NOT the fast path: a feature goes
+  through the full loop with delta specs, personas and formal QA.'

@@ -1,0 +1,15 @@
+name: agencia
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'SDD agency: orchestrate the OpenSpec loop (initialize, propose, plan, implement, review,
+  QA, release)'
+instruction: 'AGENCY INVOCATION. Loading this bundle makes Hermes the sole orchestrator of the SDD loop
+  over the cwd project. Protocol: (1) resolve the project root with ''pwd -P'' + ''openspec context --json''
+  and compare it against the expected root; (2) stage preflight: ''test -f openspec/project.md'' or run
+  workflows/initialize-project.md; (3) read the stage workflow at ~/.hermes/workflows/<stage>.md and the
+  role file at ~/.hermes/agents/<role>.md; (4) load the personas/methods that workflow names, via skill_view;
+  (5) delegate one bounded task per agent with a self-contained brief; (6) validate each agent''s output
+  in the real repo before advancing; (7) close with templates/final-report.md. If the request does not
+  name a stage, ask which one: initialize-project, idea-to-openspec, openspec-to-architecture, plan-change,
+  implement-change, review-change, qa-change or release-change.'

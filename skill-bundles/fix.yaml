@@ -1,0 +1,12 @@
+name: fix
+skills:
+- hermes-sdd-orchestration
+description: 'Cosmetic change with no behavior change: direct edit, no OpenSpec change.'
+instruction: 'LEVEL: COSMETIC. Follow rules/openspec.md "Task size and fast path" (the cosmetic level). A direct
+  edit with NO observable behavior change: typo in a user-visible message, indentation, renaming a local
+  variable. There is NO OpenSpec change for this level: nothing changes about behavior, so there is nothing
+  to verify at spec level. Protocol: (1) resolve root with pwd -P + openspec context --json, contrast against
+  expected root; (2) make the direct edit; (3) verify no behavior changed (build/lint where applicable,
+  git diff); (4) re-check the diff (git status --porcelain). If during the work you find ANY observable behavior
+  change, STOP and escalate to bugfix (minimal) or feature (full loop) — cosmetic never carries behavior, and
+  behavior never goes straight to the tree without a change.'
