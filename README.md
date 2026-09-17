@@ -65,6 +65,8 @@ the conversation with the user.
 5. In any project: run `/agencia` (or `/feature`, `/bugfix`, `/fix`) and go.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
+For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
+`docs/usage-examples.md`.
 
 ## First run calibration
 

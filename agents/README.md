@@ -91,6 +91,7 @@ initialize-project → idea-to-openspec → openspec-to-architecture → plan-ch
 | close a change | `workflows/release-change.md` |
 | an artifact's template | `templates/<artifact>.md` |
 | walk the whole feature lifecycle (idea → PRD → … → release) | `docs/sdd-feature-lifecycle.md` |
+| concrete copy-paste scenarios per level (feature/bugfix/fix/init) | `docs/usage-examples.md` |
 | which persona/method to load at a stage | the agent's "Persona and method" section + `hermes-sdd-orchestration` |
 
 ## System state
