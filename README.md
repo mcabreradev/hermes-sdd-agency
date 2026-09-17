@@ -20,7 +20,7 @@ rules/          orchestration · project-boundaries · openspec · sdd · qualit
                 coding · testing
 templates/      openspec-project · proposal · spec · tasks · architecture · adr ·
                 review-report · qa-report · initialize-project-report · final-report
-docs/           sdd-feature-lifecycle.md (the full idea → PRD → … → release path)
+docs/           sdd-feature-lifecycle · usage-examples · FAQ
 skill-bundles/  /agencia /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```
@@ -66,7 +66,10 @@ the conversation with the user.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
-`docs/usage-examples.md`.
+`docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`.
+
+See also `CONTRIBUTING.md` (how to change the agency) and `CHANGELOG.md` (release
+history).
 
 ## First run calibration
 

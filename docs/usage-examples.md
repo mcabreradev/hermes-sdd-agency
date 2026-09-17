@@ -230,5 +230,6 @@ openspec instructions apply --change "<name>" --json  # state: ready
 ## See also
 
 - `docs/sdd-feature-lifecycle.md` — the full internal path, stage by stage.
+- `docs/FAQ.md` — common questions and answers.
 - `README.md` — system overview, gate, install, rules.
 - `INSTALL.md` — installation and verification.
