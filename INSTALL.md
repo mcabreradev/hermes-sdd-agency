@@ -11,8 +11,8 @@ cd hermes-sdd-agency
 # 1. Process tree (rules, agents, workflows, templates, docs) into Hermes' home
 cp -R agents workflows rules templates docs ~/.hermes/
 
-# 2. Personas (expertise) into the skills dir
-cp -R skills/agents ~/.hermes/skills/
+# 2. Entire skills tree (personas, orchestration, openspec-*, process skills)
+cp -R skills ~/.hermes/
 
 # 3. Bundle installs — pick the ones you want
 #    (each is a slash command: /agencia /feature /bugfix /fix /idea /plan /implementar
@@ -44,8 +44,14 @@ per conversation). Sanity check:
 
 ```bash
 hermes bundles list | grep -E 'agencia|feature|bugfix|/fix'
-ls ~/.hermes/skills/agents | wc -l      # expect 23 personas
+ls ~/.hermes/skills/agents | wc -l             # expect 23 personas
+ls ~/.hermes/skills | grep openspec            # expect 14 (openspec-sdd + 12 CLI + ...)
 ```
+
+Note on layout: the repo stores `skills/` **flat** (a copy of the SDD-relevant subset of
+your `~/.hermes/skills/`, under `skills/software-development/` for the two orchestration
+skills). The install copies the whole tree, so internal `file_path` references resolve
+identically; only the exact directory nesting differs from a full profile copy.
 
 ## What you must NOT copy into a project
 
@@ -56,9 +62,10 @@ The only project-level entry is OpenSpec's own `openspec/`, created by
 
 ## Keeping the export in sync
 
-`rules/`, `agents/`, `workflows/`, `templates/`, `docs/`, `skill-bundles/` and
-`skills/agents/` are copied from `~/.hermes/`. When you change a rule or add a bundle
-locally, re-copy that directory here and commit so the public export stays current.
+`rules/`, `agents/`, `workflows/`, `templates/`, `docs/`, `skill-bundles/` and the
+SDD-relevant skills under `skills/` are copied from `~/.hermes/`. When you change a rule,
+add a bundle or edit a persona/process skill locally, re-copy that directory here and
+commit so the public export stays current.
 
 ## Requirements
 
