@@ -33,7 +33,7 @@ set -euo pipefail
 REPO_URL="${HERMES_SDD_AGENCY_REPO:-https://github.com/mcabreradev/hermes-sdd-agency.git}"
 
 PROCESS_DIRS=(agents workflows rules templates docs)
-ALL_BUNDLES=(agency feature bugfix fix idea plan implement architecture review qa release init-project do resume)
+ALL_BUNDLES=(agency feature bugfix fix idea plan implement architecture review qa release init-project do continue)
 
 # --- option parsing -----------------------------------------------------------
 PREFIX=""
@@ -219,7 +219,7 @@ fi
 # --- post-install checks ------------------------------------------------------
 if (( DO_BUNDLES && ! DRY_RUN )); then
   printf '\nInstalled slash commands:\n'
-  hermes bundles list 2>/dev/null | grep -E 'agency|feature|bugfix|fix|idea|plan|implement|architecture|review|qa|release|init-project|do|resume' || true
+  hermes bundles list 2>/dev/null | grep -E 'agency|feature|bugfix|fix|idea|plan|implement|architecture|review|qa|release|init-project|do|continue' || true
 fi
 
 # Warn (never install) when the /feature bundle is present but its discovery

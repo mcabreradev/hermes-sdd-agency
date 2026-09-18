@@ -1,8 +1,8 @@
-# Workflow: resume-change (RESUME MODE)
+# Workflow: continue-change (CONTINUE MODE)
 
 Continues a change that already has a **validated OpenSpec change**
 (proposal/spec/tasks) and runs the pending stages to completion, ending in a PR
-(draft) for human review. It is the `/resume` bundle's workflow.
+(draft) for human review. It is the `/continue` bundle's workflow.
 
 It does **not** start from an idea: there is no discovery or spec stage to run.
 It detects where the flow stopped and picks up from the first pending stage. It
@@ -35,7 +35,7 @@ git log --oneline -5
 
 - If `openspec/project.md` is missing or the root does not resolve, run
   `workflows/initialize-project.md` first. Do not invent a root.
-- `resume` requires an **active change**. If none exists, this is not the right
+- `continue` requires an **active change**. If none exists, this is not the right
   workflow — tell the user (`/do` or `/feature` starts one).
 
 ## 1. Detect — where did the flow stop? (Hermes, never by assumption)
@@ -130,7 +130,7 @@ Every decision actually taken is recorded as an ADR in the project
   output, `path:line`); repeating the same brief is forbidden.
 - Two failures with the same error ⇒ spec or design is wrong: go back a stage.
 - A `BLOCKER`/`MAJOR` still open after its cutoff, or a persisted `qa: fail`, is
-  escalated to the human — a stuck quality wall wakes the user even in resume mode.
+  escalated to the human — a stuck quality wall wakes the user even in continue mode.
 
 ## 5. Close and update the PR
 
@@ -148,14 +148,14 @@ With review approved + QA pass + everything committed:
 ## Output
 
 Final report in the project + the updated PR (draft). The report: closed stages
-with evidence, the stage it resumed from, gates run, OpenSpec status, ASSUMED
+with evidence, the stage it continued from, gates run, OpenSpec status, ASSUMED
 decisions to verify, declared debt, and a single next step (the PR).
 
 ## Typical errors
 
-- Assuming `resume` starts a new PR — it detects and updates the existing draft.
+- Assuming `continue` starts a new PR — it detects and updates the existing draft.
 - Re-running discovery/spec when they are already validated (there is no idea stage here).
 - Skipping a stage that is not actually closed and advancing blindly.
-- Letting a routine resume take a non-trivial security/architecture/contract decision.
+- Letting a routine continue take a non-trivial security/architecture/contract decision.
 - Closing without archiving + syncing into the PR.
 - Accepting an agent's self-report without re-verifying in the repo.

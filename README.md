@@ -108,15 +108,15 @@ anything touching a contract/security it stops and asks. Try it first on a toy
 project, then read the first PR's ASSUMED list cover-to-cover before trusting it
 overnight. See `workflows/autonomous-change.md`.
 
-### `/resume` — continue a change already started
+### `/continue` — continue an existing change
 
-`/resume` continues when a **validated OpenSpec change already exists**
+`/continue` continues when a **validated OpenSpec change already exists**
 (proposal/spec/tasks, e.g. via `/feature`) and you want the rest of the loop run:
 code → review → QA → archive+sync, ending with the **existing PR draft updated**.
 It detects the state (`openspec list`/`status`, git, PR) rather than assuming it,
 so it never re-runs discovery/spec already done and never opens a second PR. Same
 confidence gate as `/do` (routine sleeps, non-trivial wakes). See
-`workflows/resume-change.md`.
+`workflows/continue-change.md`.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
