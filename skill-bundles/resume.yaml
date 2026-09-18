@@ -1,0 +1,35 @@
+name: resume
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'RESUME: continue a change that already has a validated OpenSpec change (proposal/spec/tasks),
+  running the pending stages (implement → review → QA → release) and updating the existing PR draft.
+  Detects where the flow stopped and picks up from there.'
+instruction: 'RESUME MODE. A validated OpenSpec change already exists over the cwd project — you are
+  NOT starting from an idea. Detect the real state, then run the pending stages to completion with a
+  confidence gate, ending in a PR (draft) the human reviews and merges. Never publishes/merges/tags.
+
+  DETECT (do not assume): openspec list --json / openspec status --change "<name>" --json to find the
+  active change and what is still pending; git log + gh pr list to see if a PR draft already exists.
+  If one does, UPDATE it — never open a second PR.
+
+  FROM THE PENDING STAGE: if proposal/spec/tasks are done and no code exists, continue at implement-change,
+  then review-change, qa-change, release-change. If some code already exists, do not re-implement it:
+  review/validate what is there and continue from the next pending stage. One agent per stage via
+  delegate_task, independent stages parallel, every output re-verified in the repo before advancing
+  (git status --porcelain, git diff --stat, re-run the gate) — an agent reply is a self-report.
+
+  CONFIDENCE GATE (same as /do): routine decisions (follow the existing stack, minimal behavior, do not
+  expand scope) run automatically, each recorded as an ADR flagged "ASSUMED — verify in PR". The moment a
+  stage hits a NON-TRIVIAL decision — contract/API change, schema/data-model change, real security risk
+  (auth/secrets/exposure), ambiguous business rule changing visible behavior, split-feature, structural
+  debt, a non-standard new dependency, or high cost to revert — STOP that stage, report options +
+  recommendation + impact, and WAIT. "Routine sleeps, non-trivial wakes."
+
+  CLOSE: final report (templates/final-report.md) in the project with the Decisions/ASSUMED section;
+  archive the change + sync specs (rules/openspec.md closure, and the synced specs go into the PR);
+  update the PR draft with the code, reports, ADRs and synced specs. The PR awaits the human — never
+  merge/publish/tag on your own.
+
+  This is NOT the fast path and NOT /do: the change already exists, so there is no discovery/spec
+  stage to run. For bugfix/minimal use /bugfix; for cosmetic use /fix.'
