@@ -117,13 +117,14 @@
   /* usage + faq + advanced */
   .usage-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
   .use{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface)}
-  .use .cmdline{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:8px}
+  .use:hover{border-color:var(--accent-border);background:var(--surface-hover);cursor:default}
+  .use .cmdline{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:8px;padding:3px 10px;border:1px solid var(--border-light);border-radius:var(--radius);width:fit-content}
   .use p{font-size:13.5px;color:var(--text-dim)}
   /* advanced cards: consistent icon header, accent top border to mark the tier */
   .use.adv{border-top:3px solid var(--accent)}
-  .adv-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .adv-head svg{width:18px;height:18px;color:var(--accent);flex:none}
-  .adv-head .adv-title{font-family:var(--font-mono);font-size:13.5px;font-weight:600;color:var(--text);text-transform:none}
+  .use .adv-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .use .adv-head svg{width:18px;height:18px;color:var(--accent);flex:none}
+  .use .adv-head .adv-title{font-family:var(--font-mono);font-size:13.5px;font-weight:600;color:var(--text);text-transform:none}
   .faq details{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--surface);padding:0 18px}
   .faq details summary{cursor:pointer;padding:14px 0;font-weight:600;color:var(--text);list-style:none}
   .faq details summary::-webkit-details-marker{display:none}
@@ -313,11 +314,15 @@
           <tr><td><code>/feature</code> · <code>/bugfix</code> · <code>/fix</code></td><td>task-level triggers</td><td class="nowrite">no</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:14px;font-size:13.5px;color:var(--text-dim)">These slash commands trigger the <em>stages</em>; each stage loads its complementary process <strong>skills</strong> as it runs — e.g. <code>review-structural</code> (SQL / LLM trust-boundary / side-effect scan) inside <code>/review</code>, <code>code-health</code> (0-10 score) and report-only mode inside <code>/qa</code>, <code>plan-scope-review</code> (expand / hold / strip) before <code>/plan</code>, and <code>document-diataxis</code> plus the <code>no-smoke-worktree</code> fingerprint check inside <code>/release</code>. The full skill set lives under <code>skills/</code> in the repo.</p>
+      <div class="usage-cards" style="margin-top:18px">
+        <div class="use adv" style="grid-column:1/-1">
+          <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h6l2-7 4 14 2-7h6"/></svg><span class="adv-title">Skills load inside the stages</span></div>
+          <p>These slash commands trigger the <em>stages</em>; each loads its complementary process <strong>skills</strong> as it runs — e.g. <code>review-structural</code> (SQL / LLM trust-boundary / side-effect scan) inside <code>/review</code>, <code>code-health</code> (0-10 score) and report-only mode inside <code>/qa</code>, <code>plan-scope-review</code> (expand / hold / strip) before <code>/plan</code>, and <code>document-diataxis</code> plus the <code>no-smoke-worktree</code> fingerprint check inside <code>/release</code>. The full skill set lives under <code>skills/</code> in the repo.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-
 <section id="usage">
   <div class="wrap">
     <div class="sec-label">USAGE</div>
@@ -325,19 +330,19 @@
     <p class="sec-intro">Hermes classifies every request into one of three task levels and runs the matching path. Copy-paste scenarios live in the repo&rsquo;s <code>docs/usage-examples.md</code>; here is the shape of each.</p>
     <div class="usage-cards">
       <div class="use">
-        <span class="cmdline">/feature</span>
-        <p><strong>Feature</strong> — a business rule, a contract, or architecture. Full loop: analysis → spec → plan → code → review → QA → release. Starts with discovery of the problem.</p>
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v8M12 8l-3-3M12 8l3-3"/><path d="M20 13c0 6-3.5 9-8 9s-8-3-8-9"/></svg><span class="adv-title">feature</span></div>
+        <p><strong>Full</strong> — a business rule, a contract, or architecture. Whole loop: analysis → spec → plan → code → review → QA → release. Starts with discovery of the problem.</p>
       </div>
       <div class="use">
-        <span class="cmdline">/bugfix</span>
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M12 7v5"/><path d="M9 9l3 3 3-3"/></svg><span class="adv-title">bugfix</span></div>
         <p><strong>Minimal</strong> — a bounded fix that changes behavior. Runs the fast path (<code>skip_specs</code>) but <em>always</em> carries a regression test that fails without the fix.</p>
       </div>
       <div class="use">
-        <span class="cmdline">/fix</span>
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/></svg><span class="adv-title">fix</span></div>
         <p><strong>Cosmetic</strong> — no observable behavior change. A direct edit; there is no OpenSpec change because there is nothing to verify at spec level.</p>
       </div>
       <div class="use">
-        <span class="cmdline">/do</span>
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">do</span></div>
         <p><strong>Autonomous</strong> — run the whole loop end-to-end with no human in the loop, ending in a PR for review. A confidence gate stops on non-trivial decisions.</p>
       </div>
     </div>
