@@ -162,6 +162,10 @@
     .install-cmd code{white-space:normal;word-break:break-all;line-height:1.6;overflow-x:visible}
     #install .stp{grid-template-columns:34px 1fr;gap:10px 10px}
     #install .stp .w{grid-column:2;text-align:left}
+    /* FAQ + USAGE responsive: wrap long inline/code tokens so nothing overflows */
+    .use p code, .faq details p code{white-space:normal;word-break:break-all}
+    .code-block{white-space:normal;word-break:break-all;overflow-x:visible;font-size:11.5px;line-height:1.65}
+    .usage-cards{grid-template-columns:1fr}
   }
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   @media (prefers-reduced-motion:reduce){.nav-panel,.nav-panel nav,.nav-panel nav a,.menu-toggle .burger i{transition:none;transform:none}}
