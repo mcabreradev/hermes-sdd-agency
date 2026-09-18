@@ -3,6 +3,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 [![OpenSpec](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg)](INSTALL.md)
 [![Made for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg)](https://hermes-agent.nousresearch.com/)
+[![Site](https://img.shields.io/badge/website-live-teal.svg)](https://mcabreradev.github.io/hermes-sdd-agency/)
 ![Status: public](https://img.shields.io/badge/status-public-brightgreen.svg)
 
 An opinionated **Spec-Driven Development** orchestration system for [Hermes
@@ -73,7 +74,8 @@ For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifec
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
 `docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`. For a complete
 study change showing the real `proposal.md` / `spec.md` / `tasks.md` shape, see
-`docs/example-change/`.
+`docs/example-change/`. A rendered landing page is live at
+**[mcabreradev.github.io/hermes-sdd-agency/](https://mcabreradev.github.io/hermes-sdd-agency/)**.
 
 See also `CONTRIBUTING.md` (how to change the agency) and `CHANGELOG.md` (release
 history).
