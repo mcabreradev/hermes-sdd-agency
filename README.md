@@ -65,7 +65,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agenc
 It asks where to install (default `~/.hermes`) via an interactive menu when
 run in a terminal — arrow keys to navigate, space to toggle bundles, type to
 filter, Enter to confirm, Esc/Ctrl+C to cancel; nothing is written until you
-confirm the summary. It merges the process tree, skills and
+confirm the summary. On that final Yes/No confirm, `↑/←` picks **Yes**, `↓/→`
+picks **No**, and the keys **y**/**n** work too — it defaults to **No** so an
+overwrite can't ride a stray Enter. It merges the process tree, skills and
 bundles, and is idempotent — safe to re-run. Piped runs (like the one-command
 form above, stdin not a TTY) skip the menu and use the defaults. Flags:
 `-p <home>` target (also honors

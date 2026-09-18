@@ -16,9 +16,11 @@ installer menu (`npx skills add`-style): select bundles with **space**, move
 with **↑↓**, type to filter the list live, press **Enter** to confirm each
 step, **Esc**/**Ctrl+C** to cancel. The install only starts after an explicit
 **Yes** on the summary — pick the target home (Enter accepts the default
-`~/.hermes`), review what will be installed, and confirm. Piped/CI runs
-(stdin not a TTY) skip the menu entirely and use the defaults — they never
-wait for input. Flags:
+`~/.hermes`), review what will be installed, and confirm. On the final
+Yes/No confirm use **↑ / ← → Yes** and **↓ / → → No** (or just type **y** /
+**n**), then **Enter** — the installer defaults to **No**, so an overwrite
+can never ride a stray Enter. Piped/CI runs (stdin not a TTY) skip the menu
+entirely and use the defaults — they never wait for input. Flags:
 
 ```
 -p, --prefix DIR     Target Hermes home (default: $HERMES_HOME or ~/.hermes)
