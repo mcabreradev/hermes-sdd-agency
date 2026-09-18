@@ -56,19 +56,16 @@ the conversation with the user.
 
 ## Install (into another Hermes)
 
-1. Clone this repo somewhere stable.
-2. **Install each bundle** (repeat for the ones you want):
-   ```bash
-   hermes skills install /path/to/hermes-sdd-agency/skill-bundles/<name>.yaml
-   ```
-   or place the `.yaml` files in `~/.hermes/skill-bundles/`.
-3. **Copy the global process tree** into the target `~/.hermes/`:
-   ```bash
-   cp -R agents workflows rules templates docs ~/.hermes/
-   ```
-   and the personas into `~/.hermes/skills/agents/`.
-4. Restart the session (skills load fresh per conversation).
-5. In any project: run `/agency` (or `/feature`, `/bugfix`, `/fix`) and go.
+**One command:**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agency/main/install.sh)
+```
+
+It asks where to install (default `~/.hermes`), merges the process tree, skills and
+bundles, and is idempotent — safe to re-run. Flags: `-p <home>` target (also honors
+`$HERMES_HOME`), `--bundles a,b,c` subset, `--no-bundles`, `--dry-run`. Or clone and run
+`./install.sh` to skip the re-download. Full guide in `INSTALL.md`.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
