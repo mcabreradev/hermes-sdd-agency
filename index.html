@@ -106,6 +106,19 @@
   .cmd-table td code{font-family:var(--font-mono);background:transparent;font-size:13px}
   .cmd-table td .write{color:var(--accent);font-weight:500}
   .cmd-table td .nowrite{color:var(--text-muted)}
+  /* usage + faq + advanced */
+  .usage-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .use{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface)}
+  .use .cmdline{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:8px}
+  .use p{font-size:13.5px;color:var(--text-dim)}
+  .faq details{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--surface);padding:0 18px}
+  .faq details summary{cursor:pointer;padding:14px 0;font-weight:600;color:var(--text);list-style:none}
+  .faq details summary::-webkit-details-marker{display:none}
+  .faq details summary::before{content:"›";color:var(--accent);margin-right:10px;font-family:var(--font-mono)}
+  .faq details[open] summary::before{content:"⌄"}
+  .faq details p{margin:0 0 16px;color:var(--text-dim);font-size:14.5px}
+  .code-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;color:var(--text);margin-bottom:16px}
+  .code-block .prompt{color:var(--accent)}
   /* principles */
   .principles{display:flex;flex-direction:column;gap:0}
   .pr{padding:18px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:22px 1fr;gap:16px;align-items:baseline}
@@ -139,6 +152,9 @@
       <a href="#cycles">The loop</a>
       <a href="#levels">Task levels</a>
       <a href="#commands">Commands</a>
+      <a href="#usage">Usage</a>
+      <a href="#faq">FAQ</a>
+      <a href="#advanced">Advanced</a>
       <a href="#rules">Principles</a>
       <a href="#install">Install</a>
     </nav>
@@ -258,6 +274,96 @@
           <tr><td><code>/feature</code> · <code>/bugfix</code> · <code>/fix</code></td><td>task-level triggers</td><td class="nowrite">no</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<section id="usage">
+  <div class="wrap">
+    <div class="sec-label">USAGE</div>
+    <h2>Pick the trigger that matches the change.</h2>
+    <p class="sec-intro">Hermes classifies every request into one of three task levels and runs the matching path. Copy-paste scenarios live in the repo&rsquo;s <code>docs/usage-examples.md</code>; here is the shape of each.</p>
+    <div class="usage-cards">
+      <div class="use">
+        <span class="cmdline">/feature</span>
+        <p><strong>Feature</strong> — a business rule, a contract, or architecture. Full loop: analysis → spec → plan → code → review → QA → release. Starts with discovery of the problem.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/bugfix</span>
+        <p><strong>Minimal</strong> — a bounded fix that changes behavior. Runs the fast path (<code>skip_specs</code>) but <em>always</em> carries a regression test that fails without the fix.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/fix</span>
+        <p><strong>Cosmetic</strong> — no observable behavior change. A direct edit; there is no OpenSpec change because there is nothing to verify at spec level.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/do</span>
+        <p><strong>Autonomous</strong> — run the whole loop end-to-end with no human in the loop, ending in a PR for review. A confidence gate stops on non-trivial decisions.</p>
+      </div>
+    </div>
+    <div class="code-block"><span class="prompt"># the trigger does not depend on exact wording</span>
+<span class="prompt">$</span> hermes
+&gt; let&rsquo;s run SDD: add SSO login to the web app
+&gt; fix the invoice total — it rounds wrong when the tax is 21% with decimals
+&gt; rename the local variable dat to data in src/parser.ts</div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-label">FAQ</div>
+    <h2>Frequently asked questions.</h2>
+    <div class="faq">
+      <details>
+        <summary>Do I need OpenSpec installed to use it?</summary>
+        <p>Yes. The loop is built on the OpenSpec CLI (<code>openspec</code>), ≥ 1.13.0, on your <code>PATH</code> (e.g. <code>~/.local/bin/openspec</code>). Hermes runs it from each project root.</p>
+      </details>
+      <details>
+        <summary>Do I have to install all the bundles?</summary>
+        <p>No. <code>/agency</code> loads the orchestrator plus <code>openspec-sdd</code>; the per-stage commands are convenience entry points. The installer installs all 13 by default, but <code>--bundles a,b,c</code> selects a subset.</p>
+      </details>
+      <details>
+        <summary>Can two agents talk to each other?</summary>
+        <p>No. Agents never talk to each other and never read each other&rsquo;s state. Every output returns to Hermes in the mandatory envelope and is re-verified in the repo. Hermes is the only bus.</p>
+      </details>
+      <details>
+        <summary>Who can block progress?</summary>
+        <p>Only the <strong>reviewer</strong> (<code>changes-requested</code>) and the <strong>qa</strong> agent (<code>fail</code>). Open BLOCKER/MAJOR, a <code>qa: fail</code> or any <code>blocked</code> halts the workflow.</p>
+      </details>
+      <details>
+        <summary>Do I have to write the spec prose by hand?</summary>
+        <p>No. The openspec stage&rsquo;s agent writes the change artifacts via the CLI. You supply the idea and the repo; Hermes and the stage agents produce the proposal, spec deltas, design, tasks and code.</p>
+      </details>
+      <details>
+        <summary>Can I use this on several projects at once?</summary>
+        <p>Yes. Each project is a separate workflow with its own root, change and final report. Hermes runs independent stages in parallel via <code>delegate_task</code> and never mixes context across projects.</p>
+      </details>
+    </div>
+    <p class="sec-intro" style="margin-top:8px;margin-bottom:0">Full Q&amp;A in the repo&rsquo;s <code>docs/FAQ.md</code>.</p>
+  </div>
+</section>
+
+<section id="advanced">
+  <div class="wrap">
+    <div class="sec-label">ADVANCED</div>
+    <h2>Configure for how you actually work.</h2>
+    <div class="usage-cards">
+      <div class="use">
+        <span class="cmdline">install flags</span>
+        <p>Target a custom home with <code>-p &lt;dir&gt;</code> (honors <code>$HERMES_HOME</code>), install a subset with <code>--bundles a,b,c</code>, skip bundles with <code>--no-bundles</code>, preview with <code>--dry-run</code>, and confirm non-interactive installs with <code>-y</code>.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">the confidence gate</span>
+        <p><code>/do</code> and <code>/continue</code> run routine decisions automatically (recorded as ADRs flagged <em>ASSUMED</em>) but stop and wait on non-trivial ones: contract/API, data model, real security risk, high cost to revert.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">parallel workstreams</span>
+        <p>Run independent changes in separate git worktrees, each with its own root and report. Independent stages fan out via <code>delegate_task</code>; overlapping file sets run sequentially.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">fast paths</span>
+        <p>Refactors, low-risk fixes and tooling use <code>skip_specs: true</code> (a validated change, minus requirement deltas). A cosmetic level touches no behavior and skips the loop entirely.</p>
+      </div>
     </div>
   </div>
 </section>
