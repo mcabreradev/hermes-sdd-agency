@@ -192,7 +192,7 @@ _menu_vispos() {
 _menu_frame() {
   local i toggle curmark p
   printf '\033[?25l\033[99A\033[J'
-  printf '%b%b skills %b %b◇%b %s\n' "$_MENU_B" "$_MENU_K" "$_MENU_0" "$_MENU_G" "$_MENU_0" "$MENU_TITLE"
+  printf '%b%b Hermes SDD Agency %b %b◇%b %s\n' "$_MENU_B" "$_MENU_K" "$_MENU_0" "$_MENU_G" "$_MENU_0" "$MENU_TITLE"
   printf '\n'
   if [[ "$_MENU_PHASE" == "bundles" ]]; then
     _menu_vis
@@ -304,11 +304,26 @@ _menu_key() {
       # arrow delivers "[" + letter immediately; a bare Esc times out on each
       # read and resolves to cancel instead of hanging the loop.
       IFS= read -r -s -n 1 -d '' -t 1 k2 || k2=""
+      # Some terminals send arrow keys in SS3 form (\eOA/\eOB…) instead of
+      # CSI (\e[A/\e[B…) — map both so arrow navigation works on any client.
+      if [[ "$k2" == "O" ]]; then
+        IFS= read -r -s -n 1 -d '' -t 1 k3 || k3=""
+        case "$k3" in
+          A) key="up" ;;
+          B) key="down" ;;
+          C) key="right" ;;
+          D) key="left" ;;
+          *) key="esc" ;;
+        esac
+        return
+      fi
       [[ "$k2" == "[" ]] || { key="esc"; return; }
       IFS= read -r -s -n 1 -d '' -t 1 k3 || k3=""
       case "$k3" in
         A) key="up" ;;
         B) key="down" ;;
+        C) key="right" ;;
+        D) key="left" ;;
         *) key="esc" ;;
       esac
       ;;
