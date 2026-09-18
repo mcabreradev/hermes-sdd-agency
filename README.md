@@ -64,8 +64,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agenc
 
 It asks where to install (default `~/.hermes`), merges the process tree, skills and
 bundles, and is idempotent — safe to re-run. Flags: `-p <home>` target (also honors
-`$HERMES_HOME`), `--bundles a,b,c` subset, `--no-bundles`, `--dry-run`. Or clone and run
-`./install.sh` to skip the re-download. Full guide in `INSTALL.md`.
+`$HERMES_HOME`), `--bundles a,b,c` subset, `--no-bundles`, `--dry-run`, `-y` to skip the
+overwrite confirmation on non-interactive runs. Or clone and run `./install.sh` to skip the
+re-download. Full guide in `INSTALL.md`.
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see

@@ -23,6 +23,8 @@
 #                        Default: all 12.
 #       --no-bundles     Install process tree + skills but skip bundles.
 #       --dry-run        Print what would happen; write nothing.
+#   -y, --yes            Skip the overwrite confirmation (non-interactive
+#                        installs that may touch an existing home).
 #   -h, --help           Show this help.
 
 set -euo pipefail
@@ -38,6 +40,7 @@ PREFIX=""
 BUNDLES=("${ALL_BUNDLES[@]}")
 DO_BUNDLES=1
 DRY_RUN=0
+ASSUME_YES=0
 
 usage() {
   cat <<'HELP'
@@ -64,6 +67,8 @@ Flags:
                        Default: all 12.
       --no-bundles     Install process tree + skills but skip bundles.
       --dry-run        Print what would happen; write nothing.
+  -y, --yes            Skip the overwrite confirmation (non-interactive
+                       installs that may touch an existing home).
   -h, --help           Show this help.
 HELP
 }
@@ -78,6 +83,7 @@ while [[ $# -gt 0 ]]; do
     --bundles=*) IFS=',' read -r -a BUNDLES <<< "${1#*=}"; shift ;;
     --no-bundles) DO_BUNDLES=0; shift ;;
     --dry-run)    DRY_RUN=1; shift ;;
+    -y|--yes)     ASSUME_YES=1; shift ;;
     -h|--help)    usage; exit 0 ;;
     *) die "unknown argument: $1 (see --help)" ;;
   esac
@@ -151,12 +157,52 @@ install_from() {
   fi
 }
 
+# --- overwrite guard ----------------------------------------------------------
+# Protects the user from silently overwriting an existing home: a fresh,
+# empty target installs cleanly; an existing agency gets a re-install warning;
+# a target with other data gets a stronger warning. In non-interactive runs
+# the guard aborts unless --yes is passed.
+guard_dest() {
+  local dest="$1"
+  (( ! DRY_RUN )) || return 0                      # dry-run writes nothing
+  [[ -e "$dest" ]] && [[ -n "$(ls -A "$dest" 2>/dev/null)" ]] || return 0  # empty/fresh
+
+  if [[ -d "$dest/agents" ]]; then
+    if (( ASSUME_YES )); then
+      printf 'Updating existing agency in %s (--yes).\n' "$dest"
+    elif [[ -t 0 ]]; then
+      printf 'An Hermes SDD Agency install already exists in %s.\n' "$dest"
+      printf 'This will merge/overwrite its process tree, skills and bundles.\n'
+      printf 'Continue? [y/N] ' >&2
+      IFS= read -r ans
+      [[ "${ans,,}" =~ ^(y|yes)$ ]] || { err "aborted by user"; exit 1; }
+    else
+      die "target '$dest' already has an agency and stdin is not a TTY (no '--yes'); aborting to avoid an accidental overwrite"
+    fi
+  else
+    # Target exists, has content, but no agency marker: could be a real,
+    # unrelated Hermes home (configs, other skills). Warn strongly.
+    if (( ASSUME_YES )); then
+      printf 'Installing over existing (non-agency) data in %s (--yes).\n' "$dest"
+    elif [[ -t 0 ]]; then
+      printf 'WARNING: %s already exists and has other data, but no agency.\n' "$dest"
+      printf 'The install will copy the process tree and skills on top of it.\n'
+      printf 'Continue? [y/N] ' >&2
+      IFS= read -r ans
+      [[ "${ans,,}" =~ ^(y|yes)$ ]] || { err "aborted by user"; exit 1; }
+    else
+      die "target '$dest' exists with other data and stdin is not a TTY (no '--yes'); aborting to avoid an accidental overwrite"
+    fi
+  fi
+}
+
 # --- preflight ---------------------------------------------------------------
 command -v hermes >/dev/null 2>&1 || die "required: 'hermes' is not on PATH (install Hermes Agent first)"
 
 # --- resolve and prepare source ---------------------------------------------
 HERMES_HOME="$(resolve_prefix)"
 export HERMES_HOME
+guard_dest "$HERMES_HOME"
 if (( local_mode )); then
   install_from "$SRC_DIR"
 else

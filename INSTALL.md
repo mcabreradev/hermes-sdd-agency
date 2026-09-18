@@ -19,7 +19,13 @@ default). Flags:
     --bundles a,b,c  Only install the named bundles (default: all 12)
     --no-bundles     Process tree + skills only, skip bundles
     --dry-run        Print what would happen; write nothing
+-y, --yes            Skip the overwrite confirmation (non-interactive)
 ```
+
+The installer is **guarded against accidental overwrites**: if the target home
+already holds data it stops and asks for confirmation (interactive) or aborts
+(non-interactive, unless `--yes`). Reinstalling into an existing agency prints
+an update warning; an existing home with other data prints a stronger one.
 
 Or install from a clone (no re-download):
 
@@ -42,6 +48,22 @@ What it does, in order:
 
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).
+
+### `/feature` discovery dependency
+
+The `/feature` bundle is a **discovery-first** loop: `superpowers:brainstorming`,
+`grill-with-docs`, `grilling` and `domain-modeling` are loaded before any
+planning/code (HARD-GATE: no implementation until the design is approved). These
+skills are **not** shipped by this repo. To use `/feature` on a target:
+
+- `superpowers:brainstorming` comes from the Superpowers plugin:
+  `hermes plugins install obra/superpowers --enable`
+- `grill-with-docs`, `grilling`, `domain-modeling` come from Matt Pocock's
+  skills repo (`github.com/mattpocock/skills`), not from obra/superpowers nor
+  from this repo — install them separately.
+
+Without them, `/feature` still runs the SDD loop but the discovery step cannot
+resolve its skills. `/agency` and the other stage bundles are unaffected.
 
 ## Path B — a full profile copy
 
