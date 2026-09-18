@@ -62,8 +62,13 @@ the conversation with the user.
 bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agency/main/install.sh)
 ```
 
-It asks where to install (default `~/.hermes`), merges the process tree, skills and
-bundles, and is idempotent — safe to re-run. Flags: `-p <home>` target (also honors
+It asks where to install (default `~/.hermes`) via an interactive menu when
+run in a terminal — arrow keys to navigate, space to toggle bundles, type to
+filter, Enter to confirm, Esc/Ctrl+C to cancel; nothing is written until you
+confirm the summary. It merges the process tree, skills and
+bundles, and is idempotent — safe to re-run. Piped runs (like the one-command
+form above, stdin not a TTY) skip the menu and use the defaults. Flags:
+`-p <home>` target (also honors
 `$HERMES_HOME`), `--bundles a,b,c` subset, `--no-bundles`, `--dry-run`, `-y` to skip the
 overwrite confirmation on non-interactive runs. Or clone and run `./install.sh` to skip the
 re-download. Full guide in `INSTALL.md`.
