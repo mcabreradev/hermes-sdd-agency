@@ -1,11 +1,11 @@
-name: resume
+name: continue
 skills:
 - hermes-sdd-orchestration
 - openspec-sdd
-description: 'RESUME: continue a change that already has a validated OpenSpec change (proposal/spec/tasks),
+description: 'CONTINUE: continue a change that already has a validated OpenSpec change (proposal/spec/tasks),
   running the pending stages (implement → review → QA → release) and updating the existing PR draft.
   Detects where the flow stopped and picks up from there.'
-instruction: 'RESUME MODE. A validated OpenSpec change already exists over the cwd project — you are
+instruction: 'CONTINUE MODE. A validated OpenSpec change already exists over the cwd project — you are
   NOT starting from an idea. Detect the real state, then run the pending stages to completion with a
   confidence gate, ending in a PR (draft) the human reviews and merges. Never publishes/merges/tags.
 
