@@ -222,6 +222,27 @@ if (( DO_BUNDLES && ! DRY_RUN )); then
   hermes bundles list 2>/dev/null | grep -E 'agency|feature|bugfix|fix|idea|plan|implement|architecture|review|qa|release|init-project' || true
 fi
 
+# Warn (never install) when the /feature bundle is present but its discovery
+# skills are not — so a /feature user knows what to run, without this installer
+# reaching into third-party plugin/skill installers (npx, hermes plugins).
+warn_feature_deps() {
+  local need=()
+  [[ -d "$HERMES_HOME/skills/grilling" ]]         || need+=(grilling)
+  [[ -d "$HERMES_HOME/skills/grill-with-docs" ]] || need+=(grill-with-docs)
+  [[ -d "$HERMES_HOME/skills/domain-modeling" ]] || need+=(domain-modeling)
+  ((${#need[@]})) || return 0
+  printf '\nnote: /feature loads discovery skills missing from this home:\n'
+  printf '  %s\n' "${need[*]}"
+  printf '  install them once (see INSTALL.md):\n'
+  printf '    hermes plugins install obra/superpowers --enable\n'
+  printf '    npx skills@latest add mattpocock/skills\n'
+}
+feature_selected=0
+for b in "${BUNDLES[@]}"; do [[ "$b" == "feature" ]] && feature_selected=1; done
+if (( DO_BUNDLES && feature_selected && ! DRY_RUN )); then
+  warn_feature_deps
+fi
+
 command -v openspec >/dev/null 2>&1 \
   || err "note: 'openspec' CLI not found (>= 1.13.0) — required to run the /agency loop. See INSTALL.md."
 
