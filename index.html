@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes SDD Agency — a Spec-Driven Development loop, orchestrated by Hermes Agent</title>
+<meta name="description" content="Reusable rules, workflows, agent contracts, skill bundles and personas that run a complete Spec-Driven Development loop on Hermes Agent. Process is global; product is local.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600;700&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef0f2;
+    --ink:#16181c;
+    --muted:#5b6472;
+    --steel:#2f5da8;
+    --steel-dark:#24477f;
+    --hair:#c9cdd4;
+    --hair-strong:#9aa1ab;
+    --green:#2e7d4f;
+    --red:#b03b3b;
+    --amber:#b3700f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    line-height:1.6;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  /* header */
+  header{
+    border-bottom:2px solid var(--ink);
+    background:var(--paper);
+    position:sticky;top:0;z-index:10;
+  }
+  .head-inner{display:flex;align-items:baseline;justify-content:space-between;padding:18px 0;gap:16px;flex-wrap:wrap}
+  .brand{font-family:'IBM Plex Serif',serif;font-weight:700;font-size:20px;letter-spacing:-.01em}
+  .brand em{font-style:normal;color:var(--steel)}
+  nav{display:flex;gap:22px;flex-wrap:wrap}
+  nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500}
+  nav a:hover{color:var(--ink)}
+  /* hero */
+  .hero{border-bottom:1px solid var(--hair);padding:72px 0 60px}
+  .hero .wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:56px;align-items:center}
+  .hero-kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);margin-bottom:18px}
+  .hero h1{
+    font-family:'IBM Plex Serif',serif;font-weight:700;font-size:46px;line-height:1.08;
+    letter-spacing:-.02em;margin-bottom:20px;
+  }
+  .hero p.lede{font-size:18px;color:var(--muted);max-width:34em}
+  .hero-cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+  .btn{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;text-decoration:none;
+    padding:12px 18px;border:1px solid var(--ink);color:var(--ink);
+    transition:background .12s,color .12s;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper)}
+  .btn-solid{background:var(--steel);border-color:var(--steel);color:#f5f7fa}
+  .btn-solid:hover{background:var(--steel-dark);border-color:var(--steel-dark)}
+  /* hero diagram */
+  .hero-diag{border:1px solid var(--hair);border-top:3px solid var(--steel);background:#f7f8fa;padding:22px}
+  .diag-title{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px}
+  .flow{display:flex;flex-direction:column;gap:0}
+  .stp{
+    display:grid;grid-template-columns:34px 5fr 56px;align-items:center;gap:12px;
+    padding:7px 0;font-size:13.5px;position:relative;
+  }
+  .stp .n{font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--steel);font-weight:600}
+  .stp .t{font-weight:500}
+  .stp .w{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-align:right}
+  .stp .w.code{color:var(--green);font-weight:600}
+  .stp .w.block{color:var(--red)}
+  .stp .bar{position:absolute;left:16px;top:34px;width:1px;height:16px;background:var(--hair-strong)}
+  .stp:last-child .bar{display:none}
+  .loop-note{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:12px;padding-top:12px;border-top:1px dashed var(--hair);}
+  /* sections */
+  section{padding:64px 0;border-bottom:1px solid var(--hair)}
+  .sec-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);margin-bottom:10px;text-transform:none}
+  h2{font-family:'IBM Plex Serif',serif;font-weight:700;font-size:30px;letter-spacing:-.015em;margin-bottom:14px}
+  .sec-intro{color:var(--muted);max-width:60em;margin-bottom:32px;font-size:16px}
+  /* grid of roles */
+  .role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0}
+  .role{border:1px solid var(--hair);border-right:none;border-bottom:none;padding:20px}
+  .role:nth-child(4n){border-right:1px solid var(--hair)}
+  .role:nth-last-child(-n+4){border-bottom:1px solid var(--hair)}
+  .role h3{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--steel);margin-bottom:8px}
+  .role p{font-size:13.5px;color:var(--muted)}
+  .role .flag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;margin-top:12px;padding:3px 7px;border:1px solid var(--hair-strong);color:var(--muted)}
+  .role .flag.block{color:var(--red);border-color:var(--red)}
+  /* the three levels */
+  .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+  .lvl{border-top:3px solid;padding-top:16px}
+  .lvl h3{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;margin-bottom:10px}
+  .lvl p{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .lvl .cmd{font-family:'IBM Plex Mono',monospace;font-size:13px;background:#0f1116;color:#cfd6e4;display:inline-block;padding:4px 10px}
+  .lvl.cosmetic{border-color:var(--muted)}
+  .lvl.minimal{border-color:var(--amber)}
+  .lvl.feature{border-color:var(--steel)}
+  /* commands table */
+  .cmd-table{width:100%;border-collapse:collapse}
+  .cmd-table th,.cmd-table td{border:1px solid var(--hair);padding:11px 14px;text-align:left;font-size:14px}
+  .cmd-table th{background:#e4e7ec;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--steel-dark)}
+  .cmd-table td code{font-family:'IBM Plex Mono',monospace;background:transparent;font-size:13px}
+  .cmd-table td .write{color:var(--green);font-weight:600}
+  .cmd-table td .nowrite{color:var(--muted)}
+  /* principles */
+  .principles{display:flex;flex-direction:column;gap:0}
+  .pr{padding:18px 0;border-bottom:1px solid var(--hair);display:grid;grid-template-columns:22px 1fr;gap:16px;align-items:baseline}
+  .pr:last-child{border-bottom:none}
+  .pr .n{font-family:'IBM Plex Mono',monospace;color:var(--steel);font-weight:600;font-size:15px}
+  .pr p{font-size:15px;color:var(--ink)}
+  .pr strong{font-weight:600}
+  /* structure */
+  .struct{columns:2;column-gap:40px;font-size:14.5px}
+  .struct ul{list-style:none;margin:0 0 10px;break-inside:avoid}
+  .struct li{padding:2px 0;color:var(--muted)}
+  .struct li code{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink)}
+  /* footer */
+  footer{padding:40px 0 60px;border-top:2px solid var(--ink)}
+  .foot-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:baseline}
+  footer .l{font-size:13px;color:var(--muted)}
+  footer a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+  footer a:hover{color:var(--ink)}
+  /* responsive */
+  @media(max-width:820px){
+    .hero{padding:48px 0 40px}
+    .hero .wrap{grid-template-columns:1fr;gap:32px}
+    .hero h1{font-size:36px}
+    .struct{columns:1}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  *:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+  @media(prefers-color-scheme:dark){
+    :root{
+      --paper:#14171c;--ink:#e7eaef;--muted:#a7afbb;--steel:#7ba4e8;--steel-dark:#5c8ad8;
+      --hair:#2a313c;--hair-strong:#3d4654;--green:#6fbf8f;--red:#e06a6a;--amber:#e0a24d;
+    }
+    .hero-diag{background:#1a1e25}
+    .cmd-table th{background:#1e232c}
+    .btn{color:var(--ink);border-color:var(--hair-strong)}
+    .btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+    .btn-solid{color:#0d1016}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-inner">
+    <div class="brand">Hermes SDD <em>Agency</em></div>
+    <nav>
+      <a href="#why">Why</a>
+      <a href="#cycles">The loop</a>
+      <a href="#levels">Task levels</a>
+      <a href="#commands">Commands</a>
+      <a href="#rules">Principles</a>
+      <a href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="hero-kicker">A SPEC-DRIVEN DEVELOPMENT LOOP FOR HERMES AGENT</div>
+      <h1>One orchestrator. Eight roles. A gate that stops code without a validated spec.</h1>
+      <p class="lede">Reusable rules, workflows, agent contracts, skill bundles and personas that run software projects end to end. Hermes is the only bus — it decides, delegates, re-verifies and closes. OpenSpec holds the requirements inside each project&rsquo;s repo.</p>
+      <div class="hero-cta">
+        <a class="btn btn-solid" href="https://github.com/mcabreradev/hermes-sdd-agency">Browse the repo</a>
+        <a class="btn" href="#install">Install guide</a>
+      </div>
+    </div>
+    <div class="hero-diag" aria-label="the SDD loop">
+      <div class="diag-title">CANONICAL LOOP</div>
+      <div class="flow">
+        <div class="stp"><span class="n">0</span><span class="t">initialize-project</span><span class="w nowrite">no code</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">1</span><span class="t">discovery · idea / PRD</span><span class="w nowrite">analyze</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">2</span><span class="t">openspec · proposal + specs</span><span class="w block">gate</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">3</span><span class="t">architect · design + ADR</span><span class="w nowrite">decide</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">4</span><span class="t">planner · tasks.md</span><span class="w nowrite">plan</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">5</span><span class="t">builder · code + tests</span><span class="w code">writes</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">6</span><span class="t">reviewer · adversarial diff</span><span class="w block">can block</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">7</span><span class="t">qa · execute scenarios</span><span class="w block">can block</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">8</span><span class="t">release · notes + archive + sync</span><span class="w code">close</span></div>
+      </div>
+      <div class="loop-note">gate: validate passes → no ERROR · archive + sync specs · final report</div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="sec-label">WHY</div>
+    <h2>Process is global. Product is local.</h2>
+    <p class="sec-intro">This repository ships the <strong>process</strong> — reusable rules, agent roles, workflows and templates. It carries no project&rsquo;s requirements. OpenSpec lives inside each project&rsquo;s own repo, so a global instruction never leaks a product decision, and one project&rsquo;s rules never contaminate another.</p>
+    <div class="role-grid">
+      <div class="role"><h3>discovery</h3><p>Explores the domain, writes the PRD and bounds vague ideas.</p></div>
+      <div class="role"><h3>openspec</h3><p>Scaffolds a validated change: proposal, spec deltas, scenarios.</p></div>
+      <div class="role"><h3>architect</h3><p>Decides boundaries, contracts and rejected alternatives; writes ADRs.</p></div>
+      <div class="role"><h3>planner</h3><p>Breaks the change into granular, verifiable tasks.</p></div>
+      <div class="role"><h3>builder</h3><p>The only stage that writes code, in batches of tasks with tests.</p></div>
+      <div class="role"><h3>reviewer</h3><p>Adversarial review of the diff against the spec.<span class="flag block">blocks</span></p></div>
+      <div class="role"><h3>qa</h3><p>Validates real behavior against the spec scenarios by executing them.<span class="flag block">blocks</span></p></div>
+      <div class="role"><h3>release</h3><p>Release notes, OpenSpec archive, final repo state.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="cycles">
+  <div class="wrap">
+    <div class="sec-label">THE GATE</div>
+    <h2>No code without a validated change.</h2>
+    <p class="sec-intro">Every agent&rsquo;s output is re-verified in the repo before the next stage. Only reviewer and qa can block progress. Two failures with the same error means the spec is wrong — the loop goes back a stage, never in circles.</p>
+    <table class="cmd-table">
+      <thead>
+        <tr><th>Preflight</th><th>What it proves</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>test -f openspec/project.md</code></td><td>the project entered the loop</td></tr>
+        <tr><td><code>openspec context --json</code></td><td>root.path matches the expected root</td></tr>
+        <tr><td><code>openspec validate &lt;name&gt; --type change --json</code></td><td>no ERROR in the delta</td></tr>
+        <tr><td><code>openspec instructions apply --change &lt;name&gt; --json</code></td><td>state is ready</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="levels">
+  <div class="wrap">
+    <div class="sec-label">TASK LEVELS</div>
+    <h2>Three sizes, one discipline.</h2>
+    <p class="sec-intro">Hermes classifies every request. Strictness stays where it protects, without turning small work into ceremony.</p>
+    <div class="levels">
+      <div class="lvl cosmetic">
+        <h3>Cosmetic</h3>
+        <p>No observable behavior change — a typo, indentation, a local rename.</p>
+        <span class="cmd">/fix</span>
+      </div>
+      <div class="lvl minimal">
+        <h3>Minimal</h3>
+        <p>A bounded fix with behavior, carrying a regression test that fails without it. Validated via <code>skip_specs</code>.</p>
+        <span class="cmd">/bugfix</span>
+      </div>
+      <div class="lvl feature">
+        <h3>Feature</h3>
+        <p>Business rules, contracts or architecture. The full loop with delta specs, personas and formal QA.</p>
+        <span class="cmd">/feature</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="commands">
+  <div class="wrap">
+    <div class="sec-label">SLASH COMMANDS</div>
+    <h2>Drive the agency from any project.</h2>
+    <div style="margin-top:24px">
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Stage</th><th>Writes code?</th></tr></thead>
+        <tbody>
+          <tr><td><code>/agency</code></td><td>orchestrator — asks the stage if not named</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/init-project</code></td><td>initializes the repo for the loop</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/idea</code></td><td>idea to validated change</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/architecture</code></td><td>design decisions + ADRs</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/plan</code></td><td>break change into tasks.md</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/implement</code></td><td>write the code in batches</td><td class="write">yes</td></tr>
+          <tr><td><code>/review</code></td><td>adversarial diff review</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/qa</code></td><td>execute spec scenarios</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/release</code></td><td>close: notes + archive + sync</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/feature</code> · <code>/bugfix</code> · <code>/fix</code></td><td>task-level triggers</td><td class="nowrite">no</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <div class="sec-label">PRINCIPLES</div>
+    <h2>Rules that are never broken.</h2>
+    <div class="principles">
+      <div class="pr"><span class="n">1</span><p><strong>No implementation code</strong> without a validated OpenSpec change in the project.</p></div>
+      <div class="pr"><span class="n">2</span><p>OpenSpec lives in <strong>each project&rsquo;s repo</strong>, never in Hermes.</p></div>
+      <div class="pr"><span class="n">3</span><p>Agents <strong>never talk to each other</strong>; every output goes to Hermes, which validates.</p></div>
+      <div class="pr"><span class="n">4</span><p><strong>Evidence beats assertion</strong> — an agent&rsquo;s output is a self-report, re-verified in the repo.</p></div>
+      <div class="pr"><span class="n">5</span><p><strong>Product requirements are never global truth</strong>; they live in the project&rsquo;s specs and ADRs.</p></div>
+      <div class="pr"><span class="n">6</span><p>Every report declares its <strong>projectRoot</strong>, matched against the verified root.</p></div>
+      <div class="pr"><span class="n">7</span><p><strong>Only reviewer and qa can block</strong>; a blocker closes only with new evidence.</p></div>
+      <div class="pr"><span class="n">8</span><p>Everything the system produces is <strong>English</strong>; the only exception is the conversation with the user.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-label">INSTALL</div>
+    <h2>Run it on another Hermes in minutes.</h2>
+    <p class="sec-intro">Copy the process tree, install the bundles, restart. Full walkthroughs live in the repo&rsquo;s <code>docs/</code>.</p>
+    <div class="hero-diag" style="border-top-color:var(--steel)">
+      <div class="diag-title">QUICK START</div>
+      <div class="flow">
+        <div class="stp"><span class="n">1</span><span class="t">clone + copy the process tree</span><span class="w nowrite">rules·agents·templates</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">2</span><span class="t">install the skill bundles you want</span><span class="w nowrite">/agency /feature /bugfix /fix</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">3</span><span class="t">restart the session</span><span class="w nowrite">skills load fresh</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">4</span><span class="t">cd into a project and run /agency</span><span class="w code">go</span></div>
+      </div>
+      <div class="loop-note">calibrate on a 3–5 task change before trusting it on something large</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span class="l">Hermes SDD Agency · <a href="https://github.com/mcabreradev/hermes-sdd-agency">github.com/mcabreradev/hermes-sdd-agency</a></span>
+    <span class="l"><a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/README.md">README</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/INSTALL.md">INSTALL</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/sdd-feature-lifecycle.md">Lifecycle</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/usage-examples.md">Examples</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
