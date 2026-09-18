@@ -313,6 +313,7 @@
           <tr><td><code>/feature</code> · <code>/bugfix</code> · <code>/fix</code></td><td>task-level triggers</td><td class="nowrite">no</td></tr>
         </tbody>
       </table>
+      <p style="margin-top:14px;font-size:13.5px;color:var(--text-dim)">These slash commands trigger the <em>stages</em>; each stage loads its complementary process <strong>skills</strong> as it runs — e.g. <code>review-structural</code> (SQL / LLM trust-boundary / side-effect scan) inside <code>/review</code>, <code>code-health</code> (0-10 score) and report-only mode inside <code>/qa</code>, <code>plan-scope-review</code> (expand / hold / strip) before <code>/plan</code>, and <code>document-diataxis</code> plus the <code>no-smoke-worktree</code> fingerprint check inside <code>/release</code>. The full skill set lives under <code>skills/</code> in the repo.</p>
     </div>
   </div>
 </section>
