@@ -68,6 +68,25 @@ bundles, and is idempotent — safe to re-run. Flags: `-p <home>` target (also h
 overwrite confirmation on non-interactive runs. Or clone and run `./install.sh` to skip the
 re-download. Full guide in `INSTALL.md`.
 
+### Enabling `/feature` (discovery skills)
+
+`/feature` runs a **discovery-first** loop: it loads `superpowers:brainstorming`,
+`grill-with-docs`, `grilling` and `domain-modeling` before any planning or code
+(HARD-GATE: no implementation until the design is approved). Those four skills are
+**not** shipped by this repo. Install them once on the target:
+
+```bash
+hermes plugins install obra/superpowers --enable       # brainstorming
+npx skills@latest add mattpocock/skills                # the other three (entire set)
+# or just the three:
+#   npx skills@latest add mattpocock/skills -a hermes-agent \
+#     --skill grilling --skill grill-with-docs --skill domain-modeling
+```
+
+The `install.sh` warns (never installs) when `/feature` is selected and these skills
+are missing. Without them, `/feature` still runs the SDD loop; only its discovery step
+cannot resolve its skills. `/agency` and the other stage bundles are unaffected.
+
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
 `docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`. For a complete
