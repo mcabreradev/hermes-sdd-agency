@@ -38,6 +38,25 @@ The agent: checks the diff ↔ notes consistency, applies the project's versioni
 for a decision if it is not declared), writes the changelog in the format the repo already uses, and
 —if authorized— archives the change.
 
+### Docs follow what shipped (`document-diataxis` + drift check)
+
+- Build a **Diataxis coverage map** for the change (tutorial / how-to / reference /
+  explanation, per `skills/document-diataxis`). A new capability with uncovered quadrants is a
+  **documentation debt** recorded in the report, not silently ignored.
+- Cross-reference the diff: any doc (README / architecture / contributing / project doc)
+  that contradicts what shipped is **drift** and is fixed here or recorded as debt.
+- **Diagram drift**: if the change alters architecture, the system/architecture diagram must
+  change to match — or the stale diagram is flagged explicitly (see `diagram-triplet`).
+- Polish the changelog voice with a sell-test: each entry states what was added/fixed and why
+  it matters, not a raw commit title dump.
+
+### Bind the closed tree
+
+- Record the **`no-smoke-worktree` fingerprint** of the tree being released, and compare it
+  against the reviewer/QA fingerprints recorded in earlier stages. A mismatch against those
+  stages is evidence the shipped tree was validated on different content → stop and
+  re-review/re-test before closing (see `rules/quality.md`).
+
 ## 2. OpenSpec archiving (if applicable)
 
 ```bash

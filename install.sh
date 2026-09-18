@@ -39,7 +39,7 @@ set -euo pipefail
 # --- repo constants -----------------------------------------------------------
 REPO_URL="${HERMES_SDD_AGENCY_REPO:-https://github.com/mcabreradev/hermes-sdd-agency.git}"
 
-PROCESS_DIRS=(agents workflows rules templates docs)
+PROCESS_DIRS=(agents workflows rules templates docs bin)
 ALL_BUNDLES=(agency feature bugfix fix idea plan implement architecture review qa release init-project do continue)
 
 # --- option parsing -----------------------------------------------------------

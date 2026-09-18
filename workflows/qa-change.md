@@ -34,6 +34,20 @@ Agent rules: it validates behavior, it does not read code to conclude; it retrie
 once to rule out the environment; it reports flaky with both outputs; the scenarios that cannot be
 run are marked `NOT RUN` with the reason.
 
+### Report-only mode (`qa-only`)
+
+When the brief asks for **report-only** (or the change is being QA'd before any fix is
+authorized), the `qa` agent produces the same matrix **without fixing anything**:
+
+- Complete scenario → case → real result matrix, with `FAIL` + reproduction steps and
+  "expected vs actual" for every defect — but **no** builder correction cycle runs.
+- Output includes a **health summary** (see `code-health`) as the before-score baseline, so a
+  later fixing pass can show the before/after.
+- The report's verdict is `fail` if any `BLOCKER`/`MAJOR` defect exists, `pass` only when the
+  matrix is clean — report-only does not change the closure bar, it only skips the fix loop.
+- Record the **`no-smoke-worktree` fingerprint** so the report is bound to the exact tree
+  that was exercised (see `rules/quality.md`).
+
 ## 2. Validation of the report (Hermes)
 
 - Every `PASS` must have executed evidence (command + output).

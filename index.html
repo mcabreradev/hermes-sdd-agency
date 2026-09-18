@@ -401,6 +401,10 @@
         <p>Run independent changes in separate git worktrees, each with its own root and report. Independent stages fan out via <code>delegate_task</code>; overlapping file sets run sequentially.</p>
       </div>
       <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7-7 7s-7-2-7-7 3.5-7 7-7c2.8 0 4.8 1 5.5 3"/><path d="M14 8 20 7l-1-6"/></svg><span class="adv-title">Verifiable evidence</span></div>
+        <p><code>bin/no-smoke-worktree</code> fingerprints the working tree (a content hash that survives rebase/amend but changes on any source change). Reviewer, QA and release record it and <code>release-change</code> compares — no smoke, no &ldquo;I validated it&rdquo; over older content.</p>
+      </div>
+      <div class="use adv">
         <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">Fast paths</span></div>
         <p>Refactors, low-risk fixes and tooling use <code>skip_specs: true</code> (a validated change, minus requirement deltas). A cosmetic level touches no behavior and skips the loop entirely.</p>
       </div>
@@ -416,7 +420,7 @@
       <div class="pr"><span class="n">1</span><p><strong>No implementation code</strong> without a validated OpenSpec change in the project.</p></div>
       <div class="pr"><span class="n">2</span><p>OpenSpec lives in <strong>each project&rsquo;s repo</strong>, never in Hermes.</p></div>
       <div class="pr"><span class="n">3</span><p>Agents <strong>never talk to each other</strong>; every output goes to Hermes, which validates.</p></div>
-      <div class="pr"><span class="n">4</span><p><strong>Evidence beats assertion</strong> — an agent&rsquo;s output is a self-report, re-verified in the repo.</p></div>
+      <div class="pr"><span class="n">4</span><p><strong>Evidence beats assertion</strong> — an agent&rsquo;s output is a self-report, re-verified in the repo. Reviewer, QA and release stages bind their evidence to the exact tree via <code>bin/no-smoke-worktree</code> (a content fingerprint), so a stage can never claim it validated content it never saw.</p></div>
       <div class="pr"><span class="n">5</span><p><strong>Product requirements are never global truth</strong>; they live in the project&rsquo;s specs and ADRs.</p></div>
       <div class="pr"><span class="n">6</span><p>Every report declares its <strong>projectRoot</strong>, matched against the verified root.</p></div>
       <div class="pr"><span class="n">7</span><p><strong>Only reviewer and qa can block</strong>; a blocker closes only with new evidence.</p></div>
