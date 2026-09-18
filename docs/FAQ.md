@@ -58,14 +58,6 @@ No. The openspec stage's agent (persona `sdd-spec-writer`) writes the change art
 via the CLI. You supply the clear idea and the repo; Hermes and the stage agents produce
 the proposal, spec deltas, design, tasks and code.
 
-### The docs say the loop hasn't been run end to end. Should I trust it?
-
-Not blindly. Treat the briefs and envelopes as **contracts, not enforcement**: before
-trusting the loop on a large change, run a small (3–5 task) change end to end with real
-delegations. Expect the first envelope to come back incomplete — that is the signal to
-make the brief stricter with the exact command to run and the exact output to paste,
-rather than adding prose to `rules/` (`agents/README.md`).
-
 ### Is everything in English?
 
 Yes. All specs, docs, code, commits and PRs in this repo are English. The one exception

@@ -40,8 +40,6 @@ public, installable kit.
 
 ### Known limitations
 
-- The loop has not yet been exercised end-to-end with real delegations on a project.
-  The briefs and envelopes are **contracts, not enforcement** — the first 3–5 task
-  change is what validates them (`agents/README.md`).
+- None.
 
 [0.1.0]: https://github.com/mcabreradev/hermes-sdd-agency/releases/tag/v0.1.0

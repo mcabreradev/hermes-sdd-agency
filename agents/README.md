@@ -106,6 +106,3 @@ initialize-project → idea-to-openspec → openspec-to-architecture → plan-ch
 - **Personas and process skills**: 23 personas in `~/.hermes/skills/agents/` + 11 process
   skills in `~/.hermes/skills/`, installed from aitmpl. They cost one index line per
   session (~60 chars each): install only what a stage actually uses.
-- **Pending calibration**: the loop has not been run end to end yet with
-  real delegations. The first run (a 3-5 task change) is what validates the
-  briefs; until then the contracts are expectations, not guarantees.

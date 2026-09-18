@@ -80,14 +80,6 @@ study change showing the real `proposal.md` / `spec.md` / `tasks.md` shape, see
 See also `CONTRIBUTING.md` (how to change the agency) and `CHANGELOG.md` (release
 history).
 
-## First run calibration
-
-The loop is **contract, not enforcement**: nothing validates an agent's reply
-mechanically, so the loop is only as good as the brief. Before trusting it on a large
-change, run a small (3–5 task) change end to end with real delegations — preflight,
-builder, review, qa, release — and make the briefs stricter from what the first
-envelope reveals.
-
 Always re-verify an agent's claim in the repo (`git status --porcelain`,
 `git diff --stat`, re-run the gate) — **an agent's output is a self-report, not a fact**.
 

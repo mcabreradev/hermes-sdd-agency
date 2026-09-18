@@ -58,19 +58,6 @@ initialize-project → idea-to-openspec → openspec-to-architecture → plan-ch
 One agent per stage. Independent stages may run in parallel (`delegate_task`); dependent
 ones wait for Hermes to verify the previous output first.
 
-## First run — exercise the loop before trusting it
-
-The role files and the envelope are **contracts, not enforcement**: nothing validates an
-agent's reply mechanically, so the loop is only as good as the brief. Before running the
-agency on a large change (a 50+ task change is the wrong place to discover this), pick a
-3–5 task change in a real project and run it end to end with real delegations — preflight,
-builder, review, qa, release.
-
-Expect the first envelope to come back incomplete, or with `evidence` that restates the
-brief instead of quoting a command and its output. That is the signal to make the brief
-stricter — name the exact command to run and the exact output to paste back — rather than
-to add another paragraph to `rules/`.
-
 Independent verification beats trusting a self-report: after any stage, re-check the claim
 in the repo (`git status --porcelain`, `git diff --stat`, re-run the gate) before it unlocks
 the next stage.
