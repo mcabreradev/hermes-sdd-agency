@@ -13,6 +13,37 @@ not when the agent reports that it finished.
   self-report, not a fact.
 - Never fabricate output. If something could not be executed, the blocker is reported as is.
 
+## Content evidence: bind reviews and QA to the tree, not to a claim
+
+A claim that a stage "reviewed" or "tested" the work is a self-report; it proves nothing
+unless it is bound to the actual content it was performed on. A working-tree content
+fingerprint is that binding.
+
+- `bin/worktree-no-smoke` prints a **content hash of the working tree** (git `write-tree`
+  over a temp index with `git add -A`). Same content ⇒ same hash; any change to source —
+  including **untracked new files** — changes the hash. It survives rebase/amend/squash
+  that preserve content.
+- **Reviewer and QA stages must record the fingerprint** they performed their stage on,
+  and `release-change` must record the fingerprint of the tree it closes.
+
+```
+reviewer fingerprint:  $(cd <project-root> && <agency-bin>/worktree-no-smoke)
+qa fingerprint:        $(cd <project-root> && <agency-bin>/worktree-no-smoke)
+release fingerprint:   $(cd <project-root> && <agency-bin>/worktree-no-smoke)
+```
+
+where `<agency-bin>` is the agency's `bin/` dir as installed (e.g. `~/.hermes/bin`).
+`install.sh` copies `bin/` into the target; the fingerprint is taken from inside the
+project root so `git rev-parse` finds the right repo.
+
+- At merge time, compare: **if the closed tree's fingerprint differs from the one the
+  reviewer/QA reported, the validation was performed on older (or different) content and is
+  not proof that the shipped tree was reviewed.** Treat the mismatch as a blocker: re-review
+  or re-test before landing.
+- The command and its output are the evidence line; the hash alone, without the command that
+  produced it, is a bare token and does not count.
+
+
 ## Output formats (contract of each agent)
 
 The mandatory envelope is defined in `rules/orchestration.md` (section "Mandatory output
