@@ -4,29 +4,44 @@ Two install paths, depending on scope.
 
 ## Path A — one Hermes instance (self or a machine)
 
+**One command (preferred):** the installer merges the process tree, skills and
+bundles into your Hermes home (default `~/.hermes`, overridable with `-p`).
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agency/main/install.sh)
+```
+
+The installer asks for the target home when run interactively (Enter accepts the
+default). Flags:
+
+```
+-p, --prefix DIR     Target Hermes home (default: $HERMES_HOME or ~/.hermes)
+    --bundles a,b,c  Only install the named bundles (default: all 12)
+    --no-bundles     Process tree + skills only, skip bundles
+    --dry-run        Print what would happen; write nothing
+```
+
+Or install from a clone (no re-download):
+
 ```bash
 git clone https://github.com/mcabreradev/hermes-sdd-agency.git
 cd hermes-sdd-agency
-
-# 1. Process tree (rules, agents, workflows, templates, docs) into Hermes' home
-cp -R agents workflows rules templates docs ~/.hermes/
-
-# 2. Entire skills tree (personas, orchestration, openspec-*, process skills)
-cp -R skills ~/.hermes/
-
-# 3. Bundle installs — pick the ones you want
-#    (each is a slash command: /agency /feature /bugfix /fix /idea /plan /implement
-#     /architecture /review /qa /release /init-project)
-hermes skills install skill-bundles/agency.yaml
-hermes skills install skill-bundles/feature.yaml
-hermes skills install skill-bundles/bugfix.yaml
-hermes skills install skill-bundles/fix.yaml
-# ... repeat for any other stage bundle
-
-# 4. Restart the session, then in any project:
-cd <your-project>
-/agency          # or /feature for a feature, /bugfix for a minimal fix, /fix for cosmetic
+./install.sh
 ```
+
+What it does, in order:
+
+1. `agents/ workflows/ rules/ templates/ docs/` → copied into the target home
+   (merge; does not wipe existing config).
+2. `skills/` → copied into `<home>/skills/` (personas + orchestration +
+   openspec-* + process skills).
+3. `skill-bundles/*.yaml` → copied into `<home>/skill-bundles/`. **Merely
+   placing a bundle `.yaml` there registers it** — `hermes bundles list` reads
+   the directory; you do NOT need `hermes skills install <path>` (which only
+   works for catalog IDs or remote URLs, not local paths).
+
+Then restart the session, and in any project run `/agency` (or `/feature`,
+`/bugfix`, `/fix`).
 
 ## Path B — a full profile copy
 
