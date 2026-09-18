@@ -49,6 +49,7 @@
   nav a{color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500;white-space:nowrap}
   nav a:hover{color:var(--text)}
   .menu-toggle{display:none;align-items:center;gap:10px;cursor:pointer;user-select:none;font-family:var(--font-mono);font-size:12px;color:var(--accent)}
+  .menu-toggle .menu-label{display:none}
   .menu-toggle .burger{display:flex;flex-direction:column;gap:4px}
   .menu-toggle .burger i{display:block;width:20px;height:2px;background:var(--accent);border-radius:1px}
   #menu-toggle{display:none}
@@ -156,7 +157,7 @@
   <input type="checkbox" id="menu-toggle" aria-hidden="true">
   <div class="wrap head-inner">
     <div class="brand">Hermes SDD <em>Agency</em></div>
-    <label for="menu-toggle" class="menu-toggle"><span class="burger"><i></i><i></i><i></i></span><span>Menu</span></label>
+    <label for="menu-toggle" class="menu-toggle"><span class="burger"><i></i><i></i><i></i></span><span class="menu-label">Menu</span></label>
     <nav>
       <a href="#why">Why</a>
       <a href="#cycles">The loop</a>
