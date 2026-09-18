@@ -427,5 +427,18 @@
   </div>
 </footer>
 
+<script>
+  // Close the mobile menu when a nav link is tapped (the anchor doesn't uncheck
+  // the toggle checkbox on its own). No-op on desktop where the panel is hidden.
+  (function () {
+    var panel = document.querySelector('.head-inner .nav-panel');
+    var toggle = document.getElementById('menu-toggle');
+    if (!panel || !toggle) return;
+    panel.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('a')) toggle.checked = false;
+    });
+  })();
+</script>
+
 </body>
 </html>
