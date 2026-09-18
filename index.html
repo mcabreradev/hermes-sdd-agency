@@ -42,12 +42,20 @@
   .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
   /* header */
   header{position:sticky;top:0;z-index:10;background:color-mix(in oklab,var(--bg) 85%, transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-  .head-inner{display:flex;align-items:baseline;justify-content:space-between;padding:16px 0;gap:16px;flex-wrap:wrap}
-  .brand{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .head-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 0;gap:16px}
+  .brand{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:-.01em;white-space:nowrap;padding:0 6px}
   .brand em{font-style:normal;color:var(--accent)}
   nav{display:flex;gap:22px;flex-wrap:wrap}
-  nav a{color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500}
+  nav a{color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500;white-space:nowrap}
   nav a:hover{color:var(--text)}
+  .menu-toggle{display:none;align-items:center;gap:10px;cursor:pointer;user-select:none;font-family:var(--font-mono);font-size:12px;color:var(--accent);padding:0 6px;background:none;border:none}
+  .menu-toggle .menu-label{display:none}
+  .menu-toggle .burger{display:flex;flex-direction:column;gap:4px;pointer-events:none}
+  .menu-toggle .burger i{display:block;width:20px;height:2px;background:var(--accent);border-radius:1px}
+  .menu-toggle[aria-expanded="true"] .burger i:first-child{transform:translateY(6px) rotate(45deg)}
+  .menu-toggle[aria-expanded="true"] .burger i:nth-child(2){opacity:0}
+  .menu-toggle[aria-expanded="true"] .burger i:last-child{transform:translateY(-6px) rotate(-45deg)}
+  /* mobile nav panel: neutral wrapper on desktop; panel behaviour lives under the media query */
   /* hero */
   .hero{border-bottom:1px solid var(--border);padding:72px 0 60px;
     background:radial-gradient(ellipse at 78% -20%, var(--accent-dim), transparent 55%),var(--bg)}
@@ -106,6 +114,24 @@
   .cmd-table td code{font-family:var(--font-mono);background:transparent;font-size:13px}
   .cmd-table td .write{color:var(--accent);font-weight:500}
   .cmd-table td .nowrite{color:var(--text-muted)}
+  /* usage + faq + advanced */
+  .usage-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .use{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface)}
+  .use .cmdline{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:8px}
+  .use p{font-size:13.5px;color:var(--text-dim)}
+  /* advanced cards: consistent icon header, accent top border to mark the tier */
+  .use.adv{border-top:3px solid var(--accent)}
+  .adv-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .adv-head svg{width:18px;height:18px;color:var(--accent);flex:none}
+  .adv-head .adv-title{font-family:var(--font-mono);font-size:13.5px;font-weight:600;color:var(--text);text-transform:none}
+  .faq details{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--surface);padding:0 18px}
+  .faq details summary{cursor:pointer;padding:14px 0;font-weight:600;color:var(--text);list-style:none}
+  .faq details summary::-webkit-details-marker{display:none}
+  .faq details summary::before{content:"›";color:var(--accent);margin-right:10px;font-family:var(--font-mono)}
+  .faq details[open] summary::before{content:"⌄"}
+  .faq details p{margin:0 0 16px;color:var(--text-dim);font-size:14.5px}
+  .code-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;color:var(--text);margin-bottom:16px}
+  .code-block .prompt{color:var(--accent)}
   /* principles */
   .principles{display:flex;flex-direction:column;gap:0}
   .pr{padding:18px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:22px 1fr;gap:16px;align-items:baseline}
@@ -124,8 +150,31 @@
     .hero{padding:48px 0 40px}
     .hero .wrap{grid-template-columns:1fr;gap:32px}
     .hero h1{font-size:36px}
+    header .menu-toggle{display:flex}
+    .nav-panel{display:none;position:absolute;top:100%;left:28px;right:28px;flex-direction:column;background:var(--bg);border:1px solid var(--border-light);border-top:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-card);padding:0 8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+    .nav-panel.open{display:flex;opacity:1;transform:translateY(0);pointer-events:auto}
+    .nav-panel nav{flex-direction:column;gap:0;max-height:0;overflow:hidden;transition:max-height .22s ease}
+    .nav-panel.open nav{max-height:420px}
+    .nav-panel nav a{display:block;padding:11px 8px;font-size:13.5px;border-bottom:1px solid var(--border-light);cursor:pointer}
+    /* install section responsive: wrap the copyable command, restack the steps */
+    .install-cmd{font-size:11.5px;padding:12px 12px;border-radius:var(--radius)}
+    .install-cmd .prompt{flex:none}
+    .install-cmd code{white-space:normal;word-break:break-all;line-height:1.6;overflow-x:visible}
+    #install .stp{grid-template-columns:34px 1fr;gap:10px 10px}
+    #install .stp .w{grid-column:2;text-align:left}
+    /* FAQ + USAGE responsive: wrap long inline/code tokens so nothing overflows */
+    .use p code, .faq details p code{white-space:normal;word-break:break-all}
+    .code-block{white-space:normal;word-break:break-all;overflow-x:visible;font-size:11.5px;line-height:1.65}
+    .usage-cards{grid-template-columns:1fr}
+    /* THE GATE table: block-ify on mobile so long preflight commands wrap */
+    .cmd-table,.cmd-table thead,.cmd-table tbody,.cmd-table tr,.cmd-table td{display:block;width:100%}
+    .cmd-table thead{display:none}
+    .cmd-table tbody tr{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;padding:6px 12px}
+    .cmd-table td{border:none;padding:6px 0}
+    .cmd-table td code{white-space:normal;word-break:break-all;font-size:12px}
   }
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  @media (prefers-reduced-motion:reduce){.nav-panel,.nav-panel nav,.nav-panel nav a,.menu-toggle .burger i{transition:none;transform:none}}
   *:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
@@ -134,14 +183,20 @@
 <header>
   <div class="wrap head-inner">
     <div class="brand">Hermes SDD <em>Agency</em></div>
-    <nav>
-      <a href="#why">Why</a>
-      <a href="#cycles">The loop</a>
-      <a href="#levels">Task levels</a>
-      <a href="#commands">Commands</a>
-      <a href="#rules">Principles</a>
-      <a href="#install">Install</a>
-    </nav>
+    <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="nav-panel"><span class="burger"><i></i><i></i><i></i></span><span class="menu-label">Menu</span></button>
+    <div class="nav-panel" id="nav-panel">
+      <nav>
+        <a href="#why">Why</a>
+        <a href="#cycles">The loop</a>
+        <a href="#levels">Task levels</a>
+        <a href="#commands">Commands</a>
+        <a href="#usage">Usage</a>
+        <a href="#faq">FAQ</a>
+        <a href="#advanced">Advanced</a>
+        <a href="#rules">Principles</a>
+        <a href="#install">Install</a>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -262,6 +317,97 @@
   </div>
 </section>
 
+<section id="usage">
+  <div class="wrap">
+    <div class="sec-label">USAGE</div>
+    <h2>Pick the trigger that matches the change.</h2>
+    <p class="sec-intro">Hermes classifies every request into one of three task levels and runs the matching path. Copy-paste scenarios live in the repo&rsquo;s <code>docs/usage-examples.md</code>; here is the shape of each.</p>
+    <div class="usage-cards">
+      <div class="use">
+        <span class="cmdline">/feature</span>
+        <p><strong>Feature</strong> — a business rule, a contract, or architecture. Full loop: analysis → spec → plan → code → review → QA → release. Starts with discovery of the problem.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/bugfix</span>
+        <p><strong>Minimal</strong> — a bounded fix that changes behavior. Runs the fast path (<code>skip_specs</code>) but <em>always</em> carries a regression test that fails without the fix.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/fix</span>
+        <p><strong>Cosmetic</strong> — no observable behavior change. A direct edit; there is no OpenSpec change because there is nothing to verify at spec level.</p>
+      </div>
+      <div class="use">
+        <span class="cmdline">/do</span>
+        <p><strong>Autonomous</strong> — run the whole loop end-to-end with no human in the loop, ending in a PR for review. A confidence gate stops on non-trivial decisions.</p>
+      </div>
+    </div>
+    <div class="code-block"><span class="prompt"># the trigger does not depend on exact wording</span>
+<span class="prompt">$</span> hermes
+&gt; let&rsquo;s run SDD: add SSO login to the web app
+&gt; fix the invoice total — it rounds wrong when the tax is 21% with decimals
+&gt; rename the local variable dat to data in src/parser.ts</div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-label">FAQ</div>
+    <h2>Frequently asked questions.</h2>
+    <div class="faq">
+      <details>
+        <summary>Do I need OpenSpec installed to use it?</summary>
+        <p>Yes. The loop is built on the OpenSpec CLI (<code>openspec</code>), ≥ 1.13.0, on your <code>PATH</code> (e.g. <code>~/.local/bin/openspec</code>). Hermes runs it from each project root.</p>
+      </details>
+      <details>
+        <summary>Do I have to install all the bundles?</summary>
+        <p>No. <code>/agency</code> loads the orchestrator plus <code>openspec-sdd</code>; the per-stage commands are convenience entry points. The installer installs all 13 by default, but <code>--bundles a,b,c</code> selects a subset.</p>
+      </details>
+      <details>
+        <summary>Can two agents talk to each other?</summary>
+        <p>No. Agents never talk to each other and never read each other&rsquo;s state. Every output returns to Hermes in the mandatory envelope and is re-verified in the repo. Hermes is the only bus.</p>
+      </details>
+      <details>
+        <summary>Who can block progress?</summary>
+        <p>Only the <strong>reviewer</strong> (<code>changes-requested</code>) and the <strong>qa</strong> agent (<code>fail</code>). Open BLOCKER/MAJOR, a <code>qa: fail</code> or any <code>blocked</code> halts the workflow.</p>
+      </details>
+      <details>
+        <summary>Do I have to write the spec prose by hand?</summary>
+        <p>No. The openspec stage&rsquo;s agent writes the change artifacts via the CLI. You supply the idea and the repo; Hermes and the stage agents produce the proposal, spec deltas, design, tasks and code.</p>
+      </details>
+      <details>
+        <summary>Can I use this on several projects at once?</summary>
+        <p>Yes. Each project is a separate workflow with its own root, change and final report. Hermes runs independent stages in parallel via <code>delegate_task</code> and never mixes context across projects.</p>
+      </details>
+    </div>
+    <p class="sec-intro" style="margin-top:8px;margin-bottom:0">Full Q&amp;A in the repo&rsquo;s <code>docs/FAQ.md</code>.</p>
+  </div>
+</section>
+
+<section id="advanced">
+  <div class="wrap">
+    <div class="sec-label">ADVANCED</div>
+    <h2>Configure for how you actually work.</h2>
+    <p class="sec-intro">Beyond the one-command install and the default triggers — flags, autonomy and the fast paths for when you want to tune the process.</p>
+    <div class="usage-cards">
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="adv-title">Install flags</span></div>
+        <p>Target a custom home with <code>-p &lt;dir&gt;</code> (honors <code>$HERMES_HOME</code>), install a subset with <code>--bundles a,b,c</code>, skip bundles with <code>--no-bundles</code>, preview with <code>--dry-run</code>, and confirm non-interactive installs with <code>-y</code>.</p>
+      </div>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="adv-title">The confidence gate</span></div>
+        <p><code>/do</code> and <code>/continue</code> run routine decisions automatically (recorded as ADRs flagged <em>ASSUMED</em>) but stop and wait on non-trivial ones: contract/API, data model, real security risk, high cost to revert.</p>
+      </div>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h10M13 8l4 4-4 4M21 12h-5"/></svg><span class="adv-title">Parallel workstreams</span></div>
+        <p>Run independent changes in separate git worktrees, each with its own root and report. Independent stages fan out via <code>delegate_task</code>; overlapping file sets run sequentially.</p>
+      </div>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">Fast paths</span></div>
+        <p>Refactors, low-risk fixes and tooling use <code>skip_specs: true</code> (a validated change, minus requirement deltas). A cosmetic level touches no behavior and skips the loop entirely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="rules">
   <div class="wrap">
     <div class="sec-label">PRINCIPLES</div>
@@ -304,6 +450,27 @@
     <span class="l"><a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/README.md">README</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/INSTALL.md">INSTALL</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/sdd-feature-lifecycle.md">Lifecycle</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/usage-examples.md">Examples</a></span>
   </div>
 </footer>
+
+<script>
+  // Mobile nav: toggle the panel on the button, keep aria-expanded/aria-controls
+  // in sync (a11y), and close when a link is tapped. No-op on desktop where the
+  // panel is hidden.
+  (function () {
+    var toggle = document.getElementById('menu-toggle');
+    var panel = document.getElementById('nav-panel');
+    if (!toggle || !panel) return;
+    function setOpen(open) {
+      panel.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    toggle.addEventListener('click', function () {
+      setOpen(!panel.classList.contains('open'));
+    });
+    panel.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('a')) setOpen(false);
+    });
+  })();
+</script>
 
 </body>
 </html>
