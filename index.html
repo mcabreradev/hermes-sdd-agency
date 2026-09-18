@@ -62,6 +62,9 @@
   .btn-solid:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
   /* hero diagram */
   .hero-diag{border:1px solid var(--border);border-top:3px solid var(--accent);background:var(--surface);padding:22px;border-radius:var(--radius);box-shadow:var(--shadow-card)}
+  .install-cmd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card,#111);font-family:var(--font-mono);font-size:13px;overflow-x:auto}
+  .install-cmd .prompt{color:var(--accent);user-select:none}
+  .install-cmd code{white-space:nowrap;color:var(--foreground)}
   .diag-title{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:16px;letter-spacing:.02em}
   .flow{display:flex;flex-direction:column;gap:0}
   .stp{display:grid;grid-template-columns:34px 5fr 56px;align-items:center;gap:12px;padding:7px 0;font-size:13.5px;position:relative}
@@ -250,6 +253,7 @@
           <tr><td><code>/review</code></td><td>adversarial diff review</td><td class="nowrite">no</td></tr>
           <tr><td><code>/qa</code></td><td>execute spec scenarios</td><td class="nowrite">no</td></tr>
           <tr><td><code>/release</code></td><td>close: notes + archive + sync</td><td class="nowrite">no</td></tr>
+          <tr><td><code>/do</code></td><td>autonomous: run the whole loop, end in a PR for review</td><td class="write">yes</td></tr>
           <tr><td><code>/feature</code> · <code>/bugfix</code> · <code>/fix</code></td><td>task-level triggers</td><td class="nowrite">no</td></tr>
         </tbody>
       </table>
@@ -279,6 +283,7 @@
     <div class="sec-label">INSTALL</div>
     <h2>Run it on another Hermes in minutes.</h2>
     <p class="sec-intro">One command installs the process tree, skills and bundles into a Hermes home. It is guarded against accidental overwrites. Full walkthroughs live in the repo&rsquo;s <code>INSTALL.md</code>.</p>
+    <div class="install-cmd"><span class="prompt">$</span><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agency/main/install.sh)</code></div>
     <div class="hero-diag">
       <div class="diag-title">QUICK START</div>
       <div class="flow">

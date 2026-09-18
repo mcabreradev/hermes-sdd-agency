@@ -87,6 +87,27 @@ The `install.sh` warns (never installs) when `/feature` is selected and these sk
 are missing. Without them, `/feature` still runs the SDD loop; only its discovery step
 cannot resolve its skills. `/agency` and the other stage bundles are unaffected.
 
+### `/do` — autonomous mode (run the loop while you sleep)
+
+`/do` runs the full agency loop end-to-end with minimal human input — discovery,
+spec, plan, build, review, bugfix loop, QA, and a final **PR (draft)** awaiting your
+review. You merge in the morning. It never publishes, tags or merges itself.
+
+It is governed by a **confidence gate**: routine decisions (follow the existing
+stack, minimal behavior, don't expand scope) run automatically with every decision
+recorded as an ADR and flagged `ASSUMED — verify in PR`. The moment a stage hits a
+**non-trivial** decision — a contract/API change, data-model change, real security
+risk (auth/secrets/exposure), an ambiguous business rule that changes visible
+behaviour, or something costly to revert — it stops that stage and waits for you.
+"Routine sleeps, non-trivial wakes."
+
+Every run ends with `templates/autonomous-report.md` in the project listing what
+ran and every `ASSUMED` decision, so the PR is auditable. For routine, well-scoped
+features this is exactly "go to sleep, wake up to a feature"; for a new domain or
+anything touching a contract/security it stops and asks. Try it first on a toy
+project, then read the first PR's ASSUMED list cover-to-cover before trusting it
+overnight. See `workflows/autonomous-change.md`.
+
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
 `docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`. For a complete

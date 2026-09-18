@@ -75,6 +75,17 @@ npx skills@latest add mattpocock/skills -a hermes-agent \
 Without them, `/feature` still runs the SDD loop but the discovery step cannot
 resolve its skills. `/agency` and the other stage bundles are unaffected.
 
+### `/do` — autonomous mode (no discovery-skills needed)
+
+`/do` runs the full agency loop end-to-end with minimal human input and ends in a
+PR (draft) for your review. It is **self-contained** — it does not load the
+discovery skills that `/feature` needs, so it installs with zero extra steps. It
+is governed by a confidence gate: routine decisions run with conservative
+defaults (each recorded as an ADR and flagged `ASSUMED`), and non-trivial
+decisions (contract/API, data model, real security risk, costly-to-revert
+architecture) stop the stage and wait for you. It never publishes, tags or
+merges. See `workflows/autonomous-change.md` and `templates/autonomous-report.md`.
+
 ## Path B — a full profile copy
 
 If you want an entire isolated Hermes profile that includes this agency:

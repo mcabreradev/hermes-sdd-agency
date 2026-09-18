@@ -1,0 +1,39 @@
+name: do
+skills:
+- hermes-sdd-orchestration
+- openspec-sdd
+description: 'AUTONOMOUS MODE: run the whole SDD loop end-to-end with minimal human input, then open
+  a PR for review. Runs alone by default, but stops and waits when a stage hits a non-trivial design
+  decision. Never publishes.'
+instruction: 'AUTONOMOUS MODE. Run the FULL SDD agency loop over the cwd project end-to-end: discovery
+  → openspec → architect → planner → builder → reviewer → (bugfix loop) → QA → release-pr. Follow
+  workflows/autonomous-change.md in full.
+
+  DEFAULT BEHAVIOUR: run the whole loop without asking the human for the routine decisions. The
+  terminal state is a PR (draft) awaiting human review — you never merge, never publish, never tag.
+
+  THE CONFIDENCE GATE (the one thing that wakes the human):
+  Run autonomously through the routine/mechanical decisions using these defaults:
+  - Architecture (routine): follow the project''s existing stack/patterns (AGENTS.md, tech stack,
+    existing code); path of least resistance, no new non-standard dependency.
+  - Business (routine): if the idea does not state a business rule, implement the minimal behavior
+    and mark "ASSUMED — verify in PR" in the report + ADR; never invent a rule.
+  - Scope (routine): never expand. New scope → cut it off and record it (another change).
+  BUT the moment a stage identifies a NON-TRIVIAL decision — high cost to revert, a public contract/API,
+  schema/data-model change, security (auth/secrets/exposure), an ambiguous business rule that changes
+  visible behaviour, splitting the feature, accepting structural debt, or a new dependency that is not
+  standard for the stack — STOP that stage, report the decision with options + a recommendation + impact,
+  and WAIT for the user. Do not assume it. "Routine sleeps, non-trivial wakes."
+
+  Every decision actually taken (routine) is recorded as an ADR in the project and listed in the final
+  autonomous report, so the user sees it in the PR and can correct.
+
+  Protocol: (1) resolve root (pwd -P + openspec context --json), compare against expected; (2) preflight
+  test -f openspec/project.md or run workflows/initialize-project.md; (3) follow the stages of
+  workflows/autonomous-change.md, one agent per stage via delegate_task, independent stages in parallel;
+  (4) verify every agent output in the real repo before advancing (git status --porcelain, git diff --stat,
+  re-run the gate) — an agent reply is a self-report, not a fact; (5) close: PR (draft) awaiting review,
+  final autonomous report in the repo, archive+sync the change. Never merge/publish/tag.
+
+  This is NOT the fast path: it is the full feature loop, autonomous-with-a-gate. For bugfix/minimal use
+  /bugfix; for cosmetic use /fix.'
