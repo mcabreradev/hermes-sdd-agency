@@ -19,7 +19,13 @@ default). Flags:
     --bundles a,b,c  Only install the named bundles (default: all 12)
     --no-bundles     Process tree + skills only, skip bundles
     --dry-run        Print what would happen; write nothing
+-y, --yes            Skip the overwrite confirmation (non-interactive)
 ```
+
+The installer is **guarded against accidental overwrites**: if the target home
+already holds data it stops and asks for confirmation (interactive) or aborts
+(non-interactive, unless `--yes`). Reinstalling into an existing agency prints
+an update warning; an existing home with other data prints a stronger one.
 
 Or install from a clone (no re-download):
 
@@ -42,6 +48,32 @@ What it does, in order:
 
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).
+
+### `/feature` discovery dependency
+
+The `/feature` bundle is a **discovery-first** loop: `superpowers:brainstorming`,
+`grill-with-docs`, `grilling` and `domain-modeling` are loaded before any
+planning/code (HARD-GATE: no implementation until the design is approved). These
+skills are **not** shipped by this repo; install them on the target once:
+
+```bash
+# brainstorming (one-command Hermes plugin)
+hermes plugins install obra/superpowers --enable
+
+# grill-with-docs, grilling, domain-modeling (entire 38-skill collection)
+npx skills@latest add mattpocock/skills
+```
+
+`npx skills` detects the Hermes agent on its own and installs into your Hermes.
+To install just the three needed (instead of all 38):
+
+```bash
+npx skills@latest add mattpocock/skills -a hermes-agent \
+  --skill grilling --skill grill-with-docs --skill domain-modeling
+```
+
+Without them, `/feature` still runs the SDD loop but the discovery step cannot
+resolve its skills. `/agency` and the other stage bundles are unaffected.
 
 ## Path B — a full profile copy
 
