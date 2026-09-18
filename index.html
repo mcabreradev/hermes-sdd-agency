@@ -119,6 +119,11 @@
   .use{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface)}
   .use .cmdline{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-bottom:8px}
   .use p{font-size:13.5px;color:var(--text-dim)}
+  /* advanced cards: consistent icon header, accent top border to mark the tier */
+  .use.adv{border-top:3px solid var(--accent)}
+  .adv-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .adv-head svg{width:18px;height:18px;color:var(--accent);flex:none}
+  .adv-head .adv-title{font-family:var(--font-mono);font-size:13.5px;font-weight:600;color:var(--text);text-transform:none}
   .faq details{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--surface);padding:0 18px}
   .faq details summary{cursor:pointer;padding:14px 0;font-weight:600;color:var(--text);list-style:none}
   .faq details summary::-webkit-details-marker{display:none}
@@ -365,21 +370,22 @@
   <div class="wrap">
     <div class="sec-label">ADVANCED</div>
     <h2>Configure for how you actually work.</h2>
+    <p class="sec-intro">Beyond the one-command install and the default triggers — flags, autonomy and the fast paths for when you want to tune the process.</p>
     <div class="usage-cards">
-      <div class="use">
-        <span class="cmdline">install flags</span>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="adv-title">Install flags</span></div>
         <p>Target a custom home with <code>-p &lt;dir&gt;</code> (honors <code>$HERMES_HOME</code>), install a subset with <code>--bundles a,b,c</code>, skip bundles with <code>--no-bundles</code>, preview with <code>--dry-run</code>, and confirm non-interactive installs with <code>-y</code>.</p>
       </div>
-      <div class="use">
-        <span class="cmdline">the confidence gate</span>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="adv-title">The confidence gate</span></div>
         <p><code>/do</code> and <code>/continue</code> run routine decisions automatically (recorded as ADRs flagged <em>ASSUMED</em>) but stop and wait on non-trivial ones: contract/API, data model, real security risk, high cost to revert.</p>
       </div>
-      <div class="use">
-        <span class="cmdline">parallel workstreams</span>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h10M13 8l4 4-4 4M21 12h-5"/></svg><span class="adv-title">Parallel workstreams</span></div>
         <p>Run independent changes in separate git worktrees, each with its own root and report. Independent stages fan out via <code>delegate_task</code>; overlapping file sets run sequentially.</p>
       </div>
-      <div class="use">
-        <span class="cmdline">fast paths</span>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">Fast paths</span></div>
         <p>Refactors, low-risk fixes and tooling use <code>skip_specs: true</code> (a validated change, minus requirement deltas). A cosmetic level touches no behavior and skips the loop entirely.</p>
       </div>
     </div>
