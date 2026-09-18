@@ -37,7 +37,7 @@ cd hermes-sdd-agency
 
 What it does, in order:
 
-1. `agents/ workflows/ rules/ templates/ docs/` → copied into the target home
+1. `agents/ workflows/ rules/ templates/ docs/ bin/` → copied into the target home
    (merge; does not wipe existing config).
 2. `skills/` → copied into `<home>/skills/` (personas + orchestration +
    openspec-* + process skills).
@@ -45,6 +45,9 @@ What it does, in order:
    placing a bundle `.yaml` there registers it** — `hermes bundles list` reads
    the directory; you do NOT need `hermes skills install <path>` (which only
    works for catalog IDs or remote URLs, not local paths).
+
+`bin/` holds `worktree-no-smoke`, the content-fingerprint used by reviewer/QA/release
+stages to bind evidence to the exact tree (see `rules/quality.md` and the README).
 
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).
@@ -134,7 +137,7 @@ The only project-level entry is OpenSpec's own `openspec/`, created by
 
 ## Keeping the export in sync
 
-`rules/`, `agents/`, `workflows/`, `templates/`, `docs/`, `skill-bundles/` and the
+`rules/`, `agents/`, `workflows/`, `templates/`, `docs/`, `bin/`, `skill-bundles/` and the
 SDD-relevant skills under `skills/` are copied from `~/.hermes/`. When you change a rule,
 add a bundle or edit a persona/process skill locally, re-copy that directory here and
 commit so the public export stays current.

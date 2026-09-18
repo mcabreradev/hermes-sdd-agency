@@ -9,7 +9,30 @@ coherent, reviewable increments of the system.
 
 ## [Unreleased]
 
-- None pending.
+### Added
+
+- **`bin/worktree-no-smoke`** — content fingerprint of the working tree (git `write-tree`
+  over a temp index; survives rebase/amend, changes on any source change incl. untracked).
+  Reviewer/QA/release stages now record it and `release-change` compares, so evidence is
+  bound to the exact tree that was validated (anti-"smoke"). Enforced in `rules/quality.md`.
+- **Complementary skills** (`skills/`): `review-structural` (SQL / LLM trust-boundary /
+  conditional side-effect diff scan), `code-health` (0-10 score, trends), `project-learnings`
+  (`.context/learnings.jsonl` per project), `web-performance-benchmark` (Core Web Vitals,
+  before/after), `plan-scope-review` (the four scope modes), `visual-design-review`,
+  `design-exploration`, `design-to-html`, `diagram-triplet`, `developer-experience-review`,
+  `document-diataxis` (coverage map), `security-evidence-first` (attacker·boundary·impact·challenge).
+- **`install.sh`** now copies `bin/` into the target home (`PROCESS_DIRS` + INSTALL/README sync).
+
+### Changed
+
+- `workflows/qa-change.md` — report-only mode (`qa-only`): same matrix, no fix loop, with a
+  health baseline and the worktree fingerprint; verdict bar unchanged.
+- `workflows/release-change.md` — Diataxis coverage map + doc/architecture-diagram drift
+  check + changelog sell-test, and the closed-tree fingerprint comparison against earlier stages.
+
+The skills and rule concepts were adapted from [garrytan/gstack](https://github.com/garrytan/gstack)
+(MIT); only host-agnostic ideas were distilled in, the Claude-specific runtime was left out.
+
 
 ## [0.1.0] - 2026-09-17
 

@@ -27,6 +27,8 @@ rules/          orchestration · project-boundaries · openspec · sdd · qualit
 templates/      openspec-project · proposal · spec · tasks · architecture · adr ·
                 review-report · qa-report · initialize-project-report · final-report
 docs/           sdd-feature-lifecycle · usage-examples · FAQ
+bin/            worktree-no-smoke — content-fingerprint of the working tree
+                (binds reviewer/QA evidence to the exact tree they validated)
 skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```
@@ -117,6 +119,30 @@ It detects the state (`openspec list`/`status`, git, PR) rather than assuming it
 so it never re-runs discovery/spec already done and never opens a second PR. Same
 confidence gate as `/do` (routine sleeps, non-trivial wakes). See
 `workflows/continue-change.md`.
+
+## Evidence you can verify: `worktree-no-smoke`
+
+A claim that a stage "reviewed" or "tested" the work is a self-report. `bin/worktree-no-smoke`
+prints a **content fingerprint** of the working tree (git `write-tree` over a temp index) that
+binds an agent's evidence to the exact content it actually saw — it survives rebase/amend, and
+changes when **any** source (including untracked files) changes.
+
+Reviewer, QA and release stages record the fingerprint of the tree they worked on; at merge
+time `release-change` compares them. A mismatch means the shipped tree was validated on older
+content → re-review/re-test before landing. Enforced in `rules/quality.md`.
+
+## Complementary skills (`skills/`)
+
+Beyond the personas and OpenSpec mechanics, the repo ships process skills for the loop:
+
+- **review** `review-structural` — diff scan for SQL, LLM trust-boundary, conditional side effects.
+- **qa** `code-health` (0-10 score), report-only mode in `qa-change`.
+- **plan** `plan-scope-review` — pick a scope mode (expand / hold / strip) before planning.
+- **reliability** `web-performance-benchmark` (Core Web Vitals), `project-learnings`
+  (`.context/learnings.jsonl`), `developer-experience-review` (plan vs reality).
+- **design** `visual-design-review`, `design-exploration`, `design-to-html`, `diagram-triplet`.
+- **docs / security** `document-diataxis` (coverage map, used by `release-change`),
+  `security-evidence-first` (attacker·boundary·impact·challenge).
 
 For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
