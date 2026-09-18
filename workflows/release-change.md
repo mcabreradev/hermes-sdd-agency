@@ -52,7 +52,7 @@ for a decision if it is not declared), writes the changelog in the format the re
 
 ### Bind the closed tree
 
-- Record the **`worktree-no-smoke` fingerprint** of the tree being released, and compare it
+- Record the **`no-smoke-worktree` fingerprint** of the tree being released, and compare it
   against the reviewer/QA fingerprints recorded in earlier stages. A mismatch against those
   stages is evidence the shipped tree was validated on different content → stop and
   re-review/re-test before closing (see `rules/quality.md`).

@@ -27,7 +27,7 @@ rules/          orchestration · project-boundaries · openspec · sdd · qualit
 templates/      openspec-project · proposal · spec · tasks · architecture · adr ·
                 review-report · qa-report · initialize-project-report · final-report
 docs/           sdd-feature-lifecycle · usage-examples · FAQ
-bin/            worktree-no-smoke — content-fingerprint of the working tree
+bin/            no-smoke-worktree — content-fingerprint of the working tree
                 (binds reviewer/QA evidence to the exact tree they validated)
 skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
@@ -120,9 +120,9 @@ so it never re-runs discovery/spec already done and never opens a second PR. Sam
 confidence gate as `/do` (routine sleeps, non-trivial wakes). See
 `workflows/continue-change.md`.
 
-## Evidence you can verify: `worktree-no-smoke`
+## Evidence you can verify: `no-smoke-worktree`
 
-A claim that a stage "reviewed" or "tested" the work is a self-report. `bin/worktree-no-smoke`
+A claim that a stage "reviewed" or "tested" the work is a self-report. `bin/no-smoke-worktree`
 prints a **content fingerprint** of the working tree (git `write-tree` over a temp index) that
 binds an agent's evidence to the exact content it actually saw — it survives rebase/amend, and
 changes when **any** source (including untracked files) changes.

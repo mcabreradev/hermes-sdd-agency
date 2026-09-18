@@ -19,7 +19,7 @@ A claim that a stage "reviewed" or "tested" the work is a self-report; it proves
 unless it is bound to the actual content it was performed on. A working-tree content
 fingerprint is that binding.
 
-- `bin/worktree-no-smoke` prints a **content hash of the working tree** (git `write-tree`
+- `bin/no-smoke-worktree` prints a **content hash of the working tree** (git `write-tree`
   over a temp index with `git add -A`). Same content ⇒ same hash; any change to source —
   including **untracked new files** — changes the hash. It survives rebase/amend/squash
   that preserve content.
@@ -27,9 +27,9 @@ fingerprint is that binding.
   and `release-change` must record the fingerprint of the tree it closes.
 
 ```
-reviewer fingerprint:  $(cd <project-root> && <agency-bin>/worktree-no-smoke)
-qa fingerprint:        $(cd <project-root> && <agency-bin>/worktree-no-smoke)
-release fingerprint:   $(cd <project-root> && <agency-bin>/worktree-no-smoke)
+reviewer fingerprint:  $(cd <project-root> && <agency-bin>/no-smoke-worktree)
+qa fingerprint:        $(cd <project-root> && <agency-bin>/no-smoke-worktree)
+release fingerprint:   $(cd <project-root> && <agency-bin>/no-smoke-worktree)
 ```
 
 where `<agency-bin>` is the agency's `bin/` dir as installed (e.g. `~/.hermes/bin`).

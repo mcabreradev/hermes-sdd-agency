@@ -11,7 +11,7 @@ coherent, reviewable increments of the system.
 
 ### Added
 
-- **`bin/worktree-no-smoke`** — content fingerprint of the working tree (git `write-tree`
+- **`bin/no-smoke-worktree`** — content fingerprint of the working tree (git `write-tree`
   over a temp index; survives rebase/amend, changes on any source change incl. untracked).
   Reviewer/QA/release stages now record it and `release-change` compares, so evidence is
   bound to the exact tree that was validated (anti-"smoke"). Enforced in `rules/quality.md`.

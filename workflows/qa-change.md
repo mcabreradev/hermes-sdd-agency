@@ -45,7 +45,7 @@ authorized), the `qa` agent produces the same matrix **without fixing anything**
   later fixing pass can show the before/after.
 - The report's verdict is `fail` if any `BLOCKER`/`MAJOR` defect exists, `pass` only when the
   matrix is clean — report-only does not change the closure bar, it only skips the fix loop.
-- Record the **`worktree-no-smoke` fingerprint** so the report is bound to the exact tree
+- Record the **`no-smoke-worktree` fingerprint** so the report is bound to the exact tree
   that was exercised (see `rules/quality.md`).
 
 ## 2. Validation of the report (Hermes)

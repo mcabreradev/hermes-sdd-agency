@@ -46,7 +46,7 @@ What it does, in order:
    the directory; you do NOT need `hermes skills install <path>` (which only
    works for catalog IDs or remote URLs, not local paths).
 
-`bin/` holds `worktree-no-smoke`, the content-fingerprint used by reviewer/QA/release
+`bin/` holds `no-smoke-worktree`, the content-fingerprint used by reviewer/QA/release
 stages to bind evidence to the exact tree (see `rules/quality.md` and the README).
 
 Then restart the session, and in any project run `/agency` (or `/feature`,
