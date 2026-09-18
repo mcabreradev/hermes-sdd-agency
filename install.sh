@@ -257,6 +257,8 @@ _menu_frame() {
     else
       printf '%b%b│%b     ● Yes%b   %b❯ %b○%b No\n' "$_MENU_D" "$_MENU_C" "$_MENU_0" "$_MENU_D" "$_MENU_C" "$_MENU_D" "$_MENU_0"
     fi
+    printf '%b%b│%b  %b↑%b/%b←%b %bYes%b   %b↓%b/%b→%b %bNo%b   %by/n%b ↵ confirm   %b⌫%b cancel\n' \
+      "$_MENU_D" "$_MENU_C" "$_MENU_0" "$_MENU_C" "$_MENU_0" "$_MENU_C" "$_MENU_0" "$_MENU_G" "$_MENU_0" "$_MENU_C" "$_MENU_0" "$_MENU_C" "$_MENU_0" "$_MENU_G" "$_MENU_0" "$_MENU_C" "$_MENU_0" "$_MENU_D" "$_MENU_0"
   elif (( MENU_DONE )); then
     printf '%b◇%b  Yes — installing\n' "$_MENU_G" "$_MENU_0"
   fi
@@ -378,7 +380,7 @@ menu_run() {
             if (( p > 0 )); then _MENU_CUR="${_VIS[$(( p - 1 ))]}"; fi
           fi
         elif [[ "$_MENU_PHASE" == "confirm" ]]; then
-          _MENU_CONF=0
+          _MENU_CONF=0   # up = Yes
         fi
         ;;
       down)
@@ -397,7 +399,17 @@ menu_run() {
             fi
           fi
         elif [[ "$_MENU_PHASE" == "confirm" ]]; then
-          _MENU_CONF=1
+          _MENU_CONF=1   # down = No
+        fi
+        ;;
+      left)
+        if [[ "$_MENU_PHASE" == "confirm" ]]; then
+          _MENU_CONF=0   # left = Yes (horizontal layout)
+        fi
+        ;;
+      right)
+        if [[ "$_MENU_PHASE" == "confirm" ]]; then
+          _MENU_CONF=1   # right = No (horizontal layout)
         fi
         ;;
       space)
@@ -454,6 +466,13 @@ menu_run() {
         exit 1
         ;;
       *)
+        if [[ "$_MENU_PHASE" == "confirm" ]]; then
+          # Direct y/n keys toggle the confirm without relying on arrow-key
+          # encoding (SS3 vs CSI varies across terminals).
+          if [[ "$key" == "y" || "$key" == "Y" ]]; then _MENU_CONF=0;
+          elif [[ "$key" == "n" || "$key" == "N" ]]; then _MENU_CONF=1; fi
+          continue
+        fi
         [[ "$key" =~ ^[[:print:]]$ ]] || continue
         if [[ "$_MENU_PHASE" == "bundles" ]]; then
           [[ "$key" == " " ]] || _MENU_QUERY="$_MENU_QUERY$key"
