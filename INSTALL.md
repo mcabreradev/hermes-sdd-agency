@@ -86,6 +86,20 @@ decisions (contract/API, data model, real security risk, costly-to-revert
 architecture) stop the stage and wait for you. It never publishes, tags or
 merges. See `workflows/autonomous-change.md` and `templates/autonomous-report.md`.
 
+### `/resume` — continue an existing change
+
+`/resume` continues a change that already has a **validated OpenSpec change**
+(proposal/spec/tasks, e.g. set up via `/feature`) and runs the pending stages to
+termination — code, review, QA, archive + sync — ending with the **existing PR
+draft updated**. It detects the current state (`openspec list`/`status`, git,
+PR) instead of assuming it, and picks up from the first pending stage, so it
+never re-runs discovery/spec that are already done and never opens a second PR.
+
+Same confidence gate as `/do`: routine decisions run with conservative defaults
+(each recorded as an ADR flagged `ASSUMED`), non-trivial ones
+(contract/API, data model, real security risk, costly-to-revert) stop the stage
+and wait. See `workflows/resume-change.md`.
+
 ## Path B — a full profile copy
 
 If you want an entire isolated Hermes profile that includes this agency:
