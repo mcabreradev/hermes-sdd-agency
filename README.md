@@ -138,6 +138,17 @@ Reviewer, QA and release stages record the fingerprint of the tree they worked o
 time `release-change` compares them. A mismatch means the shipped tree was validated on older
 content → re-review/re-test before landing. Enforced in `rules/quality.md`.
 
+## Every run leaves a structured trace: `run-trace`
+
+The loop also keeps a **machine-readable memory of each run**. Each stage appends a
+structured trace entry (stage, change, status, files, evidence, blockers, decisions/ASSUMED,
+run id, next step, timestamp) to `reports/run-<run-id>.jsonl` — the single source of truth
+for resuming a partial run and auditing what happened, so a dead session or a parked
+decision doesn't force re-reading prose. `bin/run-trace` emits the run summary from the log
+alone. The trace is additive (it mirrors the envelope, `rules/observability.md`) and lives in
+the project, never in `~/.hermes/**` (`rules/project-boundaries.md`); it is gitignored so a
+growing log never disturbs the `no-smoke-worktree` release fingerprint.
+
 ## Complementary skills (`skills/`)
 
 Beyond the personas and OpenSpec mechanics, the repo ships process skills for the loop:

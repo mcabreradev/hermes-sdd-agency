@@ -73,9 +73,16 @@ sanitized procedure.
 
 ### Can I use this on several projects at once?
 
-Yes. Each project is a separate workflow with its own root, change and final report
+Yes. Each project is a separate workflow with its own root, change, run trace and final report
 (`rules/project-boundaries.md`). Hermes can run independent stages in parallel via
 `delegate_task`; it never mixes context across projects.
+
+### Where does the agency keep the memory of a run?
+
+In a structured trace: each stage appends to `reports/run-<run-id>.jsonl` in the project
+(`rules/observability.md`), and `bin/run-trace` prints the run summary. It is the source of
+truth for resuming a partial run and auditing what happened. It lives in the project, not in
+`~/.hermes/` (`rules/project-boundaries.md`).
 
 ### How do I keep my fork in sync with the upstream?
 
