@@ -13,6 +13,26 @@ ended up having.
 - Tests are not written to freeze values that change by design (catalogs,
   versions, counts). Relationships and contracts between data are tested, not snapshots.
 
+## Test-driven development (default method)
+
+Behavior-bearing work is implemented **test-first** by default. This is the agency's
+antidote to trial-and-error loops: behavior is pinned by a failing test before any
+implementation exists.
+
+- **RED:** write one minimal test that demonstrates the expected behavior from the spec
+  scenario. Run it and confirm it fails **for the expected reason** (feature missing, not
+  a typo). A test that passes before the code exists is testing the wrong thing.
+- **GREEN:** write the minimal code that makes it pass. No extra features, no
+  refactoring beyond the test.
+- **REFACTOR:** clean up while keeping the test green. Do not add behavior.
+- Verify RED and GREEN per task, with the real run output, before moving to the next
+  task.
+
+**Skipping TDD is the exception, not the default.** The builder deliberately omits the
+cycle only for UI glue, generated code, configuration/transpilation or a throwaway
+prototype — and records each omission with its concrete reason in the report. Everything
+that changes observable behavior is test-first unless the omission is justified there.
+
 ## Prohibitions
 
 - A test is not weakened, skipped (`skip`) nor deleted to make the gate pass. If an

@@ -5,8 +5,11 @@ only after preflight enables it.
 
 - **Agents:** `builder` (and `planner` if a section has to be re-planned)
 - **Rules:** `rules/openspec.md`, `rules/coding.md`, `rules/testing.md`, `rules/quality.md`
+- **Method:** test-driven by default (`rules/testing.md`) — the builder implements
+  behavior-bearing tasks test-first (RED→GREEN→REFACTOR), skipping the cycle only with a
+  justified exception recorded in the report.
 - **Output:** code + tests for the change, tasks marked `- [x]` with evidence.
-- **Personas/method:** `fullstack-developer` / `typescript-pro` · `executing-plans` (batches with checkpoint) · `dispatching-parallel-agents` if there are independent tasks · `debugger`/`error-detective` when a task gets stuck.
+- **Personas/method:** `fullstack-developer` / `typescript-pro` · **`test-driven-development` (default)** · `executing-plans` (batches with checkpoint) · `dispatching-parallel-agents` if there are independent tasks · `debugger`/`error-detective` when a task gets stuck.
 
 ## 0. Preflight (Hermes) — blocking
 
