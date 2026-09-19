@@ -58,3 +58,8 @@ is the single source of truth for resuming and auditing a run.
 - **Scope boundary:** the mechanism that *wakes the human* (Discord/Telegram nudge) is
   explicitly out of scope — it is a separate change. This change only makes the parked
   state auditable and resumable.
+- **Scope boundary:** the **Obsidian vault mirror** — an optional read-only summary of a
+  run's trace emitted into the Obsidian vault for cross-project browsing — is also out of
+  scope. It is a separate change. The project is the single source of truth
+  (`rules/project-boundaries.md`); the vault mirror, when it lands, reads it, never writes
+  it back.

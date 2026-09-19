@@ -28,9 +28,15 @@ has (bash + OpenSpec CLI).
   `reports/` dir, one append per stage closure.
 - **Why:** `reports/` already exists in the project convention; JSON is machine-readable
   by `bin/run-trace` and humans; per-run id keeps concurrent independent runs separate
-  (the multi-project model in `rules/project-boundaries.md`).
-- **Discarded alternative:** a single global `runs.ndjson` — rejected: mixes projects and
-  makes `git status` and per-project boundaries messy.
+  (the multi-project model in `rules/project-boundaries.md`). The project is the source
+  of truth, per `rules/project-boundaries.md` (project-specific state lives in the
+  project, never in `~/.hermes/**`).
+- **Discarded alternatives:** a single global `runs.ndjson` — rejected: mixes projects and
+  makes project boundaries messy. Writing the trace to `~/.hermes/` (e.g. Obsidian vault)
+  — rejected: violates the "project state lives in the project" rule, would detach the
+  trace from the change and the `no-smoke-worktree` evidence it must be bound to. An
+  optional read-only mirror/summary to the Obsidian vault is a separate change, not the
+  source of truth.
 - **Consequences:** a run id must be minted at preflight and threaded through the stages;
   `reports/` stays git-ignored or committed per project taste (the reader works either way).
 
