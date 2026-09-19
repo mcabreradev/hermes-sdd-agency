@@ -47,6 +47,16 @@ reports of each stage.
 <!-- Open findings with severity, declared debt, NOT RUN scenarios, known
      flaky. If there is nothing, say "none". -->
 
+## Run trace
+
+<!-- The structured per-run log and its audit summary (rules/observability.md). The
+     trace is the source of truth for resume/audit; the report links it, it does not
+     replace it. -->
+
+- Run id: `<run-<UTC ISO-8601 compact>>`
+- Trace: `reports/run-<run-id>.jsonl`
+- Summary: `bin/run-trace --file reports/run-<run-id>.jsonl` → `<output>`
+
 ## Decisions made
 
 <!-- Decisions recorded in the run (ADRs, design) with their path. -->

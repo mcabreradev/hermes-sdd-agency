@@ -212,6 +212,9 @@ executing them (edge cases and the full user path):
 - **Sync specs** to `openspec/specs/<cap>/spec.md` — part of closure, never optional.
 - **Final report** (`templates/final-report.md`) written in the project: stages closed
   with evidence, gates run, OpenSpec state, declared debt, decisions, single next step.
+- **Run trace recorded** — each stage logged its trace entry to `reports/run-<run-id>.jsonl`
+  and `bin/run-trace` emitted the summary (`rules/observability.md`); the trace is the
+  source of truth for auditing and resuming the run.
 - `git status --porcelain` clean (no unexpected changes or temp files).
 
 ---

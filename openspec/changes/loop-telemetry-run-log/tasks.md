@@ -32,5 +32,5 @@ Each stage records its trace entry at closure with the run id from the brief and
 
 ## 6. Reports and docs cross-reference
 
-- [ ] 6.1 `templates/final-report.md` cites/logs the run trace — verifies: `grep -q "run-trace" templates/final-report.md`
-- [ ] 6.2 Update `README.md`, `docs/sdd-feature-lifecycle.md` and `docs/FAQ.md` to mention the run trace — verifies: `grep -q "run-trace" README.md docs/sdd-feature-lifecycle.md docs/FAQ.md`
+- [x] 6.1 `templates/final-report.md` cites/logs the run trace — verifies: `grep -q "run-trace" templates/final-report.md`
+- [x] 6.2 Update `README.md`, `docs/sdd-feature-lifecycle.md` and `docs/FAQ.md` to mention the run trace — verifies: `grep -q "run-trace" README.md docs/sdd-feature-lifecycle.md docs/FAQ.md`
