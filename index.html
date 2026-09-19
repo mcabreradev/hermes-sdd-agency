@@ -240,7 +240,7 @@
       <div class="role"><h3>openspec</h3><p>Scaffolds a validated change: proposal, spec deltas, scenarios.</p></div>
       <div class="role"><h3>architect</h3><p>Decides boundaries, contracts and rejected alternatives; writes ADRs.</p></div>
       <div class="role"><h3>planner</h3><p>Breaks the change into granular, verifiable tasks.</p></div>
-      <div class="role"><h3>builder</h3><p>The only stage that writes code, in batches of tasks with tests.</p></div>
+      <div class="role"><h3>builder</h3><p>The only stage that writes code, in batches of tasks — behavior-bearing work is <strong>test-first</strong> by rule (TDD, backend included).</p></div>
       <div class="role"><h3>reviewer</h3><p>Adversarial review of the diff against the spec.<span class="flag block">blocks</span></p></div>
       <div class="role"><h3>qa</h3><p>Validates real behavior against the spec scenarios by executing them.<span class="flag block">blocks</span></p></div>
       <div class="role"><h3>release</h3><p>Release notes, OpenSpec archive, final repo state.</p></div>
@@ -317,7 +317,7 @@
       <div class="usage-cards" style="margin-top:18px">
         <div class="use adv" style="grid-column:1/-1">
           <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h6l2-7 4 14 2-7h6"/></svg><span class="adv-title">Skills load inside the stages</span></div>
-          <p>These slash commands trigger the <em>stages</em>; each loads its complementary process <strong>skills</strong> as it runs — e.g. <code>review-structural</code> (SQL / LLM trust-boundary / side-effect scan) inside <code>/review</code>, <code>code-health</code> (0-10 score) and report-only mode inside <code>/qa</code>, <code>plan-scope-review</code> (expand / hold / strip) before <code>/plan</code>, and <code>document-diataxis</code> plus the <code>no-smoke-worktree</code> fingerprint check inside <code>/release</code>. The full skill set lives under <code>skills/</code> in the repo.</p>
+          <p>These slash commands trigger the <em>stages</em>; each loads its complementary process <strong>skills</strong> as it runs — e.g. <code>test-driven-development</code> as a hard rule inside <code>/implement</code> (behavior-bearing work is written test-first, from backends to bug fixes), <code>review-structural</code> (SQL / LLM trust-boundary / side-effect scan) inside <code>/review</code>, <code>code-health</code> (0-10 score) and report-only mode inside <code>/qa</code>, <code>plan-scope-review</code> (expand / hold / strip) before <code>/plan</code>, and <code>document-diataxis</code> plus the <code>no-smoke-worktree</code> fingerprint check inside <code>/release</code>. The full skill set lives under <code>skills/</code> in the repo.</p>
         </div>
       </div>
     </div>

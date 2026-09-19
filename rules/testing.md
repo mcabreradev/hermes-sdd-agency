@@ -13,6 +13,32 @@ ended up having.
 - Tests are not written to freeze values that change by design (catalogs,
   versions, counts). Relationships and contracts between data are tested, not snapshots.
 
+## Test-driven development (hard rule)
+
+Backend code that carries business logic is implemented **test-first, always** — this
+is a fixed rule, not a judgment call. The agency's antidote to trial-and-error loops and
+regressions: behavior is pinned by a failing test before any implementation exists, so
+each change adds the *correct*, working behavior instead of shipping bugs and patching
+them later.
+
+- **RED:** write one minimal test that demonstrates the expected behavior from the spec
+  scenario. Run it and confirm it fails **for the expected reason** (feature missing, not
+  a typo). A test that passes before the code exists is testing the wrong thing.
+- **GREEN:** write the minimal code that makes it pass. No extra features, no
+  refactoring beyond the test.
+- **REFACTOR:** clean up while keeping the test green. Do not add behavior.
+- Verify RED and GREEN per task, with the real run output, before moving to the next
+  task.
+
+**Applies whenever the code expresses observable behavior** — backends, business logic,
+API endpoints, data transforms, bug fixes, and the frontend's logic too. There is no
+agent discretion on skipped test-first for behavior-bearing work.
+
+Only code with **no behavior to prove** sits outside the cycle and then only as a
+declared `not applicable`, never as a skipped default: configuration, generated code,
+boilerplate glue, wiring and throwaway prototypes. Each such case is named in the report
+with why there is nothing to test. If there is any behavior to pin, test-first applies.
+
 ## Prohibitions
 
 - A test is not weakened, skipped (`skip`) nor deleted to make the gate pass. If an

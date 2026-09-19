@@ -135,6 +135,9 @@ data model — anything costly to revert):
 
 - Document **boundaries, contracts, rejected alternatives and risks**.
 - If warranted, an **ADR** under `docs/decisions/` via `architecture-decision-records`.
+- When the domain merits it (non-trivial business rules, entities/aggregates, bounded
+  contexts), the architect shapes it with **Domain-Driven Design** via
+  `domain-modeling`; on thin bounded behavior it proceeds without a DDD model.
 - Decide *the solution*, not the how-to-implement. Ambiguous scope/architecture ⇒
   **ask the human** (options + impact + recommendation); the answer is written into the
   project, never into global memory.
@@ -164,6 +167,12 @@ Breaks the change into **granular tasks in `tasks.md`**:
   correct root. Without it, nothing starts.
 - The builder touches **only the declared files** (scope rule; real diff is compared
   against the brief).
+- **Test-driven by hard rule** (`rules/testing.md`): every behavior-bearing task — backends,
+  business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR,
+  watching the test fail for the expected reason, then minimal code, then refactor green).
+  No agent discretion to skip test-first for code that carries business logic; only
+  behavior-free code (config, generated code, throwaway prototypes) is declared `not
+  applicable` with its reason in the report.
 - Each task writes **its test** (spec scenarios as source of truth; a fix carries a
   regression test that fails without the fix). **No line without a validated spec** —
   `rules/coding.md`.

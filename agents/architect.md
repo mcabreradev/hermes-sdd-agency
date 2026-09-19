@@ -13,7 +13,11 @@
 
 - **Adopt (persona):** `code-architect` for the design and the boundaries; `architect-reviewer`
   to contrast the design against the patterns that already exist in the repo.
-- **Method:** `architecture-decision-records` when recording a durable decision.
+- **Method:** `architecture-decision-records` when recording a durable decision; `domain-modeling`
+  to shape the change's domain when the business rules merit it.
+- **Domain-Driven Design (DDD):** applied **when the domain merits it** — non-trivial
+  business rules with entities/aggregates, a shared vocabulary, or bounded contexts. On
+  thin bounded behavior the architect proceeds without a DDD model; DDD is never forced.
 - Loading is `skill_view(name='<slug>')`, not optional: the persona provides the expertise, this
   file provides the contract. If the skill is not available, say so in `blockers`.
 

@@ -67,6 +67,15 @@ Hermes imposes the process and the prohibitions.
   if the repo has no style of its own, imperative mood, one line, no emoji and no filler.
 - The error texts that the end user sees follow the language the project already uses.
 
+## Domain model
+
+When the architect shaped the change's domain with **Domain-Driven Design**
+(`agents/architect.md`), the builder implements **following that model**: entities,
+aggregates, value objects, repositories and bounded contexts as designed — not a
+deviating structure improvised inside the code. Domain rules live in the domain model,
+not spread implicitly across the implementation. On changes the architect chose not to
+model with DDD, this rule does not apply.
+
 ## Closing the builder stage
 
 Report to Hermes, with evidence, and without claiming more than was done:
