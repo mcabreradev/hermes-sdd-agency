@@ -11,13 +11,15 @@ coherent, reviewable increments of the system.
 
 ### Added
 
-- **`test-driven-development` by default at the build stage** + **`domain-modeling`
-  (DDD) when the domain merits it** — behavior-bearing work is now written test-first
-  (RED→GREEN→REFACTOR) unless the builder records a justified exception (UI glue,
-  generated code, config, throwaway prototypes), and the architect shapes the domain
-  with DDD only when the business rules justify it. Wired into `rules/testing.md`,
+- **`test-driven-development` by hard rule at the build stage** + **`domain-modeling`
+  (DDD) when the domain merits it** — every behavior-bearing piece of work — backends,
+  business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR);
+  no agent discretion to skip test-first for code that carries business logic, only
+  behavior-free code (config, generated code, throwaway prototypes) is declared `not
+  applicable` with a reason. The architect shapes the domain with DDD only when the
+  business rules justify it. Wired into `rules/testing.md`,
   `agents/builder.md`/`agents/architect.md`, `workflows/implement-change.md`,
-  `rules/coding.md` and the lifecycle docs. Less trial-and-error, no dogma.
+  `rules/coding.md` and the lifecycle docs. Fewer regressions shipped, more correct code added.
 - **`bin/no-smoke-worktree`** — content fingerprint of the working tree (git `write-tree`
   over a temp index; survives rebase/amend, changes on any source change incl. untracked).
   Reviewer/QA/release stages now record it and `release-change` compares, so evidence is

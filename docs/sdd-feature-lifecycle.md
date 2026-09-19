@@ -167,10 +167,12 @@ Breaks the change into **granular tasks in `tasks.md`**:
   correct root. Without it, nothing starts.
 - The builder touches **only the declared files** (scope rule; real diff is compared
   against the brief).
-- **Test-driven by default** (`rules/testing.md`): each behavior-bearing task is written
-  test-first (RED→GREEN→REFACTOR — watching the test fail for the expected reason, then
-  minimal code, then refactor green). Skipping TDD is the exception, recorded with its
-  reason in the report (UI glue, generated code, config, throwaway prototypes).
+- **Test-driven by hard rule** (`rules/testing.md`): every behavior-bearing task — backends,
+  business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR,
+  watching the test fail for the expected reason, then minimal code, then refactor green).
+  No agent discretion to skip test-first for code that carries business logic; only
+  behavior-free code (config, generated code, throwaway prototypes) is declared `not
+  applicable` with its reason in the report.
 - Each task writes **its test** (spec scenarios as source of truth; a fix carries a
   regression test that fails without the fix). **No line without a validated spec** —
   `rules/coding.md`.

@@ -142,11 +142,12 @@ content → re-review/re-test before landing. Enforced in `rules/quality.md`.
 
 Beyond the personas and OpenSpec mechanics, the repo ships process skills for the loop:
 
-- **implement** `test-driven-development` — **default method at the build stage**:
-  behavior-bearing work is written test-first (RED→GREEN→REFACTOR), skipping TDD only
-  with a justified exception; `domain-modeling` — DDD the architect applies when the
-  domain merits it. Both wired into `rules/testing.md`, `agents/builder.md` and
-  `agents/architect.md`.
+- **implement** `test-driven-development` — **hard rule at the build stage**:
+  behavior-bearing work — backends, business logic, API endpoints, bug fixes — is written
+  test-first (RED→GREEN→REFACTOR) with no agent discretion to skip it; only
+  behavior-free code is declared `not applicable` with a reason.
+  `domain-modeling` — DDD the architect applies when the domain merits it. Both wired
+  into `rules/testing.md`, `agents/builder.md` and `agents/architect.md`.
 - **review** `review-structural` — diff scan for SQL, LLM trust-boundary, conditional side effects.
 - **qa** `code-health` (0-10 score), report-only mode in `qa-change`.
 - **plan** `plan-scope-review` — pick a scope mode (expand / hold / strip) before planning.

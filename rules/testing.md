@@ -13,11 +13,13 @@ ended up having.
 - Tests are not written to freeze values that change by design (catalogs,
   versions, counts). Relationships and contracts between data are tested, not snapshots.
 
-## Test-driven development (default method)
+## Test-driven development (hard rule)
 
-Behavior-bearing work is implemented **test-first** by default. This is the agency's
-antidote to trial-and-error loops: behavior is pinned by a failing test before any
-implementation exists.
+Backend code that carries business logic is implemented **test-first, always** — this
+is a fixed rule, not a judgment call. The agency's antidote to trial-and-error loops and
+regressions: behavior is pinned by a failing test before any implementation exists, so
+each change adds the *correct*, working behavior instead of shipping bugs and patching
+them later.
 
 - **RED:** write one minimal test that demonstrates the expected behavior from the spec
   scenario. Run it and confirm it fails **for the expected reason** (feature missing, not
@@ -28,10 +30,14 @@ implementation exists.
 - Verify RED and GREEN per task, with the real run output, before moving to the next
   task.
 
-**Skipping TDD is the exception, not the default.** The builder deliberately omits the
-cycle only for UI glue, generated code, configuration/transpilation or a throwaway
-prototype — and records each omission with its concrete reason in the report. Everything
-that changes observable behavior is test-first unless the omission is justified there.
+**Applies whenever the code expresses observable behavior** — backends, business logic,
+API endpoints, data transforms, bug fixes, and the frontend's logic too. There is no
+agent discretion on skipped test-first for behavior-bearing work.
+
+Only code with **no behavior to prove** sits outside the cycle and then only as a
+declared `not applicable`, never as a skipped default: configuration, generated code,
+boilerplate glue, wiring and throwaway prototypes. Each such case is named in the report
+with why there is nothing to test. If there is any behavior to pin, test-first applies.
 
 ## Prohibitions
 

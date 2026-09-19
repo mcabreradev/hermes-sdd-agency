@@ -4,23 +4,34 @@ The agency enforces spec-driven requirements but leaves the *implementation meth
 
 ## What Changes
 
-- The builder's default implementation method becomes **test-driven (TDD)**: for every behavior-bearing change it writes a failing test first, watches it fail for the right reason, writes the minimal code that makes it pass, then refactors. Skipping TDD is an explicit, documented exception, never a silent default.
-- The method is a **default, not a dogma**: the builder applies TDD by default but deliberately omits it for UI glue, generated code, config/transpilation or throwaway prototypes — and records each omission with its reason in the report.
-- **Domain-Driven Design (DDD)** is introduced as an available technique the **architect** applies when the change's domain merits it (entities, aggregates, ubiquitous language, bounded contexts), and the builder follows the resulting model.
-- The decision of *when TDD fits and when to avoid it* is made by the agent at build time, guided by explicit criteria — not left undefined, not made always-on without judgment.
+- The builder's default implementation method becomes **test-driven (TDD)** — a hard
+  rule, not a judgment call: for every piece of code that carries business logic
+  (backends, business logic, API endpoints, data transforms, bug fixes) the builder
+  writes a failing test first, watches it fail for the right reason, writes the minimal
+  code that makes it pass, then refactors.
+- The rule is a **fixed rule, not a dogma**: the builder always applies test-first to
+  behavior-bearing work; it declares `not applicable` only for code with no behavior to
+  prove (configuration, generated code, boilerplate glue, wiring, throwaway prototypes)
+  and records the reason in the report. There is no agent discretion to skip test-first
+  for logic that changes behavior.
+- **Domain-Driven Design (DDD)** is introduced as an available technique the **architect**
+  applies when the change's domain merits it (entities, aggregates, ubiquitous language,
+  bounded contexts), and the builder follows the resulting model.
+- The decision of *when DDD fits* is made by the architect guided by explicit criteria;
+  TDD, by contrast, does not depend on the agent's judgment.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `methodology/tdd-at-buildstage`: the builder implements behavior-bearing work test-first (RED→GREEN→REFACTOR) by default, with explicit documented exceptions, so the loop avoids trial-and-error.
+- `methodology/tdd-at-buildstage`: the builder implements behavior-bearing work test-first (RED→GREEN→REFACTOR) as a hard rule, with `not applicable` declared only for behavior-free code, so regressions are stopped before they ship.
 - `methodology/ddd-when-appropriate`: the architect models the domain with DDD when it is appropriate, the builder follows that model, and only when the domain merits it.
 
 ## Impact
 
-- `rules/testing.md` — add TDD as the default origin and the RED→GREEN→REFACTOR cycle, plus the explicit-omission rule.
+- `rules/testing.md` — add TDD as a hard rule and the RED→GREEN→REFACTOR cycle, plus the declared `not applicable` case.
 - `agents/builder.md` — add TDD to the persona/method section and to the protocol.
-- `workflows/implement-change.md` — state that the builder implements TDD-first by default.
+- `workflows/implement-change.md` — state that the builder implements TDD-first by hard rule for behavior-bearing work.
 - `rules/coding.md` — mention DDD model adherence once the architect chose it.
 - `agents/architect.md` — add DDD as a model-shaping technique applied when appropriate.
 - Documentation: `README.md` (complementary skills / loop description), `docs/sdd-feature-lifecycle.md`.

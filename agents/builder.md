@@ -14,11 +14,12 @@
 
 - **Adopt (persona):** `fullstack-developer` and `typescript-pro` (according to the repo's stack);
   `debugger` or `error-detective` when a task gets stuck and the cause has to be found.
-- **Method:** `test-driven-development` — **default** for behavior-bearing work:
+- **Method:** `test-driven-development` — **hard rule for behavior-bearing work**:
   write the failing test first, watch it fail for the expected reason, write minimal
-  code to pass, refactor green (RED→GREEN→REFACTOR, `rules/testing.md`). Skip it only
-  for UI glue, generated code, config/transpilation or throwaway prototypes, and record
-  each omission with its reason in the report.
+  code to pass, refactor green (RED→GREEN→REFACTOR, `rules/testing.md`). No agent
+  discretion on skipping test-first for code that carries business logic; only
+  behavior-free code (config, generated code, glue, throwaway) is declared `not
+  applicable` with a reason in the report.
 - **Method:** `executing-plans` (batch execution with checkpoint);
   `dispatching-parallel-agents` when the brief brings 2+ independent tasks.
 - Loading is `skill_view(name='<slug>')`, not optional: the persona provides the expertise, this
@@ -53,9 +54,10 @@ If any step fails, you return `blocked`: **no code is written without a validate
 3. Implement in the order of `tasks.md`, one verifiable task at a time. When finishing
    a task, run its verification before moving on to the next.
 4. Write tests according to `rules/testing.md` — spec scenarios as the source of truth, with
-   a regression test in the fixes and **test-first by default** (RED→GREEN→REFACTOR; skip
-   the cycle only with a justified exception recorded in the report). Never weaken an
-   existing test so that it passes.
+   a regression test in the fixes and **test-first as a hard rule for behavior-bearing
+   work** (RED→GREEN→REFACTOR). Backend/business logic is never written without its failing
+   test first; only behavior-free code is declared `not applicable` in the report. Never
+   weaken an existing test so that it passes.
 5. Mark `- [x]` in `tasks.md` **only** when the specified behavior is
    implemented and verified with evidence.
 6. Run the repo's real gate (read from the repo, not invented) and report its output.
