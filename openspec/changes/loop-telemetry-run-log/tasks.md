@@ -1,13 +1,13 @@
 ## 1. Define the run-trace schema and rule
 
-- [ ] 1.1 Add `rules/observability.md` defining the trace-entry schema fields (stage, status, files created/modified, evidence, blockers, decisions/ASSUMED, run id, next recommended step, timestamp) and the rule that the run log is the source of truth for resume/audit — verifies: `grep -qE "stage|status|blockers|runId|timestamp" rules/observability.md`
+- [ ] 1.1 Add `rules/observability.md` defining the trace-entry schema fields (stage, change, status, files created/modified, evidence, blockers, decisions/ASSUMED, run id, next recommended step, timestamp) — verifies: `grep -qE "stage|status|blockers|runId|change|timestamp" rules/observability.md`
 - [ ] 1.2 Document the "log is additive — never changes the evidence-first gate or reviewer/QA blocking authority" boundary and the complete envelope status vocabulary — verifies: `grep -q "additive" rules/observability.md && grep -q "approved" rules/observability.md`
 - [ ] 1.3 Update `rules/orchestration.md` so the mandatory envelope gains a `runId` field threaded through every stage brief/entry of a run — verifies: `grep -q "runId" rules/orchestration.md`
 
 ## 2. Write the run-trace reader and a fixture
 
 - [ ] 2.1 Add `bin/run-trace` (bash + `jq`, read-only) that reads a run log and emits the audit summary (stages, status, blockers, ASSUMED) from the structured NDJSON alone — verifies: `bin/run-trace --file <sample-run.jsonl>` exits 0 and prints each stage with status/blockers/ASSUMED
-- [ ] 2.2 Add a minimal sample run-log fixture with done / blocked / parked entries and confirm the reader handles all three — verifies: `bin/run-trace --file <fixture>` exits 0 and prints the done, blocked and parked entries
+- [ ] 2.2 Add a minimal sample run-log fixture `fixtures/run-trace/sample.jsonl` with done / blocked / parked entries and confirm the reader handles all three — verifies: `bin/run-trace --file <fixture>` exits 0 and prints the done, blocked and parked entries
 
 ## 3. Wire trace recording into the stages
 

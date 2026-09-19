@@ -46,7 +46,8 @@ beyond what the repo already has (bash + OpenSpec CLI).
   truth. Plain JSON array — rejected: not append-friendly; rewriting the whole file on each
   stage risks corruption and diff noise.
 - **Consequences:** a run id is minted at preflight (below); the reader/`bin/run-trace`
-  parses a stream of JSON lines.
+  parses a stream of JSON lines. The run id is **mandatory** in the envelope for every
+  stage brief/entry of a run — not optional — so the threading is enforceable.
 
 ### Decision: Run id is a short ISO timestamp, minted at preflight
 
@@ -119,6 +120,11 @@ beyond what the repo already has (bash + OpenSpec CLI).
   the raw NDJSON) to confirm/report the exact stage and decision to resume from. The
   checkbox state remains a cross-check; the trace is the authoritative record of where a
   run stopped.
+- **Identifying the right log on resume:** when several `reports/run-*.jsonl` exist,
+  `continue-change.md` resolves the correct one as the **most recent** run log whose last
+  entry is a `parked` / closed entry for the active change being resumed. Each trace entry
+  also carries the change name, so a log can be filtered to the active change deterministically.
+  This is a stated rule (not left to the resume implementation to guess).
 - **Parked entry:** `autonomous-change.md` writes a `"parked"` trace entry (status
   `needs-context`, decision in `blockers`/`openQuestions`, stage named) at a non-trivial
   decision; the resume path picks up from that entry.

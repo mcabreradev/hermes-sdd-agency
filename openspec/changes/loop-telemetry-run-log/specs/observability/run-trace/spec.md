@@ -12,8 +12,8 @@ existing evidence-first gate and reviewer/QA blocking authority are unchanged.
 ### Requirement: Structured per-run trace log
 
 The loop MUST record each closed stage into a structured, machine-readable per-run log
-(trace), capturing the stage, status, files created/modified, evidence, blockers, any
-`ASSUMED`/decisions, a run id, the next recommended step and a timestamp, so a run can
+(trace), capturing the stage, change, status, files created/modified, evidence, blockers,
+any `ASSUMED`/decisions, a run id, the next recommended step and a timestamp, so a run can
 be resumed and audited without re-reading prose reports.
 
 #### Scenario: Stage closure records a trace entry
@@ -21,8 +21,9 @@ be resumed and audited without re-reading prose reports.
 - **WHEN** a stage closes with any status in the envelope vocabulary — done, blocked,
   failed, needs-context; approved/changes-requested for reviewer; pass/fail for qa
 - **THEN** the loop appends a structured trace entry to the run log with the stage,
-  status, files created/modified, evidence, blockers, decisions/ASSUMED, run id, next
-  recommended step and timestamp
+  change, status, files created/modified, evidence, blockers, decisions/ASSUMED, run id,
+  next recommended step and timestamp, and the entry identifies its run and change so a
+  resume can deterministically resolve the correct log
 
 #### Scenario: Partial run is resumable from the log
 
