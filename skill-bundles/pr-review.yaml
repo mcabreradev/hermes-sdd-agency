@@ -2,7 +2,7 @@ name: pr-review
 skills:
 - hermes-sdd-orchestration
 - openspec-sdd
-description: Domain-experienced review of a published PR (backend/frontend persona by diff), loop until aligned. Post-open quality gate.
+description: Domain-experienced review of a published PR (backend/frontend persona by diff), loop until aligned, then formal QA. Post-open quality gate.
 instruction: 'STAGE: pr-review. Read ~/.hermes/workflows/pr-review.md in full before acting and run
   its preflight exactly as written. The PR must be OPEN with green CI, else stop and report. From
   gh pr view <n> --json filesChanged pick the domain persona (backend/frontend per the diff; see
@@ -10,4 +10,7 @@ instruction: 'STAGE: pr-review. Read ~/.hermes/workflows/pr-review.md in full be
   expected root; if ambiguous, stop and report. Delegate the review to the pr-reviewer agent with
   the domain personas it must load; validate every finding in the real published diff (gh pr diff)
   before acting. Then loop builder fixes on the PR head branch + wait for CI green + re-review, max
-  3 cycles, until approved. Never merge. Report status approved | changes-requested | blocked.'
+  3 cycles, until approved. THEN run formal QA per workflows/qa-change.md on the aligned PR head
+  (qa-expert executes scenarios against the running app + real DB; pass required) before closing.
+  For infra/data/dep changes also run report-only QA on merged main after merge. Never merge.
+  Report status approved (post-QA) | changes-requested | blocked.'

@@ -59,7 +59,10 @@ initialize-project → idea-to-openspec → openspec-to-architecture → plan-ch
 
 `pr-review` is the **post-open** quality gate: it runs *after* a PR is published
 and CI is green, and drives the PR to `approved` with a domain-persona reviewer
-(backend/frontend per the diff) and a builder↔reviewer loop (max 3 cycles).
+(backend/frontend per the diff), a builder↔reviewer loop (max 3 cycles), and a
+**mandatory formal QA gate** (`qa-expert` executing the scenarios against the
+running app + real DB — review approval alone does not close the PR). For
+infra/data/dep changes it also runs report-only QA on merged `main` after merge.
 It never merges. See `workflows/pr-review.md`. The pre-merge adversarial gate
 remains `review-change`.
 
