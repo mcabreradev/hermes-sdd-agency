@@ -1,0 +1,37 @@
+flowchart TD
+    U["🧍 Migue: idea clara + repo"] --> INIT{"¿openspec/project.md ?"}
+    INIT -- "no" --> S0["0 · Initialize<br/><i>marca de entrada al loop</i>"]
+    INIT -- "sí" --> S1
+    S0 --> S1["1 · Discovery<br/><i>explora dominio → PRD</i>"]
+    S1 --> S2["2 · Specs (OpenSpec CLI)<br/><i>proposal + delta spec con Scenario:</i>"]
+    S2 --> V1{"validate sin ERROR<br/>+ grep anti-trampas"}
+    V1 -- "no" --> S2
+    V1 -- "sí" --> S3["3 · Architecture<br/><i>design + ADR si hay decisión costosa</i>"]
+    S3 --> S4["4 · Plan<br/><i>tasks.md · tareas ≤1 día verificables</i>"]
+    S4 --> G{"preflight:<br/>validate + project.md + root"}
+    G -- "no" --> STOP["⛔ parada<br/><i>nada de código sin change validado</i>"]
+    G -- "ok" --> S5["5 · Build 🛠️<br/><i>única etapa que escribe código<br/>TDD hard rule</i>"]
+    S5 --> R["6 · Review adversarial<br/><i>BLOCKER/MAJOR/MINOR</i>"]
+    R --> RD{"¿approved?"}
+    RD -- "cambios → builder (máx 3 ciclos)" --> S5
+    RD -- "sí" --> Q["7 · QA formal<br/><i>escenarios ejecutados contra app real</i>"]
+    Q --> QD{"¿pass?"}
+    QD -- "fail → builder (máx 3 ciclos)" --> S5
+    QD -- "sí" --> S8["8 · Release<br/><i>notas + archive + sync specs</i>"]
+    S8 --> D["reporte final +<br/>git status limpio"]
+    D --> PR["PR abierto (nunca draft)"]
+    PR --> CI{"CI verde"}
+    CI -- "sí" --> PRR["9 · pr-review (post-open)<br/><i>review de dominio + QA obligatorio</i>"]
+    PRR --> AP["PR approved ✅<br/><i>merge es decisión humana</i>"]
+
+    classDef human fill:#3d3a2e,stroke:#d4a72c,stroke-width:1.4px,color:#f0e6c8;
+    classDef stage fill:#24322b,stroke:#6ee7b7,stroke-width:1.2px,color:#d6f5e8;
+    classDef gate fill:#3b2733,stroke:#f0a6c9,stroke-width:1.4px,color:#f8dcec;
+    classDef post fill:#2b2b3d,stroke:#9aa5f0,stroke-width:1.2px,color:#dfe3fb;
+    classDef stop fill:#3a2424,stroke:#f08080,stroke-width:1.4px,color:#fbdada;
+    class U,AP human;
+    class S0,S1,S2,S3,S4,S5,S8 stage;
+    class R,Q stage;
+    class INIT,V1,G,RD,QD,CI gate;
+    class PRR post;
+    class STOP stop;

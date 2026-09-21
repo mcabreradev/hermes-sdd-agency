@@ -176,7 +176,8 @@ Beyond the personas and OpenSpec mechanics, the repo ships process skills for th
 - **docs / security** `document-diataxis` (coverage map, used by `release-change`),
   `security-evidence-first` (attacker·boundary·impact·challenge).
 
-For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`.
+For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`
+(the orchestration flow at a glance: ![flow](docs/agency-flow.svg)).
 For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
 `docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`. For a complete
 study change showing the real `proposal.md` / `spec.md` / `tasks.md` shape, see
