@@ -33,9 +33,10 @@ autoloads on the phrases above; the human-facing cheat sheet lives in
 
 ```
 ~/.hermes/
-  agents/      discovery openspec architect planner builder reviewer qa release (+README.md)
+  agents/      discovery openspec architect planner builder reviewer qa release
+               pr-reviewer (+README.md)
   workflows/   initialize-project idea-to-openspec openspec-to-architecture plan-change
-               implement-change review-change qa-change release-change
+               implement-change review-change qa-change release-change pr-review
   rules/       orchestration project-boundaries openspec quality coding testing
   templates/   openspec-project proposal tasks spec architecture adr
                review-report qa-report initialize-project-report final-report
@@ -53,7 +54,14 @@ the process. Never store a project's requirements, domain rules or client facts 
 ```
 initialize-project → idea-to-openspec → openspec-to-architecture → plan-change
   → implement-change → review-change → qa-change → release-change
+  → pr-review      (post-open, domain-experienced review of the published PR)
 ```
+
+`pr-review` is the **post-open** quality gate: it runs *after* a PR is published
+and CI is green, and drives the PR to `approved` with a domain-persona reviewer
+(backend/frontend per the diff) and a builder↔reviewer loop (max 3 cycles).
+It never merges. See `workflows/pr-review.md`. The pre-merge adversarial gate
+remains `review-change`.
 
 One agent per stage. Independent stages may run in parallel (`delegate_task`); dependent
 ones wait for Hermes to verify the previous output first.

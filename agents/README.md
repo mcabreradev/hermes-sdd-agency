@@ -17,9 +17,10 @@ code, docs, tests).
 
 ```
 ~/.hermes/
-  agents/      discovery · openspec · architect · planner · builder · reviewer · qa · release
+  agents/      discovery · openspec · architect · planner · builder · reviewer · qa · release · pr-reviewer
   workflows/   initialize-project · idea-to-openspec · openspec-to-architecture ·
-               plan-change · implement-change · review-change · qa-change · release-change
+               plan-change · implement-change · review-change · qa-change · release-change ·
+               pr-review
   rules/       orchestration · project-boundaries · openspec · quality · coding · testing
   templates/   openspec-project · proposal · tasks · spec · architecture · adr ·
                review-report · qa-report · initialize-project-report · final-report
