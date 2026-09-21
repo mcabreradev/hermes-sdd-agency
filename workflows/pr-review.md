@@ -80,9 +80,31 @@ the first plausible verdict.
 - If the defect reveals the spec/design is wrong: stop the loop and go back to
   `openspec-update-change` / `openspec-to-architecture`.
 
-## 4. Closure
+## 4. Formal QA gate (mandatory, post-alignment)
 
-With `approved` and CI green:
+`pr-review` closes **only after** formal QA of the aligned code passes, not on
+review approval alone. Once the builder↔reviewer loop has reached `approved` and
+CI is green on the PR head:
+
+1. **Hermes runs `workflows/qa-change.md` on the PR head** (the branch, not the
+   diff): the `qa` agent (persona `qa-expert`) builds the scenario → case →
+   real-result matrix from the spec/requirements and **executes it** against the
+   running app + real Postgres — never concludes from reading code.
+2. QA `pass` is required to close the PR as "QA-confirmed". A `fail` loops back
+   to the builder (correction cycle, max 3 builder↔QA cycles, per
+   `workflows/qa-change.md`), then re-runs the affected scenarios and re-checks
+   CI before re-reviewing.
+3. This is **post-alignment**: QA exercises the final aligned state, so it is the
+   last gate before the PR is declared ready to merge.
+4. **Post-merge re-verification (recommended for infra/data/dep changes):** for
+   a PR that changes the data layer, runtime or a core dependency (like the
+   Prisma v6→v7 upgrade), also run a **report-only QA** against merged `main`
+   after merge to confirm the shipped tree behaves the same — record its
+   fingerprint per `rules/quality.md`.
+
+## 5. Closure
+
+With `approved`, QA `pass`, and CI green:
 
 ```bash
 gh pr diff <n> --stat
@@ -97,13 +119,16 @@ openspec validate "<change>" --type change --json   # if OpenSpec tracks the PR
 
 ## Output
 
-Final report (`templates/final-report.md`) in the project + the PR left approved.
-Verdict: `approved` | `changes-requested` | `blocked`.
+Final report (`templates/final-report.md`) in the project + the PR left approved
+and QA-confirmed. Verdict: `approved` (post-QA) | `changes-requested` | `blocked`.
 
 ## Typical errors
 
 - Reviewing the PR description instead of the published diff.
 - Re-reviewing the same stale head without waiting for CI green on the fix push.
 - Iterating to infinity without escalating (3-cycle cutoff).
+- Closing the PR **without running the formal QA gate** — review approval is not
+  the closure bar; an un-QA'd PR is `blocked`, not approved.
+- QA that concludes from reading code instead of executing the real path.
 - The pr-reviewer merging or fixing code itself (breaks role separation).
 - Picking the fixer persona without domain match (backend/frontend mismatch).
