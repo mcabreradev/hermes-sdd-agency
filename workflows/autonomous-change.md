@@ -123,7 +123,12 @@ With review approved + QA pass + everything committed:
    the **Decisions made** section listing every ADR/ASSUMED.
 2. Open the PR (draft) against the default branch: the change, the spec, the
    ADRs, the decision list, and everything flagged ASSUMED. Title/body English.
-3. Never merge, never publish, never tag. The PR awaits the human.
+3. **Post-open quality gate (mandatory):** once the PR is open and CI is green,
+   run `workflows/pr-review.md` — a domain-experienced reviewer
+   (backend/frontend persona by the diff) reviews the published PR and the
+   builder↔reviewer loop drives it to `approved` (max 3 cycles). Fixes go on
+   the PR's own branch; the PR is left open, approved, CI green.
+4. Never merge, never publish, never tag. The PR awaits the human.
 
 ## Output
 

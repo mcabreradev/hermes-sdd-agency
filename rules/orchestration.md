@@ -26,7 +26,8 @@ Hermes (only orchestrator)
   ├─ agent (builder) ────┤
   ├─ agent (reviewer) ───┤  ← can block progress
   ├─ agent (qa) ─────────┤  ← can block progress
-  └─ agent (release) ────┘
+  ├─ agent (release) ────┤
+  └─ agent (pr-reviewer) ┘  ← post-PR domain review, can block progress
 ```
 
 ## Mandatory output contract for agents
