@@ -75,5 +75,19 @@ inside this one.
 
 ## Delivery strategy
 
-Measured after implementation; expect ~190-260 authored lines. Under the advisory ~400;
-`single-pr`, then merge + live sync.
+Measured after implementation: **440 authored lines** (`git diff --numstat main...HEAD`),
+over the advisory ~400-line budget. Strategy: **`single-pr`**.
+
+- **Why `single-pr`:** the excess is one coherent capability — the 334-line live SKILL.md
+  sync (154 lines of restored pitfalls + 2 restored references) and the two bounded
+  teaching edits (~44 lines), all one file's history. There are no independently
+  shippable slices: the mirror sync alone would be a 1:1 copy with no rule change, and
+  the teaching edits are meaningless without the sync (they teach machinery absent from
+  the old mirror).
+- **Why not `chained-pr`:** the mirror commit and the teaching commit land in the same
+  file; a chained PR would carry the earlier unmerged commit into the second PR's diff.
+- **Why not `split-change`:** the spec owns both faces of the same capability
+  (`skill-sync`): mirror parity and teaching parity.
+
+After merge: copy repo → `~/.hermes` with the pre-copy diff guard (baseline guarantees
+repo ⊇ live; live-only deltas since baseline are surfaced, not overwritten).
