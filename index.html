@@ -198,6 +198,7 @@
     <div class="nav-panel" id="nav-panel">
       <nav>
         <a href="#why">Why</a>
+        <a href="#benefits">Benefits</a>
         <a href="#cycles">The loop</a>
         <a href="#levels">Task levels</a>
         <a href="#commands">Commands</a>
@@ -216,9 +217,9 @@
 <section class="hero">
   <div class="wrap">
     <div>
-      <div class="hero-kicker">A SPEC-DRIVEN DEVELOPMENT LOOP FOR HERMES AGENT</div>
-      <h1>One orchestrator. Nine roles. Evidence you can point at.</h1>
-      <p class="lede">Reusable rules, workflows, agent contracts, skill bundles and personas that run software projects end to end. Hermes is the only bus — it decides, delegates, re-verifies and closes. Every claim becomes a hash; OpenSpec holds the requirements inside each project&rsquo;s repo.</p>
+      <div class="hero-kicker">THE AI DEV SHOP — SPEC-DRIVEN, EVIDENCE-BOUND</div>
+      <h1>AI that ships with memory, method and receipts.</h1>
+      <p class="lede">Every AI coding agent forgets, improvises and self-reports. This agency fixes that with structure: specs before code, adversarial review before merge, and evidence you can re-run — so &ldquo;it works&rdquo; stops being a claim and becomes a command.</p>
       <div class="hero-cta">
         <a class="btn btn-solid" href="https://github.com/mcabreradev/hermes-sdd-agency">Browse the repo</a>
         <a class="btn" href="#install">Install guide</a>
@@ -278,19 +279,57 @@
 
 <section id="why">
   <div class="wrap">
-    <div class="sec-label">WHY</div>
-    <h2>Process is global. Product is local.</h2>
-    <p class="sec-intro">This repository ships the <strong>process</strong> — reusable rules, agent roles, workflows and templates. It carries no project&rsquo;s requirements. OpenSpec lives inside each project&rsquo;s own repo, so a global instruction never leaks a product decision, and one project&rsquo;s rules never contaminate another.</p>
-    <div class="role-grid">
-      <div class="role"><h3>discovery</h3><p>Explores the domain, writes the PRD and bounds vague ideas.</p></div>
-      <div class="role"><h3>openspec</h3><p>Scaffolds a validated change: proposal, spec deltas, scenarios.</p></div>
-      <div class="role"><h3>architect</h3><p>Decides boundaries, contracts and rejected alternatives; writes ADRs.</p></div>
-      <div class="role"><h3>planner</h3><p>Breaks the change into granular, verifiable tasks.</p></div>
-      <div class="role"><h3>builder</h3><p>The only stage that writes code, in batches of tasks — behavior-bearing work is <strong>test-first</strong> by rule (TDD, backend included).</p></div>
-      <div class="role"><h3>reviewer</h3><p>Adversarial review of the diff against the spec.<span class="flag block">blocks</span></p></div>
-      <div class="role"><h3>pr-reviewer</h3><p>Formal QA gate on the PR itself before it closes — domain review + adversarial + QA.<span class="flag block">blocks</span></p></div>
-      <div class="role"><h3>qa</h3><p>Validates real behavior against the spec scenarios by executing them.<span class="flag block">blocks</span></p></div>
-      <div class="role"><h3>release</h3><p>Release notes, OpenSpec archive, final repo state.</p></div>
+    <div class="sec-label">THE PROBLEM IT SOLVES</div>
+    <h2>Agents are brilliant code writers and unreliable story-tellers.</h2>
+    <p class="sec-intro">Working with an AI agent without structure is like hiring a brilliant developer with amnesia who describes what they did instead of showing it. Three failures show up on every real project:</p>
+    <div class="usage-cards">
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/></svg><span class="adv-title">Amnesia</span></div>
+        <p>Every new chat starts from zero. The agent forgets architecture decisions, past bugs and team conventions — so it re-asks what the repo already answers, and re-builds what already exists. <strong>State belongs in files, not sessions.</strong></p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-4V6a2 2 0 0 0-4 0v4H6a2 2 0 0 0 0 4h4v4a2 2 0 0 0 4 0v-4h4a2 2 0 0 0 0-4z"/></svg><span class="adv-title">Improvising</span></div>
+        <p>No spec, no verification. Code gets written and pushed without quality gates, so "done" means "whatever the agent felt like doing" — and you discover it in code review, or in production. <strong>Specs before code.</strong></p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h10M13 8l4 4-4 4M21 12h-5"/></svg><span class="adv-title">Self-reporting</span></div>
+        <p>"I tested it" is a story, not proof. A tree can move after the review; evidence can describe content that no longer exists. <strong>Evidence becomes a hash you can re-run</strong> — the review is bound to the exact tree it validated.</p>
+      </div>
+    </div>
+    <p class="sec-intro" style="margin-top:24px">This repo ships the <strong>process</strong> that fixes all three: reusable rules, agent roles and workflows for Hermes Agent. Product requirements stay in each project&rsquo;s own <code>openspec/</code> — a global process never leaks a product decision.</p>
+  </div>
+</section>
+
+<section id="benefits">
+  <div class="wrap">
+    <div class="sec-label">WHAT YOU GET</div>
+    <h2>What it actually does for you.</h2>
+    <p class="sec-intro">The abstract pitch is nice; the daily wins are better. This is what changes in your week when the agency runs your project:</p>
+    <div class="usage-cards">
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="adv-title">You stop being the memory</span></div>
+        <p>Architecture decisions live in ADRs, the state lives in the repo, and <code>agency-next</code> reads it from files. A dead session or a new machine picks up exactly where things stood — you don&rsquo;t re-explain your own project.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="adv-title">Fixes don&rsquo;t regress</span></div>
+        <p>Every behavior-bearing change ships with a regression test that fails without it, by rule. The loop stops a fix that has no proof, so a bug closed today stays closed.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M19 9l-5 5-3-3-6 6"/></svg><span class="adv-title">&ldquo;Done&rdquo; means verified</span></div>
+        <p>A PR only closes after a formal QA gate: domain review, adversarial review, real scenario execution. Surprises about what the agent built happen in the loop, not in production.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h6l2-7 4 14 2-7h6"/></svg><span class="adv-title">You can actually sleep</span></div>
+        <p><code>/do</code> runs the whole loop overnight: spec, plan, build, review, QA — every decision it made is flagged <code>ASSUMED</code> in an ADR. You wake up to a PR with receipts, not to a broken main.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="adv-title">Nobody takes anyone&rsquo;s word</span></div>
+        <p>Reviewer, QA and release all bind their evidence to the exact tree they validated (<code>review-snapshot</code> + fingerprint). A claim that describes other content gets bounced — including the loop&rsquo;s own bins, which its test suites pin.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">It scales to your stack</span></div>
+        <p>One process, any project: from a toy repo on day one to a multi-project workflow with parallel worktrees. The task level (cosmetic / minimal / feature) picks the ceremony — no bureaucracy for typos, no shortcuts for contracts.</p>
+      </div>
     </div>
   </div>
 </section>
