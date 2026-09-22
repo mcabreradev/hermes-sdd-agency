@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# change-collision — decide whether two changes can run in parallel.
+#
+# Reads the file sets of two refs (`git diff --name-only <base>...<ref>`) and prints:
+#   parallelizable   no literal path overlap and no shared high-risk family
+#   collision        overlapping paths, or both changes touch the same high-risk
+#                    family (schema/migrations, openspec/, contracts/auth, dependency
+#                    manifests) even without literal path overlap
+#   cannot assess    base is missing, a ref does not resolve, or a diff is empty —
+#                    NEITHER a "parallelizable" default NOR a blocking verdict; the
+#                    caller must not dispatch in parallel until the input is measurable
+#
+# Read-only. bash 3.2 + git + jq. The high-risk families are the declared classes in
+# rules/orchestration.md ("Parallelization and worktree ownership"); this command prints
+# which family fired so the verdict can be argued against the rule, not against taste.
+#
+# Exit status: 0 = verdict given; 2 = cannot assess.
+set -uo pipefail
+
+usage() {
+  cat <<EOF
+Usage: change-collision --base <ref> --a <refA> --b <refB> [--help]
+
+  --base <ref>   the common fork point the two changes share (default: main)
+  --a <ref>      first change's branch/ref (required)
+  --b <ref>      second change's branch/ref (required)
+
+Decision:
+
+  parallelizable   no path overlaps, no shared high-risk family
+  collision        overlapping paths or shared high-risk family
+                   (schema/migrations, openspec/, contracts/auth, dep manifests)
+  cannot assess    input cannot be measured (non-zero exit)
+
+High-risk families (a change touching ANY path in a family makes that family its own):
+
+  schema-migrations   schema.prisma, prisma/, migrations/, db/, *.sql
+  openspec            openspec/ (specs are the contract — never two writers)
+  contracts-auth      auth, permissions, rbac, openapi/contracts
+  dependency-manifests package.json, bun.lock*, package-lock*, pnpm-lock*, yarn.lock
+
+EOF
+}
+
+BASE="main"
+A=""
+B=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --base) [ "$#" -ge 2 ] || { printf 'change-collision: --base requires a ref\n' >&2; exit 2; }; BASE="$2"; shift 2 ;;
+    --base=*) BASE="${1#--base=}"; shift ;;
+    --a) [ "$#" -ge 2 ] || { printf 'change-collision: --a requires a ref\n' >&2; exit 2; }; A="$2"; shift 2 ;;
+    --a=*) A="${1#--a=}"; shift ;;
+    --b) [ "$#" -ge 2 ] || { printf 'change-collision: --b requires a ref\n' >&2; exit 2; }; B="$2"; shift 2 ;;
+    --b=*) B="${1#--b=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) printf 'change-collision: unknown argument %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+[ -n "$A" ] && [ -n "$B" ] || { printf 'change-collision: --a and --b are required\n' >&2; usage >&2; exit 2; }
+command -v git >/dev/null 2>&1 || { printf 'change-collision: git not found\n' >&2; exit 2; }
+command -v jq >/dev/null 2>&1 || { printf 'change-collision: jq not found\n' >&2; exit 2; }
+
+TOP=$(git rev-parse --show-toplevel 2>/dev/null) || { printf 'change-collision: not a git repository\n' >&2; exit 2; }
+git -C "$TOP" rev-parse --verify --quiet "$BASE^{commit}" >/dev/null 2>&1 || { printf 'change-collision: unknown base ref: %s\n' "$BASE" >&2; exit 2; }
+git -C "$TOP" rev-parse --verify --quiet "$A^{commit}" >/dev/null 2>&1 || { printf 'change-collision: ref A does not resolve: %s\n' "$A" >&2; exit 2; }
+git -C "$TOP" rev-parse --verify --quiet "$B^{commit}" >/dev/null 2>&1 || { printf 'change-collision: ref B does not resolve: %s\n' "$B" >&2; exit 2; }
+
+FILES_A=$(git -C "$TOP" diff --name-only "$BASE...$A" 2>/dev/null) || { printf 'change-collision: cannot list diff for %s\n' "$A" >&2; exit 2; }
+FILES_B=$(git -C "$TOP" diff --name-only "$BASE...$B" 2>/dev/null) || { printf 'change-collision: cannot list diff for %s\n' "$B" >&2; exit 2; }
+
+COUNT_A=$(printf '%s\n' "$FILES_A" | grep -c . || true)
+COUNT_B=$(printf '%s\n' "$FILES_B" | grep -c . || true)
+
+# An empty diff means the ref is not a change fork point (a base that already contains
+# the tip, or work still uncommitted) — NOT evidence of a clean non-overlap.
+if [ "$COUNT_A" -eq 0 ] || [ "$COUNT_B" -eq 0 ]; then
+  EMPTY_REF=""
+  [ "$COUNT_A" -eq 0 ] && EMPTY_REF="$A"
+  [ "$COUNT_B" -eq 0 ] && EMPTY_REF="${EMPTY_REF:+$EMPTY_REF, }$B"
+  printf 'verdict: cannot assess\nreason: empty diff on %s (base equals the tip, or work is uncommitted) — never treats an unmeasurable diff as parallelizable\n' "$EMPTY_REF"
+  printf 'change-collision: cannot assess (empty diff) — do NOT dispatch in parallel\n' >&2
+  exit 2
+fi
+
+OVERLAP=$(comm -12 <(printf '%s\n' "$FILES_A" | sort) <(printf '%s\n' "$FILES_B" | sort))
+OVERLAP_COUNT=$(printf '%s\n' "$OVERLAP" | grep -c . || true)
+
+FAMILY_RE='(^|/)(schema\.prisma|prisma/|migrations?/|db/)|\\.sql$|(^|/)openspec/|(^|/)(auth|permissions|rbac|openapi)(/|[._-]|$)'
+
+family_of() {
+  printf '%s\n' "$1" | grep -E "$FAMILY_RE" | head -n 1
+}
+
+FA=$(printf '%s\n' "$FILES_A" | grep -E "$FAMILY_RE" || true)
+FB=$(printf '%s\n' "$FILES_B" | grep -E "$FAMILY_RE" || true)
+SHARED_FAMILY=""
+if [ -n "$FA" ] && [ -n "$FB" ]; then
+  # any family hit in A and any in B (the family set is small — per-family overlap)
+  SHARED_FAMILY="yes"
+fi
+
+if [ "$OVERLAP_COUNT" -gt 0 ]; then
+  printf 'verdict: collision\n'
+  printf 'reason: overlapping paths (%s):\n' "$OVERLAP_COUNT"
+  printf '%s\n' "$OVERLAP" | sed 's/^/  /'
+  if [ -n "$SHARED_FAMILY" ]; then
+    printf 'high-risk family also shared\n'
+  else
+    printf 'high-risk family: none\n'
+  fi
+  exit 0
+elif [ -n "$SHARED_FAMILY" ]; then
+  printf 'verdict: collision\n'
+  printf 'reason: no literal overlap, but both changes touch high-risk families:\n'
+  printf '  A: %s\n' "$(printf '%s\n' "$FA" | head -n 3 | tr '\n' ' ')"
+  printf '  B: %s\n' "$(printf '%s\n' "$FB" | head -n 3 | tr '\n' ' ')"
+  exit 0
+else
+  printf 'verdict: parallelizable\n'
+  printf 'reason: no overlapping paths and no shared high-risk family\n'
+  exit 0
+fi

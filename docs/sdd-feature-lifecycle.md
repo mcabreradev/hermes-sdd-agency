@@ -238,8 +238,12 @@ a fact.
 
 ## See also
 
-- `docs/evidence-bins.md` — the five evidence bins, step by step with real outputs
-  (`no-smoke-worktree`, `review-snapshot`, `review-tier`, `agency-next`, `skill-registry`).
-- `rules/orchestration.md` — who orchestrates, envelope, retries, blockers, human approval.
+- `docs/evidence-bins.md` — the evidence bins, step by step with real outputs
+  (`no-smoke-worktree`, `review-snapshot`, `review-tier`, `agency-next`, `run-trace`,
+  `skill-registry`, `change-collision`).
+- `rules/orchestration.md` — who orchestrates, envelope, retries, blockers, human approval
+  (and "Parallel execution of changes": `bin/change-collision` decides ordering — a
+  `collision` verdict runs changes sequentially, `cannot assess` never dispatches in
+  parallel).
 - `rules/sdd.md` — when the full loop runs vs the fast path, and the language contract.
 - `agents/README.md` — entry point and reading map.

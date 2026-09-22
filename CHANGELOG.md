@@ -11,6 +11,17 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **`bin/change-collision`** — decides change ordering from the file sets instead of
+  by hand: `--base <ref> --a <refA> --b <refB>` prints `parallelizable` (no path
+  overlap, no shared high-risk family) / `collision` (overlapping paths, or both
+  changes touch schema/migrations, `openspec/`, contracts/auth or dependency
+  manifests — even without literal overlap) / `cannot assess` (unmeasurable diff,
+  never a parallelizable default). Wired into `rules/orchestration.md`
+  ("Parallel execution of changes"): run it before dispatching two changes
+  concurrently; a `collision` verdict runs them sequentially, an unmeasurable diff
+  never dispatches in parallel. The verdict decides ordering, never approval — the
+  gates stay the reviewer's and QA's.
+
 - **Blocker classes + trust vocabulary** (`rules/orchestration.md`) — every blocker
   now carries a `class` that picks the allowed response by rule, not by re-reading the
   situation: `retryable` (bounded retry, consumes an iteration) · `technical` (no
