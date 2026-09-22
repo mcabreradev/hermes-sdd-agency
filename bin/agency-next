@@ -48,8 +48,8 @@ Prints one public state, the precise state, the single next transition and its c
   needs-decision   the state cannot be determined honestly, or the human must choose
 
 Also printed: the evidence it read, and a PRECISION section naming every transition whose
-verdict it could NOT determine (no run trace, gh not installed, no remote) — an unavailable
-input narrows the answer, it never becomes the optimistic one.
+verdict it could NOT determine (gh not installed, gh unable to answer, no remote, no review
+snapshot) — an unavailable input narrows the answer, it never becomes the optimistic one.
 
 The state is informational: it never blocks, authorizes, archives or replaces a gate.
 
@@ -62,6 +62,11 @@ EOF
 done
 
 say() { printf '%s\n' "$1"; }
+
+# Declared-precision limits. Initialised here (before its first possible use and before the
+# `cd` that could fail) because bash 3.2 treats "$arr[@]" on an unset/empty array under `set -u`
+# as a fatal unbound variable.
+PRECISION=()
 
 # --- helpers -----------------------------------------------------------------
 
@@ -98,6 +103,9 @@ emit() {
   if [ -n "$DECISION" ]; then
     say "decision:   $DECISION"
   fi
+  # The spec makes informational-ness part of the OUTPUT, not just of the rule: a consumer that
+  # reads only stdout must be able to see that this is not a gate verdict.
+  say "informational: yes — the gates remain the reviewer's and qa's verdicts; this state does not block, authorize or merge."
 }
 
 print_evidence() {
@@ -110,13 +118,21 @@ print_evidence() {
 }
 
 print_precision() {
-  # print_precision <line>...
-  if [ "$#" -eq 0 ]; then
+  # Empty-safe for bash 3.2: `"${PRECISION[@]}"` on an EMPTY array with `set -u` is a fatal
+  # "unbound variable", which would print the whole answer and then exit 1 — the exit status
+  # contradicting a state that was in fact determined. The count is passed explicitly.
+  if [ "${1:-0}" -eq 0 ]; then
     say "precision:  complete (every input was readable)"
-  else
-    say "precision:  narrowed — these transitions could NOT be determined:"
-    for line in "$@"; do say "  - $line"; done
+    return 0
   fi
+  say "precision:  narrowed — these transitions could NOT be determined:"
+  shift
+  for line in "$@"; do say "  - $line"; done
+}
+
+# Emit the precision section from the current array, empty-safe.
+emit_precision() {
+  print_precision "${#PRECISION[@]}" ${PRECISION[@]+"${PRECISION[@]}"}
 }
 
 # --- environment -------------------------------------------------------------
@@ -176,8 +192,6 @@ printf '%s\n' "$CANDIDATES" | grep -qx "$CHANGE" || {
   exit 0
 }
 
-PRECISION=()
-
 # --- gh availability is a declared limit, not a failure ----------------------
 REMOTE=$(git remote get-url origin 2>/dev/null || true)
 GH=""
@@ -189,7 +203,17 @@ else
 fi
 
 # --- OpenSpec artifact state -------------------------------------------------
-APPLY=$("$OPENSPEC" instructions apply --change "$CHANGE" --json 2>/dev/null || true)
+# Both calls are checked for failure AND for a missing field: mapping "could not read" onto the
+# same value as a proven result is how an unreadable input silently becomes permission to move
+# forward. `jq -e has(...)` is the read test; a failure adds a precision limit and the planning
+# gate refuses to claim completeness it did not read.
+APPLY=$("$OPENSPEC" instructions apply --change "$CHANGE" --json 2>/dev/null)
+if [ $? -ne 0 ] || ! printf '%s' "$APPLY" | "$JQ" -e 'has("state") and has("progress")' >/dev/null 2>&1; then
+  PRECISION+=("the artifact/task progress of '$CHANGE' (openspec instructions apply did not return usable JSON)")
+  APPLY_OK=0
+else
+  APPLY_OK=1
+fi
 APPLY_STATE=$(printf '%s' "$APPLY" | "$JQ" -r '.state // ""' 2>/dev/null)
 TOTAL=$(printf '%s' "$APPLY" | "$JQ" -r '.progress.total // 0' 2>/dev/null)
 COMPLETE=$(printf '%s' "$APPLY" | "$JQ" -r '.progress.complete // 0' 2>/dev/null)
@@ -197,8 +221,15 @@ TOTAL=${TOTAL:-0}; COMPLETE=${COMPLETE:-0}
 case "$TOTAL" in ''|*[!0-9]*) TOTAL=0 ;; esac
 case "$COMPLETE" in ''|*[!0-9]*) COMPLETE=0 ;; esac
 
-STATUS=$("$OPENSPEC" status --change "$CHANGE" --json 2>/dev/null || true)
-PLANNING=$(printf '%s' "$STATUS" | "$JQ" -r '.isPlanningComplete // false' 2>/dev/null)
+STATUS=$("$OPENSPEC" status --change "$CHANGE" --json 2>/dev/null)
+if [ $? -ne 0 ] || ! printf '%s' "$STATUS" | "$JQ" -e 'has("isPlanningComplete")' >/dev/null 2>&1; then
+  PRECISION+=("whether the planning artifacts of '$CHANGE' are complete (openspec status did not report isPlanningComplete)")
+  PLANNING_KNOWN=0
+  PLANNING=""
+else
+  PLANNING_KNOWN=1
+  PLANNING=$(printf '%s' "$STATUS" | "$JQ" -r '.isPlanningComplete' 2>/dev/null)
+fi
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "-")
 
@@ -208,7 +239,11 @@ for candidate in "reports/review-snapshot-${CHANGE}.json" "reports/review-snapsh
   [ -f "$candidate" ] && { SNAPSHOT="$candidate"; break; }
 done
 SNAP_VERDICT=""
+SNAP_FP=""
 if [ -n "$SNAPSHOT" ]; then
+  # The recorded fingerprint is extracted so a mismatch can name BOTH values (the spec requires
+  # it: "the mismatch is reported with both fingerprints"), not just the current tree's.
+  SNAP_FP=$(sed -n 's/.*"fingerprint"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SNAPSHOT" | head -n 1)
   if [ -n "$SNAP_BIN" ]; then
     if "$SNAP_BIN" --compare "$SNAPSHOT" >/dev/null 2>&1; then
       SNAP_VERDICT="match"
@@ -226,10 +261,20 @@ else
 fi
 
 # --- PR state ---------------------------------------------------------------
-PR_STATE=""; PR_URL=""; PR_NUMBER=""
+# Initialised before any branch that may set it: under `set -u` an unset variable is fatal, and
+# this one is read on the decision path regardless of whether gh existed.
+PR_STATE=""; PR_URL=""; PR_NUMBER=""; PR_UNAVAILABLE=0
 if [ -n "$GH" ]; then
-  PR_JSON=$("$GH" pr list --head "$BRANCH" --state open --json number,url,statusCheckRollup 2>/dev/null || true)
-  if [ -n "$PR_JSON" ] && printf '%s' "$PR_JSON" | "$JQ" -e 'length > 0' >/dev/null 2>&1; then
+  PR_JSON=$("$GH" pr list --head "$BRANCH" --state open --json number,url,statusCheckRollup 2>/dev/null)
+  PR_RC=$?
+  # gh present but unable to answer (not authenticated, no network, rate-limited) is an
+  # unavailable input, not "no open PR": reading it as the latter reports ARCHIVE_PENDING — an
+  # optimistic state for an input that was never read.
+  if [ "$PR_RC" -ne 0 ] || ! printf '%s' "$PR_JSON" | "$JQ" -e 'type == "array"' >/dev/null 2>&1; then
+    PRECISION+=("the PR state (gh is installed but could not query the remote) — the merge-ready transition cannot be confirmed")
+    PR_UNAVAILABLE=1
+  else
+    PR_UNAVAILABLE=0
     PR_NUMBER=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].number // ""' 2>/dev/null)
     PR_URL=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].url // ""' 2>/dev/null)
     # A failing or unfinished check is a fact about the PR, so an unavailable rollup must not be
@@ -255,7 +300,8 @@ if [ "$SNAP_VERDICT" = "stale" ]; then
     "review-change  (then re-snapshot: review-snapshot --base <base>)" \
     "the review snapshot no longer matches this tree — the recorded evidence describes different content"
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
-  print_precision "${PRECISION[@]}"
+  say "  snapshot fingerprint: ${SNAP_FP:-unknown}"
+  emit_precision
   exit 0
 fi
 
@@ -264,7 +310,16 @@ if [ "$SNAP_VERDICT" = "unknown" ]; then
     "review-snapshot --compare $SNAPSHOT" \
     "a review snapshot exists but the tool that verifies it was not found, so its currency is undetermined"
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
-  print_precision "${PRECISION[@]}"
+  emit_precision
+  exit 0
+fi
+
+if [ "$PLANNING_KNOWN" = "0" ]; then
+  emit "needs-decision" "PLANNING_UNDETERMINED" "check the planning artifacts" \
+    "openspec status --change \"$CHANGE\" --json" \
+    "the planning-completeness verdict could not be read, so no transition can be called valid"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  emit_precision
   exit 0
 fi
 
@@ -273,7 +328,16 @@ if [ "$PLANNING" = "false" ]; then
     "workflows/idea-to-openspec.md  (or /openspec-propose)" \
     "the change's planning artifacts are not complete yet"
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
-  print_precision "${PRECISION[@]}"
+  emit_precision
+  exit 0
+fi
+
+if [ "$APPLY_OK" = "0" ]; then
+  emit "needs-decision" "PROGRESS_UNDETERMINED" "check the task progress" \
+    "openspec instructions apply --change \"$CHANGE\" --json" \
+    "the task progress could not be read, so the implement/implemented distinction is undetermined"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  emit_precision
   exit 0
 fi
 
@@ -288,7 +352,7 @@ if [ "$TOTAL" -gt 0 ] && [ "$COMPLETE" -lt "$TOTAL" ]; then
       "tasks are in progress ($COMPLETE/$TOTAL complete)"
   fi
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
-  print_precision "${PRECISION[@]}"
+  emit_precision
   exit 0
 fi
 
@@ -298,7 +362,16 @@ if [ -z "$SNAPSHOT" ]; then
     "review-change  (snapshot first: review-snapshot --base <base>)" \
     "every task is ticked but no review evidence is recorded — treat the review as pending, never as passed"
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "-"
-  print_precision "${PRECISION[@]}"
+  emit_precision
+  exit 0
+fi
+
+if [ "$PR_UNAVAILABLE" = "1" ]; then
+  emit "needs-decision" "PR_STATE_UNDETERMINED" "check the PR state by hand" \
+    "gh pr list --head $BRANCH --state open" \
+    "gh is installed but could not query the remote, so an open PR with failing checks cannot be ruled out"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  emit_precision
   exit 0
 fi
 
@@ -329,7 +402,7 @@ if [ -n "$PR_NUMBER" ]; then
   esac
   print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
   say "  pr:              #$PR_NUMBER $PR_URL"
-  print_precision "${PRECISION[@]}"
+  emit_precision
   exit 0
 fi
 
@@ -338,5 +411,5 @@ emit "ready" "ARCHIVE_PENDING" "archive and sync (your decision)" \
   "every task is ticked and the review evidence is current, but the change is still active" \
   "archiving closes the loop and is the user's call"
 print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
-print_precision "${PRECISION[@]}"
+emit_precision
 exit 0

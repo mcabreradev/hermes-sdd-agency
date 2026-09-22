@@ -267,11 +267,32 @@ the command that performs it.
 | `ready` | the next decision is the **user's** | merge, archive, a scope call |
 | `needs-decision` | it cannot be determined honestly, or the human must choose | report and ask |
 
-The precise vocabulary it prints underneath (`READY_TO_APPLY`, `IMPLEMENTING`, `NEEDS_FIX`,
-`READY_TO_REVIEW`, `NEEDS_REVIEW`, `READY_TO_QA`, `QA_FAILED`, `PR_OPEN_CI_RED`,
-`PR_OPEN_CI_PENDING`, `READY_TO_MERGE`, `ARCHIVE_PENDING`, `STALE_EVIDENCE`,
-`EVIDENCE_UNVERIFIED`, `NO_ACTIVE_CHANGE`, `AMBIGUOUS_CHANGE`, `UNKNOWN_CHANGE`) is what a
-workflow needs to branch on.
+The precise vocabulary it prints underneath is what a workflow branches on. Only the states the
+command can actually **derive from files** are declared here; a state with no readable input
+behind it is not listed, because listing it would advertise a verdict the command cannot reach:
+
+| Precise state | Derivable from |
+|---|---|
+| `NO_ACTIVE_CHANGE` | `openspec list` (zero changes) |
+| `AMBIGUOUS_CHANGE` | `openspec list` (several changes, no `--change`) |
+| `UNKNOWN_CHANGE` | the named change is not in `openspec list` |
+| `PLANNING_UNDETERMINED` | `openspec status` did not report `isPlanningComplete` |
+| `PLANNING_INCOMPLETE` | `openspec status` → `isPlanningComplete: false` |
+| `PROGRESS_UNDETERMINED` | `openspec instructions apply` returned unusable JSON |
+| `READY_TO_APPLY` / `IMPLEMENTING` | task progress (0, or partial) |
+| `READY_TO_REVIEW` | every task ticked, no review snapshot |
+| `STALE_EVIDENCE` | the snapshot exists and no longer matches the tree |
+| `EVIDENCE_UNVERIFIED` | a snapshot exists but `review-snapshot` was not found |
+| `PR_OPEN_CI_RED` / `PR_OPEN_CI_PENDING` / `PR_OPEN_NO_CHECKS` | `gh pr list` on the branch |
+| `PR_STATE_UNDETERMINED` | `gh` present but unable to answer |
+| `READY_TO_MERGE` | a PR open with green checks and current evidence |
+| `ARCHIVE_PENDING` | tasks done, evidence current, change still active |
+
+**Not yet derivable, and deliberately absent from the list:** `NEEDS_FIX`, `READY_TO_QA`,
+`QA_FAILED` and `NEEDS_REVIEW` are stages of the loop the command cannot distinguish from files
+alone — a builder mid-correction and a change awaiting QA both look like "tasks in progress"
+until the run trace (`loop-telemetry-run-log`) exists. They are added to this table when the
+input that supports them does, never before.
 
 Rules that hold it honest:
 
