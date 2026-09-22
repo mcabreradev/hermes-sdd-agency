@@ -148,6 +148,26 @@ Detail:
   validates and passes the already verified result as context.
 - The agent that does not correspond to the stage is neither loaded nor invoked.
 
+## Parallel execution of changes
+
+Two changes with overlapping file sets run **sequentially**, never in parallel. The
+collision decision is **derived, not re-read by hand**: before dispatching two changes
+concurrently, Hermes runs `bin/change-collision --base <base> --a <refA> --b <refB>`
+and acts on the verdict:
+
+- `parallelizable` — no overlapping paths and no shared high-risk family → may run in
+  parallel (each change in its own worktree).
+- `collision` — overlapping paths, or both changes touch the same high-risk family
+  (schema/migrations, `openspec/`, contracts/auth, dependency manifests) → run
+  **sequentially**, never in parallel, even when no literal path overlaps.
+- `cannot assess` — the input is unmeasurable (empty diff, unresolved ref, bad base) →
+  **no parallel dispatch** until the diff is measurable; `cannot assess` is never read
+  as `parallelizable`.
+
+The verdict decides *ordering*, never approval: a `collision` means "run sequentially",
+it is not a blocker, not a review verdict, not a gate. The gates stay reviewer's and
+QA's.
+
 ## Output validation
 
 Before advancing to the next stage, Hermes verifies:
