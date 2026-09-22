@@ -21,7 +21,7 @@ checked=0
 # run_case <fixture-dir-name> <expected-flag> [expected-desc-substring]
 run_case() {
   local name="$1" expected_flag="$2" expected_desc="${3:-}" out flag desc
-  out=$("$BIN" --root "$ROOT" 2>/dev/null | awk -v n="$name" '$0 ~ ("PATH: .*/" n "/SKILL.md$") { show=1 } /^FLAG:/ && show { print; show=0 }')
+  out=$("$BIN" --root "$ROOT" 2>/dev/null | awk -v n="$name" '$0 ~ ("PATH: .*/" n "/SKILL.md$") { show=1 } show { print } /^FLAG:/ && show { show=0 }')
   flag=$(printf '%s\n' "$out" | sed -n 's/^FLAG: //p')
   desc=$(printf '%s\n' "$out" | sed -n 's/^DESC: //p')
   checked=$((checked + 1))
