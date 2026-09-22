@@ -67,6 +67,19 @@ It prints, per skill, the exact `SKILL.md` path, name, description and tags, and
 frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR`,
 `MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). It writes nothing.
 
+`bin/` also carries the two review-evidence tools (`rules/quality.md`, "Frozen review
+candidate" and "Review tier"):
+
+```bash
+review-snapshot --base main                     # freeze the candidate before the review
+review-snapshot --compare reports/review-snapshot.json   # at delivery: MATCH or MISMATCH
+review-tier --base main                         # low | medium | high, with the rules that fired
+```
+
+`review-snapshot` binds a review's findings to the content they describe and detects at
+delivery that the tree moved (a `MISMATCH` exits non-zero). `review-tier` derives review depth
+from the diff's declared shape; it is informational and never a gate.
+
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).
 

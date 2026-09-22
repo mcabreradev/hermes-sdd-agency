@@ -11,6 +11,17 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **`bin/review-snapshot`** — freezes the review candidate **before** anything reads it: base
+  ref, `HEAD` for context, the working-tree content fingerprint and the diff hash. Reviewer and
+  QA findings are bound to that snapshot, and `--compare` at delivery reports a `MISMATCH`
+  (non-zero) when the tree moved — so evidence can no longer describe content that no longer
+  exists. The comparison is content-based, so a rebase/amend/squash that preserves content still
+  matches.
+- **`bin/review-tier`** — derives review depth (`low`/`medium`/`high`) from the diff's own shape
+  using the declared table in `rules/quality.md`: authored lines plus the high-consequence path
+  classes (schema/migration, auth, security config, dependency manifests). It prints the rules
+  that fired, is informational — it never blocks or replaces `pr-review`'s QA gate — and reports
+  "cannot assess" instead of `low` when the diff cannot be measured.
 - **Sensitive-path deny list** (`rules/project-boundaries.md`) — the enumerated classes of
   credentials, keys and token files that no agent, bin or workflow may read, print, copy into a
   report or commit. Enforced on evidence, not intent: the `reviewer` greps the declared diff's
