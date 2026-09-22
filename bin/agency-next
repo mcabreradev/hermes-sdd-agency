@@ -277,17 +277,21 @@ if [ -n "$GH" ]; then
     PR_UNAVAILABLE=0
     PR_NUMBER=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].number // ""' 2>/dev/null)
     PR_URL=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].url // ""' 2>/dev/null)
-    # A failing or unfinished check is a fact about the PR, so an unavailable rollup must not be
-    # read as green: `gh` reports an empty rollup for a branch with no CI configured at all.
-    if printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup // [] | length' 2>/dev/null | grep -qE '^0$'; then
-      PR_STATE="none"
-      PRECISION+=("whether PR #$PR_NUMBER has passing checks (it reports no checks at all)")
-    elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .conclusion // ""' 2>/dev/null | grep -qE 'FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED'; then
-      PR_STATE="red"
-    elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .status // ""' 2>/dev/null | grep -qE 'IN_PROGRESS|QUEUED|PENDING'; then
-      PR_STATE="pending"
-    else
-      PR_STATE="green"
+    # The check rollup only means anything when a PR actually exists: without a PR the array is
+    # empty, the length test below sees 0, and the command emitted a phantom precision bullet
+    # about "PR #" — contaminating the common determinate states (ARCHIVE_PENDING,
+    # READY_TO_REVIEW) with a limit about a PR that is not there.
+    if [ -n "$PR_NUMBER" ]; then
+      if printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup // [] | length' 2>/dev/null | grep -qE '^0$'; then
+        PR_STATE="none"
+        PRECISION+=("whether PR #$PR_NUMBER has passing checks (it reports no checks at all)")
+      elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .conclusion // ""' 2>/dev/null | grep -qE 'FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED'; then
+        PR_STATE="red"
+      elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .status // ""' 2>/dev/null | grep -qE 'IN_PROGRESS|QUEUED|PENDING'; then
+        PR_STATE="pending"
+      else
+        PR_STATE="green"
+      fi
     fi
   fi
 fi

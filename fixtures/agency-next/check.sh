@@ -16,10 +16,14 @@ trap 'rm -rf "$WS"' EXIT
 fail=0
 checked=0
 
+# The suite needs the real `openspec` CLI: it is the input the command derives its state from.
+# A SKIP here is NOT green — reporting exit 0 with `checked=0` is the false-green this suite
+# exists to prevent, so an unrunnable suite fails loudly and distinctly (exit 3) instead.
 if [ -z "$OPENSPEC" ]; then
   printf 'SKIP  the openspec CLI is not on PATH — agency-next cannot be exercised here\n'
-  printf '\nchecked=0 failures=0\n'
-  exit 0
+  printf 'FAIL  the suite could not run: this is NOT a pass\n'
+  printf '\nchecked=0 failures=0 skipped=1\n'
+  exit 3
 fi
 
 # make_repo <name> — a git repo with a baseline commit.
@@ -179,6 +183,15 @@ else
   printf 'FAIL   %-40s no informational line in the output\n' "state is declared informational"
   fail=$((fail + 1))
 fi
+# With no open PR the precision section must NOT invent a limit about one: the rollup test used
+# to fire on the empty array and emit "whether PR # has passing checks" for a PR that is not there.
+checked=$((checked + 1))
+if printf '%s' "$out" | grep -q 'PR #'; then
+  printf 'FAIL   %-40s invented a limit about a PR that does not exist\n' "no phantom PR bullet"
+  fail=$((fail + 1))
+else
+  printf 'OK     %-40s no limit about a non-existent PR\n' "no phantom PR bullet"
+fi
 
 # --- a stale snapshot names BOTH fingerprints ----------------------------------------------
 ( cd "$D" && printf 'moved after the snapshot\n' >> feature.txt )
@@ -270,10 +283,8 @@ else
 fi
 
 printf '\nchecked=%s failures=%s\n' "$checked" "$fail"
-# Fail CLOSED: a suite that built nothing must not report green. `exit "$fail"` alone exits 0
-# when every case failed to build, which is how this harness hid a real crash for a whole pass.
-if [ "$checked" -eq 0 ]; then
-  printf 'FAIL   no case ran — the harness could not build its fixtures\n'
-  exit 1
-fi
+# `exit "$fail"` alone is fine BECAUSE the unrunnable case is handled at the top by the SKIP
+# branch (exit 3). The former `[ "$checked" -eq 0 ]` guard here was dead code: the first case
+# always runs and increments `checked`, so that condition was never reachable — an unwired
+# guard is worse than none, because it reads as protection.
 exit "$fail"
