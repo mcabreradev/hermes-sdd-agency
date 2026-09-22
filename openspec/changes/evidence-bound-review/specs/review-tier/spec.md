@@ -49,8 +49,16 @@ failed assessment MUST NOT be read as `low`.
 #### Scenario: The assessment cannot be performed
 
 - **WHEN** the diff cannot be measured (no base, an unreadable repository state, a missing tool)
+  **or the diff is empty** because the base equals `HEAD`
 - **THEN** the command reports that it could not assess instead of returning `low`, and the
   review proceeds at the higher depth or reports a blocker — never on an optimistic default
+
+#### Scenario: A base that does not fork the change
+
+- **WHEN** the base resolves but the diff against it is empty (the work was committed onto the
+  base branch, or the ref already contains `HEAD`)
+- **THEN** no tier is printed: an empty diff is reported as "cannot assess", because it is
+  evidence that the base is wrong, not evidence that the change is documentation-only
 
 ### Requirement: The rules are declared and inspectable
 

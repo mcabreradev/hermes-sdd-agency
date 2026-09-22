@@ -42,6 +42,9 @@ assert_tier() {
   checked=$((checked + 1))
   local got
   got=$(printf '%s\n' "$out" | sed -n 's/^tier: //p' | head -n 1)
+  # "cannot assess" is the honest verdict, not a tier: normalise it so an expectation of
+  # "<none>" is satisfied only by a real refusal.
+  [ "$got" = "cannot assess" ] && got="<none>"
   [ -z "$got" ] && got="<none>"
   if [ "$got" = "$expected" ]; then
     printf 'OK     %-34s tier=%s\n' "$case" "$got"
@@ -97,7 +100,7 @@ assert_reason_names "high names dependency-manifest" "$D" "dependency-manifest"
 D=$(make_repo medium-under)
 ( cd "$D" && mkdir -p src && printf 'export const f = () => 1;\n' > src/app.ts && git add -A && git commit -q -m "feat: behavior" )
 assert_tier "medium (under bound)" medium "$D"
-assert_reason_names "medium names its dimension" "$D" "within the bound"
+assert_reason_names "medium names its dimension" "$D" "at or under the bound"
 
 # --- high: behavior over the bound ------------------------------------------------------
 D=$(make_repo high-over)
@@ -107,13 +110,60 @@ assert_reason_names "high names the size rule" "$D" "over the bound"
 
 # --- cannot assess -----------------------------------------------------------------------
 D=$(make_repo unassessable)
-assert_tier "cannot assess (unknown base)" "<none>" "$D" -- --base does-not-exist
+assert_tier "cannot assess (unknown base)" "<none>" "$D" --base does-not-exist
 out=$(cd "$D" && "$TIER" --base does-not-exist 2>&1); rc=$?
 checked=$((checked + 1))
 if printf '%s' "$out" | grep -q "cannot assess" && [ "$rc" -ne 0 ]; then
   printf 'OK     %-34s cannot assess, exit=%s\n' "cannot assess exits non-zero" "$rc"
 else
   printf 'FAIL   %-34s expected a cannot-assess verdict, got rc=%s\n' "cannot assess exits non-zero" "$rc"
+  fail=$((fail + 1))
+fi
+
+# An EMPTY diff is not a documentation-only change: base == HEAD (work committed onto the base
+# branch, or a wrong ref) must report cannot assess, never the shallowest tier.
+D=$(make_repo empty-diff)
+( cd "$D" && git checkout -q main && mkdir -p prisma/migrations src && i=0; while [ $i -lt 900 ]; do printf 'ALTER TABLE t%s ADD COLUMN c INT;\n' "$i"; i=$((i + 1)); done > prisma/migrations/001_big.sql && printf 'export const login = () => {};\n' > src/auth.ts && git add -A && git commit -q -m "feat: big migration on the base branch" )
+assert_tier "empty diff (base == HEAD)" "<none>" "$D" --base main
+out=$(cd "$D" && "$TIER" --base main 2>&1); rc=$?
+checked=$((checked + 1))
+if printf '%s' "$out" | grep -q 'cannot assess' && [ "$rc" -eq 2 ] && ! printf '%s' "$out" | grep -q '^tier: low'; then
+  printf 'OK     %-34s cannot assess (not low), exit=2\n' "900-line migration on base is not low"
+else
+  printf 'FAIL   %-34s a 900-line migration+auth diff reported a tier\n' "900-line migration on base is not low"
+  fail=$((fail + 1))
+fi
+assert_tier "empty diff (base is HEAD)" "<none>" "$D" --base HEAD
+
+# A behavior module whose name merely starts with "document" must not be docs-like.
+D=$(make_repo doc-prefix)
+( cd "$D" && mkdir -p src && printf 'export const render = () => {};\n' > src/document.ts && printf 'export const api = () => {};\n' > src/documents-api.ts && git add -A && git commit -q -m "feat: documents module" )
+assert_tier "src/document.ts is behavior" medium "$D"
+assert_tier "src/documents-api.ts is behavior" medium "$D"
+
+# The auth row's prose covers hyphen/underscore spellings, so they must fire.
+D=$(make_repo auth-spellings)
+( cd "$D" && mkdir -p src && printf 'export const x = () => {};\n' > src/require-auth.ts && git add -A && git commit -q -m "feat: require-auth" )
+assert_tier "require-auth.ts fires auth" high "$D"
+assert_tier "auth class named for it" high "$D"
+
+# An undeclared env knob must not be able to lower a tier.
+D=$(make_repo env-knob)
+( cd "$D" && mkdir -p src && i=0; while [ $i -lt 450 ]; do printf 'export const l%s = () => %s;\n' "$i" "$i"; i=$((i + 1)); done > src/big.ts && git add -A && git commit -q -m "feat: big" )
+out=$(cd "$D" && REVIEW_TIER_SIZE_BOUND=99999 "$TIER" 2>&1)
+checked=$((checked + 1))
+if printf '%s' "$out" | grep -q '^tier: high'; then
+  printf 'OK     %-34s env knob ignored, still high\n' "no undeclared env knob"
+else
+  printf 'FAIL   %-34s an env var lowered the tier: %s\n' "no undeclared env knob" "$(printf '%s' "$out" | head -n 1)"
+  fail=$((fail + 1))
+fi
+out=$(cd "$D" && REVIEW_TIER_SIZE_BOUND=abc "$TIER" 2>&1)
+checked=$((checked + 1))
+if ! printf '%s' "$out" | grep -q 'integer expression expected'; then
+  printf 'OK     %-34s no unvalidated arithmetic\n' "invalid env value is inert"
+else
+  printf 'FAIL   %-34s an unvalidated value reached the comparison\n' "invalid env value is inert"
   fail=$((fail + 1))
 fi
 

@@ -40,9 +40,11 @@ None — new requirements only.
 
 ## Impact
 
-- **Files:** `rules/quality.md`, `workflows/review-change.md`, `agents/reviewer.md`,
-  `README.md`, `INSTALL.md`, `CHANGELOG.md`.
-- **New:** `bin/review-snapshot`, `bin/review-tier`, `fixtures/review-tier/`, `fixtures/review-snapshot/`.
+- **Files modified:** `rules/quality.md`, `workflows/review-change.md`, `workflows/release-change.md`,
+  `workflows/qa-change.md`, `agents/reviewer.md`, `agents/qa.md`, `README.md`, `INSTALL.md`,
+  `CHANGELOG.md`, `.gitignore`.
+- **New files:** `bin/review-snapshot`, `bin/review-tier`, `fixtures/review-snapshot/check.sh`,
+  `fixtures/review-tier/check.sh`.
 - **No runtime dependency added** — bash 3.2 with the tools the repo already assumes.
 - **Concepts adapted from** [Gentleman-Programming/gentle-ai](https://github.com/Gentleman-Programming/gentle-ai)
   (MIT): the frozen review candidate and the risk-proportional depth. Ideas only — no binary, no

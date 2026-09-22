@@ -69,22 +69,51 @@ field() {
   sed -n "s/.*\"$2\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" "$1" | head -n 1
 }
 
+# The diff hash for a given base, as the snapshot run computes it.
+diff_hash_for() {
+  git -C "$TOP" diff "$1...HEAD" 2>/dev/null | git -C "$TOP" hash-object --stdin 2>/dev/null
+}
+
 if [ -n "$COMPARE" ]; then
   if [ ! -f "$COMPARE" ]; then
     printf 'review-snapshot: cannot assess (snapshot not found: %s)\n' "$COMPARE" >&2
     exit 2
   fi
   WAS=$(field "$COMPARE" fingerprint)
+  WAS_BASE=$(field "$COMPARE" base)
+  WAS_DIFF=$(field "$COMPARE" diffHash)
   if [ -z "$WAS" ]; then
     printf 'review-snapshot: cannot assess (snapshot has no fingerprint: %s)\n' "$COMPARE" >&2
     exit 2
   fi
-  if [ "$WAS" = "$FINGERPRINT" ]; then
-    printf 'MATCH    snapshot=%s current=%s\n' "$WAS" "$FINGERPRINT"
+  if [ -z "$WAS_BASE" ] || [ -z "$WAS_DIFF" ]; then
+    printf 'review-snapshot: cannot assess (snapshot is incomplete: base and diffHash are required for a comparison)\n' >&2
+    exit 2
+  fi
+  # Re-verify the recorded base itself: a snapshot whose base no longer resolves cannot be
+  # compared at all. Reporting MATCH here would validate a manifest nobody can re-derive.
+  if ! git -C "$TOP" rev-parse --verify --quiet "$WAS_BASE^{commit}" >/dev/null 2>&1; then
+    printf 'review-snapshot: cannot assess (the snapshot base does not resolve here: %s)\n' "$WAS_BASE" >&2
+    exit 2
+  fi
+
+  NOW_DIFF=$(diff_hash_for "$WAS_BASE")
+  [ -n "$NOW_DIFF" ] || { printf 'review-snapshot: cannot assess (diff hash could not be recomputed for base %s)\n' "$WAS_BASE" >&2; exit 2; }
+
+  # Both fields must agree. Checking only the fingerprint would let a manifest with a forged
+  # base or diff hash (the two fields that say WHAT was reviewed) pass as MATCH.
+  if [ "$WAS" = "$FINGERPRINT" ] && [ "$WAS_DIFF" = "$NOW_DIFF" ]; then
+    printf 'MATCH    snapshot=%s current=%s  diffHash=%s base=%s\n' "$WAS" "$FINGERPRINT" "$WAS_DIFF" "$WAS_BASE"
     exit 0
   fi
-  printf 'MISMATCH snapshot=%s current=%s\n' "$WAS" "$FINGERPRINT"
-  printf 'review-snapshot: the content moved since the review was recorded — the evidence belongs to different content\n' >&2
+
+  if [ "$WAS" != "$FINGERPRINT" ]; then
+    printf 'MISMATCH fingerprint  snapshot=%s current=%s  base=%s\n' "$WAS" "$FINGERPRINT" "$WAS_BASE"
+    printf 'review-snapshot: the working-tree content moved since the review was recorded — the evidence belongs to different content\n' >&2
+  else
+    printf 'MISMATCH diffHash     snapshot=%s current=%s  base=%s\n' "$WAS_DIFF" "$NOW_DIFF" "$WAS_BASE"
+    printf 'review-snapshot: the diff against base %s changed since the review was recorded — the reviewed range is no longer the same\n' "$WAS_BASE" >&2
+  fi
   exit 1
 fi
 
@@ -101,7 +130,51 @@ DIFF_HASH=$(git -C "$TOP" diff "$BASE...HEAD" 2>/dev/null | git -C "$TOP" hash-o
 DIFF_LINES=$(git -C "$TOP" diff --numstat "$BASE...HEAD" 2>/dev/null | awk '{a+=$1; d+=$2} END {print a+0 "+" d+0}')
 
 OUT_DIR=$(dirname "$OUT")
+# A snapshot written INTO the worktree becomes part of the content it fingerprints (the
+# fingerprint is `git add -A` over the working tree), so the mandated delivery compare would
+# report MISMATCH with nobody having changed anything. Refuse a target inside the repo unless
+# it is verifiably gitignored — and say which .gitignore entry is missing.
+#
+# Both sides are resolved PHYSICALLY: on macOS `git rev-parse --show-toplevel` returns the
+# realpath (/private/var/...) while $PWD may be the symlinked form (/var/...), and a plain
+# string prefix test then misses the repo entirely (the macOS /tmp -> /private/tmp trap).
+case "$OUT" in
+  /*) OUT_ABS="$OUT" ;;
+  *) OUT_ABS="$PWD/$OUT" ;;
+esac
+# Resolve through the nearest EXISTING ancestor: a target whose parent directory does not
+# exist yet (a fresh reports/) must still be classified as inside the repo, otherwise the
+# guard silently passes and the first snapshot writes into the worktree unignored.
+OUT_RESOLVED=$(OUT_ABS="$OUT_ABS" bash -c '
+  p="$OUT_ABS"; tail=""
+  while [ ! -d "$p" ] && [ "$p" != "/" ] && [ -n "$p" ]; do
+    tail="/$(basename "$p")$tail"
+    p=$(dirname "$p")
+  done
+  cd "$p" 2>/dev/null && printf "%s%s" "$(pwd -P)" "$tail"
+') || OUT_RESOLVED=""
+OUT_ABS="${OUT_RESOLVED:-$OUT_ABS}"
+TOP_PHYS=$(cd "$TOP" 2>/dev/null && pwd -P) || TOP_PHYS="$TOP"
+case "$OUT_ABS" in
+  "$TOP_PHYS"/*|"$TOP"/*)
+    if [ "$(git -C "$TOP" rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ] && \
+       ! git -C "$TOP" check-ignore -q "$OUT_ABS" 2>/dev/null; then
+      printf 'review-snapshot: cannot write the snapshot to %s\n' "$OUT" >&2
+      printf '  it is inside the repository and NOT gitignored, so writing it would change the very\n' >&2
+      printf '  content fingerprint it records (the delivery compare would then report a false MISMATCH).\n' >&2
+      printf '  Add to .gitignore:  %s\n' "$(printf '%s' "${OUT_ABS#$TOP_PHYS/}" | sed 's/[^/]*$/*/')" >&2
+      printf '  or pass --out with a path outside the repository.\n' >&2
+      exit 2
+    fi
+    ;;
+esac
 [ -d "$OUT_DIR" ] || mkdir -p "$OUT_DIR" || { printf 'review-snapshot: cannot write snapshot to %s\n' "$OUT" >&2; exit 2; }
+
+# The manifest is JSON: a quote in a value would silently corrupt it, so refuse rather than
+# emit a file no JSON parser can read.
+case "$BASE$OUT" in
+  *'"'*) printf 'review-snapshot: cannot assess (a value containing a double quote cannot be recorded)\n' >&2; exit 2 ;;
+esac
 
 cat > "$OUT" <<EOF
 {
