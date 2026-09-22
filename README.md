@@ -135,27 +135,31 @@ so it never re-runs discovery/spec already done and never opens a second PR. Sam
 confidence gate as `/do` (routine sleeps, non-trivial wakes). See
 `workflows/continue-change.md`.
 
-## Evidence you can verify: `no-smoke-worktree`
+## Evidence you can verify: five bins, one chain
 
-A claim that a stage "reviewed" or "tested" the work is a self-report. `bin/no-smoke-worktree`
-prints a **content fingerprint** of the working tree (git `write-tree` over a temp index) that
-binds an agent's evidence to the exact content it actually saw — it survives rebase/amend, and
-changes when **any** source (including untracked files) changes.
+Agent outputs are **self-reports**, not facts — so the loop ships five commands that turn
+claims into hashes. They read **files**, never memory, and a fresh session gets the same
+truthful answer. The chain: **freeze → tier → review → compare**. Full guide with step-by-step
+examples and real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
 
-Reviewer, QA and release stages record the fingerprint of the tree they worked on; at merge
-time `release-change` compares them. A mismatch means the shipped tree was validated on older
-content → re-review/re-test before landing. Enforced in `rules/quality.md`.
-
-## Every run leaves a structured trace: `run-trace`
-
-The loop also keeps a **machine-readable memory of each run**. Each stage appends a
-structured trace entry (stage, change, status, files, evidence, blockers, decisions/ASSUMED,
-run id, next step, timestamp) to `reports/run-<run-id>.jsonl` — the single source of truth
-for resuming a partial run and auditing what happened, so a dead session or a parked
-decision doesn't force re-reading prose. `bin/run-trace` emits the run summary from the log
-alone. The trace is additive (it mirrors the envelope, `rules/observability.md`) and lives in
-the project, never in `~/.hermes/**` (`rules/project-boundaries.md`); it is gitignored so a
-growing log never disturbs the `no-smoke-worktree` release fingerprint.
+- **`bin/no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked +
+  ignored). Reviewer, QA and release record the fingerprint of the tree they worked on; a
+  mismatch at delivery means the evidence describes content that no longer exists.
+- **`bin/review-snapshot`** — freezes the review candidate **before** anything reads it (base,
+  HEAD, fingerprint, diff hash). Findings bind to that snapshot; `--compare` at delivery
+  reports a `MISMATCH` (non-zero) when the tree moved. Content-based, so a rebase/amend that
+  preserves content still matches.
+- **`bin/review-tier`** — derives review depth (`low`/`medium`/`high`) from the diff's own
+  shape using the declared table in `rules/quality.md` (≤400 authored lines ⇒ `medium`;
+  schema/migration, auth, security config or dependency manifests ⇒ `high`; an unmeasurable
+  diff ⇒ `cannot assess`, never a rubber-stamp `low`). Informational — never blocks.
+- **`bin/agency-next`** — the derived state + the one valid next transition, read from files
+  (OpenSpec JSON, git tree, fingerprint, snapshot). A missing input **narrows** the answer;
+  it never defaults to optimistic, and it never blocks, merges or archives.
+- **`bin/skill-registry`** — read-only inventory of installed skills: exact `SKILL.md` path,
+  name, description and tags, and flags for the frontmatter defects that make a skill load
+  but mis-route (`BLOCK-SCALAR` content-less indicator, `MISSING-DESCRIPTION`,
+  `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). Pinned by `fixtures/skill-registry/check.sh`.
 
 ## Complementary skills (`skills/`)
 

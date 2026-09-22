@@ -51,15 +51,17 @@ reports of each stage.
 <!-- Open findings with severity, declared debt, NOT RUN scenarios, known
      flaky. If there is nothing, say "none". -->
 
-## Run trace
+## Review evidence
 
-<!-- The structured per-run log and its audit summary (rules/observability.md). The
-     trace is the source of truth for resume/audit; the report links it, it does not
-     replace it. -->
+<!-- The evidence chain that binds this report to content, not claims
+     (rules/quality.md). The snapshot freezes the reviewed candidate; the
+     fingerprint anchors what this report validated; --compare at delivery
+     is the mismatch test. Informational: never a replacement for the gates. -->
 
-- Run id: `<run-<UTC ISO-8601 compact>>`
-- Trace: `reports/run-<run-id>.jsonl`
-- Summary: `bin/run-trace --file reports/run-<run-id>.jsonl` → `<output>`
+- Review snapshot: `reports/review-snapshot.json` (base `<base>`, head `<head>`)
+  - Fingerprint: `<fingerprint from bin/no-smoke-worktree>`
+  - Diff hash: `<diffHash from review-snapshot>`
+- Delivery check: `review-snapshot --compare reports/review-snapshot.json` → `MATCH` / `MISMATCH`
 
 ## Decisions made
 

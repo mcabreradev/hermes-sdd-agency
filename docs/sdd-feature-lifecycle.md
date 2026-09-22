@@ -164,6 +164,13 @@ Breaks the change into **granular tasks in `tasks.md`**:
 
 **Adversarial** review of the diff against the spec, design and rules:
 
+- **The candidate is frozen before anything reads it** (`review-snapshot --base <base>`):
+  base ref, HEAD, content fingerprint and diff hash are captured up front, and the reviewer
+  reports the **snapshot** its findings describe — not "the code" in the abstract.
+- **The tier sets the depth** (`review-tier --base <base>`): `low` (docs/process only),
+  `medium` (behavior-bearing ≤400 lines: full checklist sweep) or `high` (over 400 lines, or
+  any schema/migration, auth, security-config or dependency-manifest path: domain persona +
+  security audit). Informational — it never blocks and never replaces the formal QA gate.
 - Findings with `severity` (BLOCKER/MAJOR/MINOR/NIT) + `path:line` + impact + proposed fix.
 - **Can block**: `changes-requested` halts progress. Open BLOCKER/MAJOR ⇒ no advance.
 - On a block the fix returns to the builder with the exact defect and retry with new
@@ -178,6 +185,8 @@ Breaks the change into **granular tasks in `tasks.md`**:
 executing them (edge cases and the full user path):
 
 - Evidence = real executed result (command + output / failure capture), not reading code.
+- QA reports against the same **frozen snapshot** the reviewer used — its evidence names
+  the snapshot and the working-tree fingerprint it validated.
 - **Can block**: `qa: fail` halts. A defect goes back to the builder with its regression
   test. Max 3 cycles. QA neither replaces tests nor is replaced by them
   (`rules/testing.md`).
@@ -191,9 +200,10 @@ executing them (edge cases and the full user path):
 - **Sync specs** to `openspec/specs/<cap>/spec.md` — part of closure, never optional.
 - **Final report** (`templates/final-report.md`) written in the project: stages closed
   with evidence, gates run, OpenSpec state, declared debt, decisions, single next step.
-- **Run trace recorded** — each stage logged its trace entry to `reports/run-<run-id>.jsonl`
-  and `bin/run-trace` emitted the summary (`rules/observability.md`); the trace is the
-  source of truth for auditing and resuming the run.
+- **Evidence chain closed** — the release binds the delivered tree to the review evidence:
+  `review-snapshot --compare` must report `MATCH` against the frozen candidate (a `MISMATCH`
+  bounces the change back for re-review), and the working-tree fingerprint
+  (`bin/no-smoke-worktree`) anchoring the report matches the tree being merged.
 - `git status --porcelain` clean (no unexpected changes or temp files).
 
 ---
@@ -223,6 +233,8 @@ a fact.
 
 ## See also
 
+- `docs/evidence-bins.md` — the five evidence bins, step by step with real outputs
+  (`no-smoke-worktree`, `review-snapshot`, `review-tier`, `agency-next`, `skill-registry`).
 - `rules/orchestration.md` — who orchestrates, envelope, retries, blockers, human approval.
 - `rules/sdd.md` — when the full loop runs vs the fast path, and the language contract.
 - `agents/README.md` — entry point and reading map.

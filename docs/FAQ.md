@@ -11,7 +11,7 @@ no project's requirements — those live in each project's own `openspec/`.
 Yes. The loop is built on the OpenSpec CLI (`openspec`). It must be ≥ 1.13.0 and on
 your `PATH` (e.g. `~/.local/bin/openspec`). Hermes runs it from each project root.
 
-### Do I need to install all 12 bundles?
+### Do I need to install all 15 bundles?
 
 No. `/agency` loads the orchestrator plus `openspec-sdd`. The per-stage commands are
 convenience entry points. The task-level shortcuts are:
@@ -79,10 +79,13 @@ Yes. Each project is a separate workflow with its own root, change, run trace an
 
 ### Where does the agency keep the memory of a run?
 
-In a structured trace: each stage appends to `reports/run-<run-id>.jsonl` in the project
-(`rules/observability.md`), and `bin/run-trace` prints the run summary. It is the source of
-truth for resuming a partial run and auditing what happened. It lives in the project, not in
-`~/.hermes/` (`rules/project-boundaries.md`).
+In the repo, not in a session. The artifacts of a run are the OpenSpec change
+(`openspec/changes/<name>/`: proposal, spec, design, tasks), its reports under `reports/`
+and the git history itself — plus the evidence chain that binds them: the review snapshot
+(`reports/review-snapshot.json`, gitignored) freezes the reviewed content, the working-tree
+fingerprint (`bin/no-smoke-worktree`) anchors what each stage actually saw, and
+`bin/agency-next` re-derives the current state and the next step from those files alone, so
+a dead session or a new one resumes from the same truth instead of re-reading prose.
 
 ### How do I keep my fork in sync with the upstream?
 

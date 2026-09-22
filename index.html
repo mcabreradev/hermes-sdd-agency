@@ -365,7 +365,7 @@
       </details>
       <details>
         <summary>Do I have to install all the bundles?</summary>
-        <p>No. <code>/agency</code> loads the orchestrator plus <code>openspec-sdd</code>; the per-stage commands are convenience entry points. The installer installs all 13 by default, but <code>--bundles a,b,c</code> selects a subset.</p>
+        <p>No. <code>/agency</code> loads the orchestrator plus <code>openspec-sdd</code>; the per-stage commands are convenience entry points. The installer installs all 15 by default, but <code>--bundles a,b,c</code> selects a subset.</p>
       </details>
       <details>
         <summary>Can two agents talk to each other?</summary>
@@ -408,7 +408,11 @@
       </div>
       <div class="use adv">
         <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7-7 7s-7-2-7-7 3.5-7 7-7c2.8 0 4.8 1 5.5 3"/><path d="M14 8 20 7l-1-6"/></svg><span class="adv-title">Verifiable evidence</span></div>
-        <p><code>bin/no-smoke-worktree</code> fingerprints the working tree (a content hash that survives rebase/amend but changes on any source change). Reviewer, QA and release record it and <code>release-change</code> compares — no smoke, no &ldquo;I validated it&rdquo; over older content.</p>
+        <p><code>bin/no-smoke-worktree</code> fingerprints the working tree (a content hash that survives rebase/amend but changes on any source change); <code>review-snapshot</code> freezes the review candidate before anything reads it and <code>--compare</code> at delivery catches the tree having moved; <code>review-tier</code> derives review depth from the diff's own risk. Reviewer, QA and release record these in their evidence — no smoke, no &ldquo;I validated it&rdquo; over older content.</p>
+      </div>
+      <div class="use adv">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="adv-title">State from files, not memory</span></div>
+        <p><code>agency-next</code> answers &ldquo;what&rsquo;s next, and why&rdquo; by reading the OpenSpec CLI&rsquo;s JSON, the git tree, the fingerprint and the review snapshot — it prints the one valid next transition and the command that performs it, and a missing input <em>narrows</em> the answer instead of guessing. A dead session or a new one resumes from the same truth.</p>
       </div>
       <div class="use adv">
         <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="adv-title">Fast paths</span></div>
@@ -457,7 +461,7 @@
 <footer>
   <div class="wrap foot-inner">
     <span class="l">Hermes SDD Agency · <a href="https://github.com/mcabreradev/hermes-sdd-agency">github.com/mcabreradev/hermes-sdd-agency</a></span>
-    <span class="l"><a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/README.md">README</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/INSTALL.md">INSTALL</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/sdd-feature-lifecycle.md">Lifecycle</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/usage-examples.md">Examples</a></span>
+    <span class="l"><a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/README.md">README</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/INSTALL.md">INSTALL</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/evidence-bins.md">Evidence</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/sdd-feature-lifecycle.md">Lifecycle</a> · <a href="https://github.com/mcabreradev/hermes-sdd-agency/blob/main/docs/usage-examples.md">Examples</a></span>
   </div>
 </footer>
 
