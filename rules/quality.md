@@ -133,3 +133,22 @@ NIT       style preference, does not block
 
 `BLOCKER` and `MAJOR` block the stage's progress. `MINOR` and `NIT` are recorded and
 Hermes decides (fix now or leave it as declared debt in the final report).
+
+## Sensitive-path check (reviewer)
+
+The deny list of sensitive paths lives in `rules/project-boundaries.md` (section "Sensitive
+paths"). It is enforced on the declared diff, not on the author's intent:
+
+```bash
+# paths touched by the declared diff
+git diff --name-only <base>...HEAD > /tmp/diff-paths.txt
+# deny-list grep (patterns from rules/project-boundaries.md)
+grep -nE '(^|/)(\.ssh/|\.env)|\.(pem|key|p12|pfx)$|/secrets/|\.aws/credentials|\.credentials/|gh/hosts\.yml|Library/Keychains/' /tmp/diff-paths.txt
+```
+
+- **A match is a `BLOCKER`**, recorded with `path:line` of the offending declaration; the stage
+  does not advance regardless of what the file appears to contain.
+- **An empty result is the evidence line** for this check: record the command and its empty
+  output. Do not report "verified" without the command that produced it.
+- This check is additive to the other security findings (secrets in code, sensitive logs); it
+  does not replace judgment about a sensitive path that is not enumerated.

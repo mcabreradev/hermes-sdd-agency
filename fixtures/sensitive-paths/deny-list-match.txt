@@ -1,0 +1,14 @@
+# Fixture: paths that MUST match the deny list (rules/project-boundaries.md).
+.ssh/id_rsa
+.ssh/known_hosts
+config/.env
+config/.env.local
+certs/server.pem
+certs/server.key
+private/keystore.p12
+private/bundle.pfx
+app/secrets/oauth.json
+.aws/credentials
+.credentials/gcloud.json
+.config/gh/hosts.yml
+Library/Keychains/login.keychain-db

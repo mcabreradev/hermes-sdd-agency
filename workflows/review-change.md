@@ -32,7 +32,10 @@ fixes; without writing to the project except the report.
 
 The agent reviews: spec compliance, diff scope, correctness and edge cases,
 form (`rules/coding.md`), tests (`rules/testing.md`), gate re-run by itself,
-consistency with `design.md`, and data/secret security.
+consistency with `design.md`, data/secret security, and the **sensitive-path deny list**
+(`rules/project-boundaries.md`, section "Sensitive paths"): grep the paths of the declared diff
+against the list — a match is a `BLOCKER`, an empty result is recorded as the check's evidence
+line (command in `rules/quality.md`).
 
 ## 2. Validation of the findings (Hermes)
 

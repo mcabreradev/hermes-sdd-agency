@@ -1,0 +1,12 @@
+# Fixture: ordinary diff paths that MUST NOT match the deny list.
+# Deliberately includes near-misses so the pattern is exercised, not just the file list.
+src/index.ts
+src/env.ts
+rules/environment.md
+docs/envelope.md
+openspec/changes/agency-guardrails/tasks.md
+bin/no-smoke-worktree
+tests/fixtures/normal.json
+certs/README.md
+src/security/audit.ts
+package.json
