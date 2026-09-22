@@ -75,14 +75,17 @@ the next stage.
 
 ## Parallelization and worktree ownership
 
-- **Two changes with overlapping file sets run sequentially in one worktree, never in
-  parallel.** If either touches `prisma/schema.prisma`, a shared service, or the same
-  `openspec/` directory — even when logically independent — serialize them: run the first to
-  a committed state and verify the tree clean *before* dispatching the second. Two parallel
-  builders on one checkout clobber each other's half-applied edits, and each
-  `bunx prisma generate` / spec-regenerate picks up the other's intermediate state. When in
-  doubt, list the union of touched paths from the briefs (`git diff --stat main...branch`);
-  any overlap means sequential.
+- **Derive the parallel decision with `bin/change-collision` — do not eyeball the file
+  sets.** Before dispatching two changes concurrently, run `bin/change-collision --base
+  <ref> --a <refA> --b <refB>`: `parallelizable` (no overlapping paths, no shared
+  high-risk family: schema/migrations, `openspec/`, contracts/auth, dependency manifests)
+  → may run in parallel, each change in its own worktree. `collision` (overlapping paths,
+  or both changes touch the same high-risk family even without literal overlap) → run
+  sequentially. `cannot assess` (empty diff, bad base, unresolved ref — non-zero exit) →
+  **no parallel dispatch until the diff is measurable; never read it as `parallelizable`.**
+  The verdict decides ordering, never approval. When in doubt, prefer sequential: two
+  parallel builders on one checkout clobber each other's half-applied edits, and each
+  `bunx prisma generate` / spec-regenerate picks up the other's intermediate state.
 - **A builder's self-report that mentions a "sibling"/"concurrent" agent is noise.** Even with
   clean serialization (you cancelled the phantom child), a builder may still spin a narrative
   of cooperating with another agent to explain half its work. Treat it as unverified: read
@@ -245,6 +248,22 @@ openQuestions        doubts that change design, scope or business (or [])
 
 ## Loop, blocking and completion
 
+- **Blockers carry a class that selects the allowed response** (`rules/orchestration.md`,
+  "Blocker classes"): `retryable` (recoverable defect → bounded retry, consumes an
+  iteration of the stage's limit), `technical` (contradicts spec/design, change-change
+  conflict → no circular retry: another agent, back a stage, or the two-failures rule),
+  `decision` (data-model change, public contract, architecture, cost, business rule →
+  the **human** decides: options + recommendation + impact; nothing that depends on it
+  advances while unanswered). **Unclassified defaults to `decision`** — never silently
+  retried or skipped by omission. Same `class` values flow into the trace.
+- **Assign a trust level after validating, never accept a self-declared one.**
+  `rules/orchestration.md`, "Trust vocabulary": `verified` (Hermes re-ran the claim in
+  the repo), `partially_verified` (only part re-verified — the unverified part is
+  declared), `self_reported` (nothing re-verified yet), `blocked` (open blocker; no
+  dependent stage advances). The assigned level is recorded in the stage report and the
+  trace entry. **Critical stages (review, QA, release) never close on `self_reported`:**
+  re-verify the decisive claim in the repo, or declare the part that cannot be verified,
+  before the stage advances.
 - **Retry limits**: discovery/openspec 2 · architect/planner 3 · builder 5 per task ·
   builder↔reviewer 3 · builder↔qa 3 · release 1. Retrying requires new information (the exact
   defect: command, output, `path:line`); repeating the same brief is forbidden. Two failures
