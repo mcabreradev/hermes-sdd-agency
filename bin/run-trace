@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# run-trace — emit the audit summary of a per-run trace log (NDJSON).
+#
+# Reads one run log (reports/<runId>.jsonl, schema in rules/observability.md) and
+# prints, from the structured log alone and never from prose: the run id, the change,
+# the stage list with status, blockers and ASSUMED/decisions, and the last entry — the
+# parked/closed point a resume must continue from.
+#
+# Read-only. bash 3.2 + jq (the repo declares jq as its JSON tool). Deterministic:
+# the log is chronological, entries print in order; re-running over an unchanged log
+# yields identical output.
+#
+# Honesty contract (same class as the repo's other readers): a MISSING file is a
+# missing input, not an empty run — the reader says so and exits non-zero. A line
+# that does not parse is named and the run is declared unverifiable, never silently
+# skipped: a truncated value is a wrong value.
+set -uo pipefail
+
+usage() {
+  cat <<EOF
+Usage: run-trace --file <run-log.jsonl> [--help]
+
+  --file <path>   the run log to summarize (reports/<runId>.jsonl)
+
+Reads the NDJSON log and prints each entry (stage, kind, status, blockers,
+decisions/ASSUMED) in order, then the last entry — the resume point.
+
+Exit status: 0 when the log was read; 2 when it could not be read (no file, no jq,
+or a line that is not valid JSON, each named).
+EOF
+}
+
+FILE=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --file) [ "$#" -ge 2 ] || { printf 'run-trace: --file requires a path\n' >&2; exit 2; }; FILE="$2"; shift 2 ;;
+    --file=*) FILE="${1#--file=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) printf 'run-trace: unknown argument %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+[ -n "$FILE" ] || { printf 'run-trace: --file is required\n' >&2; usage >&2; exit 2; }
+command -v jq >/dev/null 2>&1 || { printf 'run-trace: jq not found on PATH\n' >&2; exit 2; }
+[ -f "$FILE" ] || { printf 'run-trace: no such run log: %s\n' "$FILE" >&2; printf 'run: %s\n' "cannot determine -- no log found"; exit 2; }
+
+RUN=$(jq -r '.runId // empty' "$FILE" 2>/dev/null | head -n 1)
+CHANGE=$(jq -r '.change // empty' "$FILE" 2>/dev/null | head -n 1)
+TOTAL=$(wc -l < "$FILE" | tr -d ' ')
+
+if [ "$TOTAL" -eq 0 ]; then
+  printf 'run: %s\nchange: %s\nentries: 0\n' "${RUN:-unknown}" "${CHANGE:-unknown}"
+  printf 'note: the log is empty — the run has not recorded any stage closure yet\n'
+  exit 0
+fi
+
+# Validate every line before summarizing: an entry that does not parse voids the
+# summary (a field that cannot be parsed is undetermined, never defaulted).
+line_no=0
+invalid=0
+while IFS= read -r line; do
+  line_no=$((line_no + 1))
+  printf '%s' "$line" | jq -e . >/dev/null 2>&1 || { invalid=1; printf 'run-trace: line %s is not valid JSON: %s\n' "$line_no" "$(printf '%s' "$line" | cut -c1-80)" >&2; }
+done < "$FILE"
+if [ "$invalid" -eq 1 ]; then
+  printf 'run: %s\nchange: %s\nentries: %s\n' "${RUN:-unknown}" "${CHANGE:-unknown}" "$TOTAL"
+  printf 'run-trace: the log contains an unparsable entry — refusing to summarize\n' >&2
+  exit 2
+fi
+
+printf 'run: %s\nchange: %s\nentries: %s\n' "${RUN:-unknown}" "${CHANGE:-unknown}" "$TOTAL"
+printf '\nstages:\n'
+jq -r '"  [\(.stage // "?")] kind=\(.kind // "closed") status=\(.status // "?") at=\(.timestamp // "?") blockers=\((.blockers // []) | tojson) assumed=\((.decisions // []) | tojson)"' "$FILE"
+printf '\nlast:\n'
+jq -rs '.[-1] | "  stage: \(.stage // "?")  kind: \(.kind // "closed")  status: \(.status // "?")"' "$FILE"
+printf '  resume: continue-change reads this entry to resolve the exact stage to resume from (trace is the source of truth; task checkboxes are the cross-check)\n'
+exit 0
