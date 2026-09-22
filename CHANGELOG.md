@@ -44,7 +44,13 @@ coherent, reviewable increments of the system.
   change crosses it, the delivery strategy (`single-pr` / `chained-pr` / `split-change`) is
   chosen and **recorded** (`workflows/implement-change.md`), so the delivered shape is a decision
   on record instead of an accident of how many commits accumulated.
-
+- **`docs/agency-flow.svg` + `scripts/gen-agency-diagram.mjs`** — a single
+  hand-built SVG of the full orchestration flow (stage 0 → release → open PR →
+  post-open `pr-review` gate), replacing the stale mermaid block in
+  `docs/sdd-feature-lifecycle.md` with an image that renders in GitHub and in
+  any viewer. The generator script is the single source of truth (mermaid's
+  `<foreignObject>` output is stripped by GitHub, so the flow is drawn as pure
+  SVG text); `docs/agency-flow.mmd` remains as the editable source. (docs(agency-flow): replace stale mermaid lifecycle with rendered SVG)
 - **`test-driven-development` by hard rule at the build stage** + **`domain-modeling`
   (DDD) when the domain merits it** — every behavior-bearing piece of work — backends,
   business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR);

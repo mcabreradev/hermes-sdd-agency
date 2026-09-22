@@ -18,33 +18,12 @@ is a clear idea + the repo. This document is what runs internally.
 
 ## Lifecycle at a glance
 
-```mermaid
-flowchart TD
-    U[User: a clear idea + the repo] --> INIT{openspec/project.md present?}
-    INIT -- no --> S0[Stage 0 initialize-project]
-    INIT -- yes --> S1
-    S0 --> S1[Stage 1 discovery - idea / PRD]
+![Agency orchestration flow](agency-flow.svg)
 
-    S1 --> S2[Stage 2 openspec - proposal + specs]
-    S2 --> V1{validate passes?<br/>no ERROR}
-    V1 -- no --> S2
-    V1 -- yes --> S3[Stage 3 architect - design + ADR]
-
-    S3 --> S4[Stage 4 planner - tasks.md]
-    S4 --> G{preflight: validate + project.md + root}
-
-    G -- ok --> S5[Stage 5 builder - code + tests]
-    S5 --> R[Stage 6 reviewer - adversarial diff]
-    R --> RD{review approved?}
-    RD -- no --> S5
-    RD -- yes --> Q[Stage 7 qa - execute scenarios]
-    Q --> QD{qa pass?}
-    QD -- no --> S5
-    QD -- yes --> S8[Stage 8 release - notes + archive + sync]
-
-    S8 --> D[archive + sync specs + final report]
-    D --> E[git status clean]
-```
+> Rendered from `scripts/gen-agency-diagram.mjs` (pure SVG, renders in GitHub,
+> browsers and the Hermes preview pane). The mermaid source lives as
+> [`agency-flow.mmd`](agency-flow.mmd) for editing — re-render it locally if you
+> change the flow, or hand-edit the generator script and re-run it.
 
 Key invariants on the path (see `rules/`):
 
