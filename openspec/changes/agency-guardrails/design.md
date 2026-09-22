@@ -105,6 +105,26 @@ declared list.
   time and at stage closure; `rules/coding.md` gains the commit-granularity rule that the
   workflow references.
 
+## Delivery strategy (recorded per `workflows/implement-change.md`)
+
+**Choice: `single-pr`.**
+
+This change crossed the advisory ~400-authored-line budget: `git diff --numstat main...HEAD`
+totals **875 added / 2 deleted = 877 authored lines** (~398 of them the change's own planning
+artifacts under `openspec/changes/agency-guardrails/`). It is delivered as one PR by explicit
+decision, not by momentum:
+
+- The three work units are already separate, reviewable commits (`feat(rules): sensitive-path
+  deny list`, `feat(bin): skill-registry`, `feat(process): work-unit commits and recorded
+  delivery strategy`), so the reviewer can read the diff unit by unit.
+- `chained-pr` was rejected because the slices are **file-disjoint with no dependency between
+  them** — a chain would serialize three independent PRs for no review benefit.
+- `split-change` was rejected because all three guardrails come from one decision (port the
+  host-agnostic guardrails from Gentle-AI) and share one archive step; splitting would produce
+  three changes with a single purpose each and no independent lifecycle.
+
+The recorded reason lives here, not in the PR description, so the choice survives the merge.
+
 ## Risks / Trade-offs
 
 - **Risk:** the deny list is finite, so a sensitive path outside it passes. **Mitigation:** the
