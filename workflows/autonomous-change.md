@@ -104,6 +104,21 @@ Every decision actually taken is recorded as an ADR in the project
 (`docs/adr/`) and listed in the final report — the user sees them in the PR and
 can correct silently.
 
+### Parked decisions are trace entries (when the run is traced)
+
+If the preflight minted a `runId`, a non-trivial stop in autonomous mode also appends
+a **`parked`** trace entry to the run log — never a prose-only note
+(`rules/observability.md`):
+
+```bash
+printf '%s\n' '{"timestamp":"<UTC ISO-8601>","runId":"<runId>","change":"<name>","stage":"autonomous-change","kind":"parked","status":"needs-context","filesCreated":[],"filesModified":[],"evidence":"<options + recommendation + impact>","blockers":["<the decision needed>"],"decisions":[{"what":"<decision>","assumed":false,"open":true}],"nextRecommendedStep":"resume-after-human-decision"}' >> reports/<runId>.jsonl
+```
+
+- The park is **auditable and resumable**: `bin/run-trace --file reports/<runId>.jsonl`
+  reports it as `last:`, and `continue-change` resumes from exactly that entry.
+- The log is gitignored (`reports/run-*.jsonl`) — the parked entry never enters the
+  fingerprint; it is evidence for Hermes and the human, not versioned state.
+
 ## 4. Escalation cutoffs (same as the base system)
 
 - Max 5 builder iterations per task, 3 builder↔reviewer cycles, 3

@@ -73,6 +73,21 @@ steps and the expected fix. Require the regression test that fails without the f
 With the complete matrix and no blocking defects, the stage closes and enables
 `release-change`.
 
+## Trace (if the run is traced)
+
+If the preflight minted a `runId`, append this stage's trace entry to the run log
+before closing — schema, `kind`/`status` values and append rules in
+`rules/observability.md`:
+
+```bash
+printf '%s\n' '{"timestamp":"<UTC ISO-8601>","runId":"<runId>","change":"<name>","stage":"qa-change","kind":"closed","status":"<envelope status>","filesCreated":[],"filesModified":[],"evidence":"<command + output>","blockers":[],"decisions":[],"nextRecommendedStep":"<next>"}' >> reports/<runId>.jsonl
+```
+
+- A blocked/failed closure stays `kind: closed` with the defect and the decision
+  needed in `blockers` (`bin/run-trace` surfaces both in the summary).
+- The log is gitignored by design (`reports/run-*.jsonl`); verify the append with
+  `bin/run-trace --file reports/<runId>.jsonl`.
+
 ## Output
 
 Report (`templates/final-report.md`): matrix state, open/closed defects,
