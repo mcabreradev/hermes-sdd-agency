@@ -1,13 +1,12 @@
 ---
 name: fixture-block-scalar
 description: |
-  A block scalar description, the exact defect a converted persona carries: the
-  literal `|` becomes the description and the skill silently mis-routes.
 metadata:
   hermes:
     tags: [fixture, defective]
 ---
 
-# Fixture: block-scalar description
+# Fixture: content-less block scalar
 
-The registry must flag this as BLOCK-SCALAR and never present `|` as the description.
+The `description: |` opens a block scalar whose body is immediately closed by the next key.
+The loader presents the literal `|` as the description — the converted-persona defect.

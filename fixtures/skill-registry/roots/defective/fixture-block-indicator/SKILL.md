@@ -1,10 +1,13 @@
 ---
 name: fixture-block-indicator
 description: |2-
-  A block scalar carrying an explicit indentation indicator — a legal YAML form whose
-  indicator must never be presented as the description.
+metadata:
+  hermes:
+    tags: [fixture, defective]
 ---
 
-# Fixture: block scalar with an indentation indicator
+# Fixture: content-less block scalar with an indentation indicator
 
-The registry must flag this as BLOCK-SCALAR, exactly like the plain `|` form.
+The `description: |2-` opens a block scalar with an explicit indentation indicator whose
+body is immediately closed by the next key. The loader presents the literal `|2-` as the
+description — the converted-persona defect, in its indicator-carrying form.
