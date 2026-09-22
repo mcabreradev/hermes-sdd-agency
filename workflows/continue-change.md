@@ -45,6 +45,7 @@ openspec list --json                     # the active change(s)
 openspec status --change "<name>" --json # artifacts, tasks, applyRequires
 openspec validate "<name>" --type change --json  # must be ERROR-free (rules/openspec.md)
 openspec instructions apply --change "<name>" --json  # state: ready | all_done
+<agency-bin>/agency-next --change "<name>"   # the derived state + the one valid next transition
 git diff --stat origin/<base>..HEAD      # is there already any implementation?
 gh pr list --head <branch> --json number,title  # does a PR draft exist?
 ```

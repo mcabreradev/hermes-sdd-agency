@@ -83,6 +83,18 @@ review-tier --base main                         # low | medium | high, with the 
 delivery that the tree moved (a `MISMATCH` exits non-zero). `review-tier` derives review depth
 from the diff's declared shape; it is informational and never a gate.
 
+`agency-next` answers "what is next" from files instead of from a session's memory:
+
+```bash
+agency-next                                  # the active change (or the ambiguity, if several)
+agency-next --change <name>                  # one public state + the precise state + the command
+```
+
+It prints `working` / `checking` / `ready` / `needs-decision`, the single next transition and
+the command that performs it, plus a **precision** section naming any transition it could not
+determine (no run trace, `gh` absent, no remote). The state is informational: it never blocks,
+merges, archives or replaces a gate.
+
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).
 
