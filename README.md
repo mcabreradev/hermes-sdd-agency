@@ -35,6 +35,8 @@ bin/            no-smoke-worktree — content-fingerprint of the working tree
                 (content fingerprint + diff hash; --compare detects that the tree moved)
                 review-tier — derives review depth (low/medium/high) from the diff
                 (declared rules in rules/quality.md; informational, never a gate)
+                agency-next — the derived state + the one valid next transition
+                (read from files; informational, never blocks or authorizes)
 skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```

@@ -1,0 +1,342 @@
+#!/usr/bin/env bash
+# agency-next — read the agency's state from files and print the one valid next transition.
+#
+# "Which step is next?" must not depend on a session's memory: two sessions, two machines or the
+# same person a month later have to agree. Every input here is therefore re-derivable by anyone
+# with the repository — the OpenSpec CLI's JSON, the git tree, the working-tree fingerprint, a
+# review snapshot when one exists, and the PR state through gh when a remote is configured.
+#
+# It prints ONE public state, the precise state underneath, the single next transition and the
+# command that performs it:
+#
+#   working          the machine is waiting on work; nobody needs to decide anything
+#   checking         a gate is pending (review, QA, CI) or evidence went stale
+#   ready            the next decision is the USER's (merge, archive, a scope call)
+#   needs-decision   it cannot be determined honestly, or the human must choose
+#
+# The state is INFORMATIONAL. It never blocks a stage, authorizes a merge, archives or closes a
+# change, or replaces any gate: the gates stay the reviewer's and QA's verdicts
+# (rules/orchestration.md). The exit status encodes only whether the state could be determined —
+# never a workflow verdict.
+#
+# An input it cannot read NARROWS the answer, it never optimizes it: an unavailable input is
+# listed in the precision section with the transitions it left undetermined. Assuming "CI green"
+# or "review passed" because the input was missing is the failure this refuses.
+#
+# Read-only. bash 3.2 + git + the OpenSpec CLI; gh only when a remote exists.
+#
+# Concept adapted from Gentle-AI's deterministic state (Gentleman-Programming, MIT): read the
+# workflow state from files so the next transition does not depend on who is asking. Ideas only.
+set -uo pipefail
+
+CHANGE=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --change) [ "$#" -ge 2 ] || { printf 'agency-next: --change requires a name\n' >&2; exit 2; }; CHANGE="$2"; shift 2 ;;
+    --change=*) CHANGE="${1#--change=}"; shift ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: agency-next [--change <name>] [--help]
+
+  --change <name>   the change to inspect. Required when more than one is active.
+
+Prints one public state, the precise state, the single next transition and its command:
+
+  working          the machine is waiting on work (apply, implement, fix)
+  checking         a gate is pending (review, QA, CI) or recorded evidence went stale
+  ready            the next decision belongs to the USER (merge, archive, scope)
+  needs-decision   the state cannot be determined honestly, or the human must choose
+
+Also printed: the evidence it read, and a PRECISION section naming every transition whose
+verdict it could NOT determine (no run trace, gh not installed, no remote) — an unavailable
+input narrows the answer, it never becomes the optimistic one.
+
+The state is informational: it never blocks, authorizes, archives or replaces a gate.
+
+Exit status: 0 when a state was determined; 2 when none could be (not a repository, no
+OpenSpec root, unreadable input).
+EOF
+      exit 0 ;;
+    *) printf 'agency-next: unknown argument %s\n' "$1" >&2; exit 2 ;;
+  esac
+done
+
+say() { printf '%s\n' "$1"; }
+
+# --- helpers -----------------------------------------------------------------
+
+# jq is the repo's declared JSON tool (rules/openspec.md, rules/project-boundaries.md,
+# rules/quality.md all pipe openspec/git JSON through it). Parsing multi-line JSON with sed
+# silently returns empty for nested objects, which is how a state machine reports a fresh
+# change as "all tasks done" — so the JSON is parsed properly or not at all.
+JQ=$(command -v jq 2>/dev/null || true)
+[ -n "$JQ" ] || { printf 'agency-next: cannot determine (jq not found — the repo reads JSON through jq)\n' >&2; exit 2; }
+
+# The bins ship with the AGENCY (copied into the Hermes home by install.sh), not with each
+# project. Resolving them only against the project's cwd silently finds nothing, which then
+# reads as "no review snapshot" — an optimistic state produced by a lookup failure.
+# Order: next to this script, then the project's own bin/, then the documented agency home.
+resolve_bin() {
+  local name="$1"
+  local here
+  here=$(cd "$(dirname "$0")" 2>/dev/null && pwd -P) || here=""
+  for candidate in "$here/$name" "$TOP/bin/$name" "${HERMES_HOME:-$HOME/.hermes}/bin/$name"; do
+    [ -x "$candidate" ] && { printf '%s' "$candidate"; return 0; }
+  done
+  return 1
+}
+
+# The public state determines the shape of the whole answer, so it is emitted once per run.
+emit() {
+  # emit <public> <precise> <transition> <command> <reason> [decision]
+  PUBLIC="$1"; PRECISE="$2"; TRANSITION="$3"; COMMAND="$4"; REASON="$5"; DECISION="${6:-}"
+  say "state:      $PUBLIC"
+  say "precise:    $PRECISE"
+  say "transition: $TRANSITION"
+  say "command:    $COMMAND"
+  say "reason:     $REASON"
+  if [ -n "$DECISION" ]; then
+    say "decision:   $DECISION"
+  fi
+}
+
+print_evidence() {
+  # print_evidence <root> <change> [fingerprint] [snapshot-path]
+  say "evidence:"
+  say "  openspec root:   $1"
+  say "  change:          ${2:--}"
+  [ -n "${3:-}" ] && say "  fingerprint:     $3"
+  [ -n "${4:-}" ] && say "  review snapshot: $4"
+}
+
+print_precision() {
+  # print_precision <line>...
+  if [ "$#" -eq 0 ]; then
+    say "precision:  complete (every input was readable)"
+  else
+    say "precision:  narrowed — these transitions could NOT be determined:"
+    for line in "$@"; do say "  - $line"; done
+  fi
+}
+
+# --- environment -------------------------------------------------------------
+
+command -v git >/dev/null 2>&1 || { printf 'agency-next: cannot determine (git not found)\n' >&2; exit 2; }
+TOP=$(git rev-parse --show-toplevel 2>/dev/null) || { printf 'agency-next: cannot determine (not a git repository)\n' >&2; exit 2; }
+cd "$TOP" || exit 2
+
+OPENSPEC=$(command -v openspec 2>/dev/null || true)
+[ -n "$OPENSPEC" ] || { printf 'agency-next: cannot determine (the openspec CLI is not on PATH)\n' >&2; exit 2; }
+
+LIST=$("$OPENSPEC" list --json 2>/dev/null) || { printf 'agency-next: cannot determine (openspec list failed)\n' >&2; exit 2; }
+if printf '%s' "$LIST" | "$JQ" -e '.root == null' >/dev/null 2>&1; then
+  printf 'agency-next: cannot determine (no OpenSpec root here — run initialize-project)\n' >&2
+  exit 2
+fi
+
+FINGERPRINT=""
+FP_BIN=$(resolve_bin no-smoke-worktree || true)
+[ -n "$FP_BIN" ] && FINGERPRINT=$("$FP_BIN" 2>/dev/null || true)
+
+SNAP_BIN=$(resolve_bin review-snapshot || true)
+[ -n "$SNAP_BIN" ] || PRECISION+=("whether the review evidence is current (review-snapshot was not found) — assuming it is would be the optimistic default")
+
+# Candidate changes: the names in `openspec list --json`.
+CANDIDATES=$(printf '%s' "$LIST" | "$JQ" -r '.changes[]?.name' 2>/dev/null)
+
+if [ -z "$CHANGE" ]; then
+  COUNT=$(printf '%s\n' "$CANDIDATES" | grep -c . || true)
+  COUNT=${COUNT:-0}
+  if [ "$COUNT" -eq 0 ]; then
+    emit "needs-decision" "NO_ACTIVE_CHANGE" "start a change" \
+      "openspec new change \"<name>\"  (then /idea or workflows/idea-to-openspec.md)" \
+      "no active OpenSpec change in this repository"
+    print_evidence "$TOP" "-" "$FINGERPRINT"
+    print_precision
+    exit 0
+  fi
+  if [ "$COUNT" -gt 1 ]; then
+    emit "needs-decision" "AMBIGUOUS_CHANGE" "name the change" \
+      "agency-next --change <name>" \
+      "$COUNT active changes exist; which one to follow is your call"
+    say "candidates:"
+    printf '%s\n' "$CANDIDATES" | sed 's/^/  - /'
+    print_evidence "$TOP" "-" "$FINGERPRINT"
+    print_precision
+    exit 0
+  fi
+  CHANGE=$(printf '%s\n' "$CANDIDATES" | head -n 1)
+fi
+
+printf '%s\n' "$CANDIDATES" | grep -qx "$CHANGE" || {
+  emit "needs-decision" "UNKNOWN_CHANGE" "name a valid change" "openspec list" \
+    "'$CHANGE' is not an active change here"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT"
+  print_precision
+  exit 0
+}
+
+PRECISION=()
+
+# --- gh availability is a declared limit, not a failure ----------------------
+REMOTE=$(git remote get-url origin 2>/dev/null || true)
+GH=""
+if [ -n "$REMOTE" ]; then
+  GH=$(command -v gh 2>/dev/null || true)
+  [ -z "$GH" ] && PRECISION+=("the PR state (gh is not installed) — the merge-ready transition cannot be confirmed")
+else
+  PRECISION+=("the PR state (this repository has no origin remote) — the merge-ready transition cannot be confirmed")
+fi
+
+# --- OpenSpec artifact state -------------------------------------------------
+APPLY=$("$OPENSPEC" instructions apply --change "$CHANGE" --json 2>/dev/null || true)
+APPLY_STATE=$(printf '%s' "$APPLY" | "$JQ" -r '.state // ""' 2>/dev/null)
+TOTAL=$(printf '%s' "$APPLY" | "$JQ" -r '.progress.total // 0' 2>/dev/null)
+COMPLETE=$(printf '%s' "$APPLY" | "$JQ" -r '.progress.complete // 0' 2>/dev/null)
+TOTAL=${TOTAL:-0}; COMPLETE=${COMPLETE:-0}
+case "$TOTAL" in ''|*[!0-9]*) TOTAL=0 ;; esac
+case "$COMPLETE" in ''|*[!0-9]*) COMPLETE=0 ;; esac
+
+STATUS=$("$OPENSPEC" status --change "$CHANGE" --json 2>/dev/null || true)
+PLANNING=$(printf '%s' "$STATUS" | "$JQ" -r '.isPlanningComplete // false' 2>/dev/null)
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "-")
+
+# --- review evidence ---------------------------------------------------------
+SNAPSHOT=""
+for candidate in "reports/review-snapshot-${CHANGE}.json" "reports/review-snapshot.json"; do
+  [ -f "$candidate" ] && { SNAPSHOT="$candidate"; break; }
+done
+SNAP_VERDICT=""
+if [ -n "$SNAPSHOT" ]; then
+  if [ -n "$SNAP_BIN" ]; then
+    if "$SNAP_BIN" --compare "$SNAPSHOT" >/dev/null 2>&1; then
+      SNAP_VERDICT="match"
+    else
+      SNAP_VERDICT="stale"
+    fi
+  else
+    # A snapshot exists but the tool that verifies it does not: reporting "current" here would
+    # be the optimistic default produced by a missing tool, so the verdict stays undetermined.
+    SNAP_VERDICT="unknown"
+    PRECISION+=("whether the review snapshot at $SNAPSHOT is still current (review-snapshot was not found) — run $SNAPSHOT's compare manually")
+  fi
+else
+  PRECISION+=("whether the review evidence is current (no review snapshot found for '$CHANGE') — assuming it is would be the optimistic default")
+fi
+
+# --- PR state ---------------------------------------------------------------
+PR_STATE=""; PR_URL=""; PR_NUMBER=""
+if [ -n "$GH" ]; then
+  PR_JSON=$("$GH" pr list --head "$BRANCH" --state open --json number,url,statusCheckRollup 2>/dev/null || true)
+  if [ -n "$PR_JSON" ] && printf '%s' "$PR_JSON" | "$JQ" -e 'length > 0' >/dev/null 2>&1; then
+    PR_NUMBER=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].number // ""' 2>/dev/null)
+    PR_URL=$(printf '%s' "$PR_JSON" | "$JQ" -r '.[0].url // ""' 2>/dev/null)
+    # A failing or unfinished check is a fact about the PR, so an unavailable rollup must not be
+    # read as green: `gh` reports an empty rollup for a branch with no CI configured at all.
+    if printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup // [] | length' 2>/dev/null | grep -qE '^0$'; then
+      PR_STATE="none"
+      PRECISION+=("whether PR #$PR_NUMBER has passing checks (it reports no checks at all)")
+    elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .conclusion // ""' 2>/dev/null | grep -qE 'FAILURE|CANCELLED|TIMED_OUT|ACTION_REQUIRED'; then
+      PR_STATE="red"
+    elif printf '%s' "$PR_JSON" | "$JQ" -r '.[0].statusCheckRollup[] | .status // ""' 2>/dev/null | grep -qE 'IN_PROGRESS|QUEUED|PENDING'; then
+      PR_STATE="pending"
+    else
+      PR_STATE="green"
+    fi
+  fi
+fi
+
+# --- decide -----------------------------------------------------------------
+# Order matters: a stale recorded evidence outranks any "tasks are done" reading, because the
+# evidence would otherwise be treated as current.
+if [ "$SNAP_VERDICT" = "stale" ]; then
+  emit "checking" "STALE_EVIDENCE" "re-review" \
+    "review-change  (then re-snapshot: review-snapshot --base <base>)" \
+    "the review snapshot no longer matches this tree — the recorded evidence describes different content"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+if [ "$SNAP_VERDICT" = "unknown" ]; then
+  emit "needs-decision" "EVIDENCE_UNVERIFIED" "verify the review evidence" \
+    "review-snapshot --compare $SNAPSHOT" \
+    "a review snapshot exists but the tool that verifies it was not found, so its currency is undetermined"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+if [ "$PLANNING" = "false" ]; then
+  emit "working" "PLANNING_INCOMPLETE" "finish the artifacts" \
+    "workflows/idea-to-openspec.md  (or /openspec-propose)" \
+    "the change's planning artifacts are not complete yet"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+if [ "$TOTAL" -gt 0 ] && [ "$COMPLETE" -lt "$TOTAL" ]; then
+  if [ "$COMPLETE" -eq 0 ]; then
+    emit "working" "READY_TO_APPLY" "implement the first task" \
+      "implement-change  (or /openspec-apply-change)" \
+      "planning is complete and no task is implemented yet ($COMPLETE/$TOTAL)"
+  else
+    emit "working" "IMPLEMENTING" "keep implementing" \
+      "implement-change  (or /openspec-apply-change)" \
+      "tasks are in progress ($COMPLETE/$TOTAL complete)"
+  fi
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+# All tasks done. From here the reading depends on evidence this command may not have.
+if [ -z "$SNAPSHOT" ]; then
+  emit "checking" "READY_TO_REVIEW" "review the implemented change" \
+    "review-change  (snapshot first: review-snapshot --base <base>)" \
+    "every task is ticked but no review evidence is recorded — treat the review as pending, never as passed"
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "-"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+if [ -n "$PR_NUMBER" ]; then
+  case "$PR_STATE" in
+    red)
+      emit "checking" "PR_OPEN_CI_RED" "fix CI" \
+        "gh pr checks $PR_NUMBER  →  fix, push, re-check" \
+        "PR #$PR_NUMBER is open but its checks are failing"
+      ;;
+    pending)
+      emit "checking" "PR_OPEN_CI_PENDING" "wait for CI" \
+        "gh pr checks $PR_NUMBER" \
+        "PR #$PR_NUMBER is open and its checks have not finished"
+      ;;
+    none)
+      emit "ready" "PR_OPEN_NO_CHECKS" "merge (your decision)" \
+        "gh pr view $PR_NUMBER  →  gh pr merge $PR_NUMBER --squash" \
+        "PR #$PR_NUMBER is open with current review evidence, but it reports no checks at all" \
+        "merging is the user's call — with no CI configured, nothing but your review stands behind it"
+      ;;
+    *)
+      emit "ready" "READY_TO_MERGE" "merge (your decision)" \
+        "gh pr merge $PR_NUMBER --squash" \
+        "PR #$PR_NUMBER is open with green checks and current review evidence" \
+        "merging is the user's call — this command does not merge, approve or close"
+      ;;
+  esac
+  print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+  say "  pr:              #$PR_NUMBER $PR_URL"
+  print_precision "${PRECISION[@]}"
+  exit 0
+fi
+
+emit "ready" "ARCHIVE_PENDING" "archive and sync (your decision)" \
+  "openspec archive \"$CHANGE\" --yes  →  validate --archived  (see workflows/release-change.md)" \
+  "every task is ticked and the review evidence is current, but the change is still active" \
+  "archiving closes the loop and is the user's call"
+print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+print_precision "${PRECISION[@]}"
+exit 0

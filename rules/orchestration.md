@@ -252,3 +252,37 @@ hermes skills list | grep openspec  # loop skills installed
 
 The agents in `agents/` are not separate processes: they are contracts that Hermes loads when the
 stage requires it (one per stage, never all at once).
+
+## State and transition (`bin/agency-next`)
+
+"Which step is next?" is **derived from files**, not from a session's memory: `bin/agency-next`
+reads the OpenSpec CLI's JSON, the git tree, the working-tree fingerprint and the review snapshot,
+and prints one public state, the precise state underneath, the single valid next transition and
+the command that performs it.
+
+| Public state | Meaning | Transition class |
+|---|---|---|
+| `working` | the machine is waiting on work; nobody must decide anything | implement / apply / fix |
+| `checking` | a gate is pending (review, QA, CI) or recorded evidence went stale | run or re-run that gate |
+| `ready` | the next decision is the **user's** | merge, archive, a scope call |
+| `needs-decision` | it cannot be determined honestly, or the human must choose | report and ask |
+
+The precise vocabulary it prints underneath (`READY_TO_APPLY`, `IMPLEMENTING`, `NEEDS_FIX`,
+`READY_TO_REVIEW`, `NEEDS_REVIEW`, `READY_TO_QA`, `QA_FAILED`, `PR_OPEN_CI_RED`,
+`PR_OPEN_CI_PENDING`, `READY_TO_MERGE`, `ARCHIVE_PENDING`, `STALE_EVIDENCE`,
+`EVIDENCE_UNVERIFIED`, `NO_ACTIVE_CHANGE`, `AMBIGUOUS_CHANGE`, `UNKNOWN_CHANGE`) is what a
+workflow needs to branch on.
+
+Rules that hold it honest:
+
+- **It is informational.** The state never blocks a stage, authorizes a merge, archives or closes
+  a change, or replaces a gate. The gates stay `reviewer`'s and `qa`'s verdicts (this file,
+  "Mandatory output contract") and `pr-review`'s formal QA gate. Treating a `ready` state as proof
+  that review or QA passed is a defect — the command's own output names the evidence it read.
+- **A missing input narrows the answer, never optimizes it.** An unavailable input (no run trace,
+  `gh` not installed, no remote, no review snapshot) is listed in the command's precision section
+  with the transitions it left undetermined. Assuming "CI green" or "review passed" because the
+  input was absent is the failure mode this refuses.
+- **One root, one change.** With several changes active it reports the ambiguity and asks for
+  `--change <name>` rather than picking one.
+- **Read-only.** It writes nothing; re-running it over an unchanged tree yields identical output.

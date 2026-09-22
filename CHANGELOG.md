@@ -11,6 +11,14 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **`bin/agency-next`** — answers "which step is next" from **files** instead of a session's
+  memory: it reads the OpenSpec CLI's JSON, the git tree, the working-tree fingerprint and the
+  review snapshot, and prints one public state (`working` / `checking` / `ready` /
+  `needs-decision`), the precise state underneath, the single valid next transition and the
+  command that performs it. A missing input **narrows** the answer — every transition it could
+  not determine is listed with the reason, so "no run trace", "`gh` not installed" or "no
+  remote" never default to the optimistic state. The state is informational: it never blocks,
+  merges, archives or replaces a gate, and a human decision is always reported as `ready`.
 - **`bin/review-snapshot`** — freezes the review candidate **before** anything reads it: base
   ref, `HEAD` for context, the working-tree content fingerprint and the diff hash. Reviewer and
   QA findings are bound to that snapshot, and `--compare` at delivery reports a `MISMATCH`
