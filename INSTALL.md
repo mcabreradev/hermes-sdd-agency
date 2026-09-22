@@ -24,7 +24,7 @@ entirely and use the defaults — they never wait for input. Flags:
 
 ```
 -p, --prefix DIR     Target Hermes home (default: $HERMES_HOME or ~/.hermes)
-    --bundles a,b,c  Only install the named bundles (default: all 12)
+    --bundles a,b,c  Only install the named bundles (default: all 15)
     --no-bundles     Process tree + skills only, skip bundles
     --dry-run        Print what would happen; write nothing
 -y, --yes            Skip the overwrite confirmation (non-interactive)

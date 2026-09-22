@@ -211,6 +211,40 @@ openspec validate "<name>" --type change --json     # no ERROR
 openspec instructions apply --change "<name>" --json  # state: ready
 ```
 
+## Example 8 — Prove it: the evidence chain in one change
+
+The agency's signature move: **nobody has to take a claim on faith**. This is the same
+change, followed by its evidence — freeze → tier → review → compare:
+
+```bash
+# 1. FREEZE — before the reviewer reads a single line, capture the candidate's identity
+review-snapshot --base origin/main --out reports/review-snapshot.json
+#    -> writes fingerprint + diffHash + base + head (content-based; a rebase that
+#       preserves content still matches, any real change trips the alarm)
+
+# 2. TIER — review depth follows the diff's shape, not anyone's mood
+review-tier --base origin/main
+#    -> tier: medium   (behavior-bearing, 316 lines, no auth/migration/security path)
+#       high would fire on >400 authored lines, or any schema/migration, auth,
+#       security-config or dependency-manifest path
+
+# 3. REVIEW — the reviewer's findings NAME the snapshot they describe, not "the code"
+#    ... (reviewer and QA report against reports/review-snapshot.json) ...
+
+# 4. COMPARE — at delivery, the tree must still BE the snapshot that was approved
+review-snapshot --compare reports/review-snapshot.json
+#    -> MATCH  (exit 0)   …or…   the working-tree content moved (exit non-zero) —
+#       the evidence belongs to different content: bounce back for re-review
+
+# anywhere along the way: what's the next step? the files answer, not a memory
+agency-next
+#    -> state: working | precise: BUILDING | transition: finish the change
+```
+
+That is the whole pitch: evidence you can re-run, a review depth you can justify, and a
+"what's next" that a dead session answers exactly like a live one. Full command reference
+with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
+
 ---
 
 ## Anti-patterns (what NOT to do)
@@ -230,6 +264,7 @@ openspec instructions apply --change "<name>" --json  # state: ready
 ## See also
 
 - `docs/sdd-feature-lifecycle.md` — the full internal path, stage by stage.
+- `docs/evidence-bins.md` — the five evidence bins, step by step with real outputs.
 - `docs/FAQ.md` — common questions and answers.
 - `README.md` — system overview, gate, install, rules.
 - `INSTALL.md` — installation and verification.
