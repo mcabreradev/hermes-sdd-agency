@@ -162,7 +162,12 @@ case "$OUT_ABS" in
       printf 'review-snapshot: cannot write the snapshot to %s\n' "$OUT" >&2
       printf '  it is inside the repository and NOT gitignored, so writing it would change the very\n' >&2
       printf '  content fingerprint it records (the delivery compare would then report a false MISMATCH).\n' >&2
-      printf '  Add to .gitignore:  %s\n' "$(printf '%s' "${OUT_ABS#$TOP_PHYS/}" | sed 's/[^/]*$/*/')" >&2
+      HINT=$(printf '%s' "${OUT_ABS#$TOP_PHYS/}" | sed 's/[^/]*$/*/')
+      case "$HINT" in
+        */*) ;;
+        *) HINT='reports/review-snapshot*.json' ;;
+      esac
+      printf '  Add to .gitignore:  %s\n' "$HINT" >&2
       printf '  or pass --out with a path outside the repository.\n' >&2
       exit 2
     fi
@@ -176,7 +181,10 @@ case "$BASE$OUT" in
   *'"'*) printf 'review-snapshot: cannot assess (a value containing a double quote cannot be recorded)\n' >&2; exit 2 ;;
 esac
 
-cat > "$OUT" <<EOF
+# The manifest must actually land: `cat > path` silently fails (rc 1, discarded) when the
+# target is a directory, which would print a full snapshot summary and exit 0 for a record
+# that does not exist — a false success the delivery compare would only discover later.
+if ! cat > "$OUT" <<EOF
 {
   "base": "$BASE",
   "head": "$HEAD_SHA",
@@ -186,6 +194,10 @@ cat > "$OUT" <<EOF
   "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
+then
+  printf 'review-snapshot: could not write the snapshot to %s (is it a directory?)\n' "$OUT" >&2
+  exit 2
+fi
 
 printf 'snapshot: %s\nbase:      %s\nhead:      %s\nfingerprint: %s\ndiffHash:  %s\nauthored:  %s\n' \
   "$OUT" "$BASE" "$HEAD_SHA" "$FINGERPRINT" "$DIFF_HASH" "$DIFF_LINES"

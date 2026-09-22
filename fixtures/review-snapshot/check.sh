@@ -142,6 +142,15 @@ else
   case_fail "unignored in-repo --out refused" "exit=$rc output=$(printf '%s' "$out" | head -n 1)"
 fi
 
+# 6e. --out naming a DIRECTORY must not report success for a record it never wrote.
+mkdir -p "$WS/outdir"
+out=$(cd "$D" && "$SNAP" --base main --out "$WS/outdir" 2>&1); rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q 'is it a directory'; then
+  case_ok "--out naming a directory is refused" "exit=2, no false success"
+else
+  case_fail "--out naming a directory is refused" "exit=$rc output=$(printf '%s' "$out" | head -n 1)"
+fi
+
 # 7. repository untouched by the tool
 before="$(cd "$D" && git status --porcelain | sort | shasum) $(cd "$D" && git rev-parse HEAD)"
 (cd "$D" && "$SNAP" --base main --out "$WS/snap2.json" >/dev/null 2>&1)

@@ -135,6 +135,19 @@ else
 fi
 assert_tier "empty diff (base is HEAD)" "<none>" "$D" --base HEAD
 
+# Uncommitted work is the most common trigger of the same shape: the diff measures committed
+# content, so an untracked change on top of the base must not be read as a tier either.
+D=$(make_repo uncommitted-work)
+( cd "$D" && mkdir -p prisma/migrations src && i=0; while [ $i -lt 300 ]; do printf 'ALTER TABLE t%s ADD COLUMN c INT;\n' "$i"; i=$((i + 1)); done > prisma/migrations/002_big.sql && printf 'export const login = () => {};\n' > src/auth.ts )
+out=$(cd "$D" && "$TIER" --base HEAD 2>&1); rc=$?
+checked=$((checked + 1))
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q 'uncommitted'; then
+  printf 'OK     %-34s names uncommitted work\n' "uncommitted work is not a tier"
+else
+  printf 'FAIL   %-34s rc=%s output=%s\n' "uncommitted work is not a tier" "$rc" "$(printf '%s' "$out" | head -n 2 | tr '\n' '|')"
+  fail=$((fail + 1))
+fi
+
 # A behavior module whose name merely starts with "document" must not be docs-like.
 D=$(make_repo doc-prefix)
 ( cd "$D" && mkdir -p src && printf 'export const render = () => {};\n' > src/document.ts && printf 'export const api = () => {};\n' > src/documents-api.ts && git add -A && git commit -q -m "feat: documents module" )

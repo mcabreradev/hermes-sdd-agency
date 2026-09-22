@@ -77,7 +77,7 @@ FILE_COUNT=$(printf '%s\n' "$PATHS" | grep -c .)
 # point (work committed onto the base branch, or a ref that already contains HEAD). Reading it
 # as `low` would hand a migration-plus-auth change the shallowest review shape.
 if [ "$FILE_COUNT" -eq 0 ] && [ "$LINES" -eq 0 ]; then
-  not_assessed "the diff is empty (base '$BASE' equals HEAD, or is not the change's fork point)"
+  not_assessed "the diff is empty: base '$BASE' equals HEAD, is not the change's fork point, or the change's work is still uncommitted (the diff measures committed content only)"
 fi
 
 REASONS=""

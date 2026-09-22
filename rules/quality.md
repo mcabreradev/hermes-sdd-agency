@@ -185,8 +185,9 @@ is therefore frozen **before** anything reads it:
   and a `--out` inside the repository that is not verifiably ignored is **refused** (exit 2,
   naming the missing entry) — writing it there would change the very content fingerprint it
   records, producing a false `MISMATCH` at delivery with nobody having touched anything.
-  `install.sh` does not carry this repo's `.gitignore` into a consuming project, so the tool
-  enforces the condition instead of relying on the consumer having copied the entry.
+  `install.sh` does not carry this repo's `.gitignore` into a consuming project, so **a project
+  adopting the agency adds `reports/review-snapshot*.json` to its own `.gitignore` before its
+  first snapshot**; the tool enforces the condition rather than relying on the entry existing.
 
 ## Review tier (depth follows the diff)
 

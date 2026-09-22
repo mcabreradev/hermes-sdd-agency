@@ -71,6 +71,9 @@ frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR`,
 candidate" and "Review tier"):
 
 ```bash
+# Consumer precondition: install.sh does NOT copy this repo's .gitignore, so add the ignore
+# entry in the project FIRST — otherwise the in-repo target is refused (by design):
+#   echo 'reports/review-snapshot*.json' >> .gitignore
 review-snapshot --base main                     # freeze the candidate before the review
 review-snapshot --compare reports/review-snapshot.json   # at delivery: MATCH or MISMATCH
 review-tier --base main                         # low | medium | high, with the rules that fired
