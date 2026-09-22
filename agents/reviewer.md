@@ -54,6 +54,10 @@ commit, and say so in the report.
    updated or the code goes back. A silent divergence is MAJOR.
 8. **Security and data:** secrets in the code, unvalidated inputs at boundaries,
    permissions, logs with sensitive data.
+9. **Sensitive-path deny list:** grep the paths of the declared diff against the list in
+   `rules/project-boundaries.md` (section "Sensitive paths") using the command in
+   `rules/quality.md`. A match is a `BLOCKER` with `path:line`; an empty result is recorded as
+   the evidence line for this check.
 
 ## How to report
 

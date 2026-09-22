@@ -1,0 +1,20 @@
+# Fixture: paths that MUST match the deny list (rules/project-boundaries.md).
+# One case per table row; check.sh asserts these against the documented pattern.
+.ssh/id_rsa
+.ssh/known_hosts
+config/.env
+config/.env.local
+config/.envrc
+.envrc.prod
+app/.env.production
+certs/server.pem
+certs/server.key
+private/keystore.p12
+private/bundle.pfx
+secrets/oauth.json
+app/secrets/oauth.json
+secrets/nested/deep.json
+.aws/credentials
+.credentials/gcloud.json
+.config/gh/hosts.yml
+Library/Keychains/login.keychain-db

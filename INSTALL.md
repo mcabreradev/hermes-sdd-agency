@@ -55,7 +55,17 @@ What it does, in order:
    works for catalog IDs or remote URLs, not local paths).
 
 `bin/` holds `no-smoke-worktree`, the content-fingerprint used by reviewer/QA/release
-stages to bind evidence to the exact tree (see `rules/quality.md` and the README).
+stages to bind evidence to the exact tree (see `rules/quality.md` and the README), and
+`skill-registry`, a read-only inventory of installed skills:
+
+```bash
+skill-registry                      # defaults to ~/.hermes/skills
+skill-registry --root <dir> --root <dir2>
+```
+
+It prints, per skill, the exact `SKILL.md` path, name, description and tags, and flags the
+frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR`,
+`MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). It writes nothing.
 
 Then restart the session, and in any project run `/agency` (or `/feature`,
 `/bugfix`, `/fix`).

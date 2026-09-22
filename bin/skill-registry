@@ -1,0 +1,268 @@
+#!/usr/bin/env bash
+# skill-registry — print the verifiable inventory of installed skills.
+#
+# Read-only diagnostic. For every SKILL.md found under the given roots it prints which
+# root it came from, the exact absolute path, name, description and tags, so the set
+# the agency resolves can be audited instead of assumed.
+#
+# It also flags the frontmatter shapes that make a skill load but mis-route:
+#   BLOCK-SCALAR         description written as a YAML block scalar (`|`, `|-`, `|2-`, `>-`, …)
+#   MULTILINE-SCALAR     description continues on indented lines, or opens a quote it never closes
+#   MISSING-DESCRIPTION  no description key, or an empty value with no continuation
+#   NO-FRONTMATTER       the file does not open with a frontmatter block
+#   UNCLOSED-FRONTMATTER the frontmatter opens with `---` and never closes
+#
+# Portability: macOS default bash 3.2, POSIX tools only (find, awk, sed, grep, sort, tr).
+# No jq, no python, no node, no package manager, no network. Writes nothing.
+#
+# Concept adapted from Gentle-AI's `skill-registry` skill (Gentleman-Programming, MIT);
+# implementation is native to this repo's bin/ pattern (bash + zero dependencies).
+set -uo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: skill-registry [--root <dir>]... [--help]
+
+  --root <dir>   directory to walk for SKILL.md files. Repeatable.
+                 Defaults to ~/.hermes/skills when no --root is given.
+                 A root that is missing or not walkable is reported and skipped.
+
+Prints one record per skill, deduplicated by resolved absolute path and in stable
+sorted order:
+
+  ROOT: <absolute root the record came from>
+  PATH: <absolute path to SKILL.md>
+  NAME: <name>
+  DESC: <description>
+  TAGS: <comma-separated tags, or ->
+  FLAG: ok | BLOCK-SCALAR | MULTILINE-SCALAR | MISSING-DESCRIPTION |
+        NO-FRONTMATTER | UNCLOSED-FRONTMATTER
+
+A summary line is written to stderr so the record stream on stdout stays pipeable.
+
+Exit status: 0 on a completed inventory (even when defects are found), 1 when no
+root could be used.
+EOF
+}
+
+ROOTS=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --root)
+      if [ "$#" -lt 2 ]; then
+        printf 'skill-registry: --root requires a directory\n' >&2
+        exit 1
+      fi
+      ROOTS+=("$2")
+      shift 2
+      ;;
+    --root=*)
+      ROOTS+=("${1#--root=}")
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'skill-registry: unknown argument %s\n' "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "${#ROOTS[@]}" -eq 0 ]; then
+  ROOTS=("$HOME/.hermes/skills")
+fi
+
+# --- helpers -----------------------------------------------------------------
+
+# Strip a surrounding pair of quotes from a scalar value.
+strip_quotes() {
+  printf '%s' "$1" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//"
+}
+
+# Collapse whitespace/newlines so a record stays one line.
+one_line() {
+  printf '%s' "$1" | tr '\n\r\t' '   ' | sed -e 's/  */ /g' -e 's/^ //' -e 's/ $//'
+}
+
+# Read the frontmatter block of a SKILL.md (between the first two `---` lines).
+# CR is stripped once here so every downstream parser sees LF-only text.
+frontmatter() {
+  awk '
+    NR == 1 && $0 !~ /^---[[:space:]]*$/ { exit }
+    NR == 1 { infm = 1; next }
+    infm && /^---[[:space:]]*$/ { closed = 1; exit }
+    infm { print }
+    END { if (infm && !closed) print "@@UNCLOSED@@" }
+  ' "$1" | tr -d '\r'
+}
+
+# Value of a top-level scalar key from frontmatter text read on stdin.
+scalar_value() {
+  local key="$1"
+  awk -v key="$key" '
+    index($0, key ":") == 1 {
+      v = substr($0, length(key) + 2)
+      sub(/^[[:space:]]+/, "", v)
+      sub(/[[:space:]]+$/, "", v)
+      print v
+      exit
+    }
+  '
+}
+
+# Does the value of a top-level key continue on indented following lines?
+# Covers `description:` with an indented block and a quote that never closes.
+desc_continues() {
+  awk '
+    index($0, "description:") == 1 { found = 1; next }
+    found {
+      if ($0 ~ /^[[:space:]]*$/) next
+      if ($0 ~ /^[[:space:]]+/) { print "yes"; exit }
+      print "no"; exit
+    }
+  '
+}
+
+# A YAML block scalar indicator: `|`, `>`, optionally with chomping (+/-) and an
+# explicit indentation indicator (digits), in either order — `|2-` and `|-2` are both legal.
+is_block_scalar() {
+  printf '%s' "$1" | grep -qE '^[|>]([0-9]+)?([-+])?$|^[|>]([-+])?([0-9]+)?$'
+}
+
+inventory_one() {
+  local root="$1" file="$2" fm flag name desc tags raw continues
+
+  if ! head -n 1 "$file" | tr -d '\r' | grep -q '^---[[:space:]]*$'; then
+    printf 'ROOT: %s\nPATH: %s\nNAME: -\nDESC: -\nTAGS: -\nFLAG: NO-FRONTMATTER\n' "$root" "$file"
+    return
+  fi
+
+  fm=$(frontmatter "$file")
+
+  if printf '%s\n' "$fm" | grep -q '^@@UNCLOSED@@$'; then
+    printf 'ROOT: %s\nPATH: %s\nNAME: -\nDESC: -\nTAGS: -\nFLAG: UNCLOSED-FRONTMATTER\n' "$root" "$file"
+    return
+  fi
+
+  flag="ok"
+
+  name=$(printf '%s\n' "$fm" | scalar_value name)
+  name=$(strip_quotes "$name")
+  [ -z "$name" ] && name="-"
+
+  raw=$(printf '%s\n' "$fm" | scalar_value description)
+  desc=$(strip_quotes "$raw")
+  continues=$(printf '%s\n' "$fm" | desc_continues)
+
+  # A block scalar is the defect this command exists to catch: presenting the
+  # literal `|` as the description is exactly the failure mode of a converted skill.
+  if is_block_scalar "$raw"; then
+    flag="BLOCK-SCALAR"
+    desc="-"
+  else
+    # A multi-line scalar is neither parsed nor silently truncated: it is flagged.
+    # Covers an indented continuation block, a quote left unclosed, and a plain
+    # scalar whose first line carries a value while the value continues below.
+    if [ "$continues" = "yes" ]; then
+      flag="MULTILINE-SCALAR"
+    elif printf '%s' "$raw" | grep -qE '^"[^"]*$|^'"'"'[^'"'"']*$'; then
+      flag="MULTILINE-SCALAR"
+    fi
+
+    if [ "$flag" = "MULTILINE-SCALAR" ]; then
+      desc="-"
+    elif [ -z "$raw" ]; then
+      flag="MISSING-DESCRIPTION"
+      desc="-"
+    fi
+  fi
+
+  tags=$(printf '%s\n' "$fm" | awk '
+    /^[[:space:]]*tags:/ {
+      v = $0
+      sub(/^[[:space:]]*tags:[[:space:]]*/, "", v)
+      gsub(/^\r/, "", v)
+      gsub(/^\[/, "", v); gsub(/\]$/, "", v)
+      gsub(/"/, "", v); gsub(/'"'"'/, "", v)
+      gsub(/[[:space:]]*,[[:space:]]*/, ", ", v)
+      sub(/[[:space:]]+$/, "", v)
+      print v
+      exit
+    }
+  ')
+  tags=$(strip_quotes "$tags")
+  [ -z "$tags" ] && tags="-"
+
+  printf 'ROOT: %s\nPATH: %s\nNAME: %s\nDESC: %s\nTAGS: %s\nFLAG: %s\n' \
+    "$root" "$file" "$name" "$(one_line "$desc")" "$tags" "$flag"
+}
+
+# --- walk --------------------------------------------------------------------
+
+usable=0
+count=0
+defects=0
+SEEN=$(mktemp "${TMPDIR:-/tmp}/skill-registry-seen-XXXXXX") || exit 1
+trap 'rm -f "$SEEN"' EXIT
+
+for root in "${ROOTS[@]}"; do
+  if [ ! -d "$root" ]; then
+    printf 'skill-registry: root not found: %s\n' "$root" >&2
+    continue
+  fi
+  # A directory that cannot be read is not a usable root: reporting "0 skills" for it
+  # would present an unreadable tree as an empty one.
+  if [ ! -r "$root" ] || [ ! -x "$root" ]; then
+    printf 'skill-registry: root not readable: %s\n' "$root" >&2
+    continue
+  fi
+
+  abs_root=$(cd "$root" && pwd -P) || {
+    printf 'skill-registry: root not resolvable: %s\n' "$root" >&2
+    continue
+  }
+  [ -z "$abs_root" ] && {
+    printf 'skill-registry: root not resolvable: %s\n' "$root" >&2
+    continue
+  }
+  usable=$((usable + 1))
+
+  # `sort` for a deterministic order; heavy irrelevant trees are pruned.
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    abs_file=$(cd "$(dirname "$file")" && pwd -P)/$(basename "$file")
+    # Overlapping or repeated roots must not double-count the same file.
+    if grep -Fxq "$abs_file" "$SEEN"; then
+      continue
+    fi
+    printf '%s\n' "$abs_file" >> "$SEEN"
+
+    record=$(inventory_one "$abs_root" "$abs_file")
+    if [ "$count" -gt 0 ]; then
+      printf '\n'
+    fi
+    printf '%s\n' "$record"
+    count=$((count + 1))
+    # Match the FIELD, never a substring of the whole record: a path may contain "FLAG: ok".
+    if ! printf '%s\n' "$record" | grep -q '^FLAG: ok$'; then
+      defects=$((defects + 1))
+    fi
+  done <<EOF
+$(find "$abs_root" \
+      \( -name node_modules -o -name .git -o -name .venv -o -name venv \) -prune -o \
+      -name SKILL.md -type f -print 2>/dev/null | LC_ALL=C sort)
+EOF
+done
+
+if [ "$usable" -eq 0 ]; then
+  printf 'skill-registry: no usable root\n' >&2
+  exit 1
+fi
+
+# Summary goes to stderr so the record stream on stdout stays pipeable.
+printf 'skill-registry: %s skills inventoried, %s flagged\n' "$count" "$defects" >&2
+exit 0

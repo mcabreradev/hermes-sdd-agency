@@ -56,6 +56,10 @@ for a decision if it is not declared), writes the changelog in the format the re
   against the reviewer/QA fingerprints recorded in earlier stages. A mismatch against those
   stages is evidence the shipped tree was validated on different content → stop and
   re-review/re-test before closing (see `rules/quality.md`).
+- Confirm the delivered shape matches the **recorded delivery strategy** (work units and the
+  authored-lines budget, `rules/coding.md` / `workflows/implement-change.md`): a `chained-pr`
+  change closes as its recorded chain of PRs, not as one merged blob, and an unrecorded
+  strategy is reported as debt rather than inferred.
 
 ## 2. OpenSpec archiving (if applicable)
 

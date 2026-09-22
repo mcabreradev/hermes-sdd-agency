@@ -49,6 +49,34 @@ Hermes imposes the process and the prohibitions.
 - The repo's state is respected: nothing is committed, nothing is pushed and the branch is not
   touched on the agent's initiative unless the workflow explicitly asks for it.
 
+## Work units and commit granularity
+
+- **One commit per coherent work unit.** A work unit is the smallest coherent behavior plus the
+  tests and docs that make it verifiable — not a checkpoint, not one commit per edited file, and
+  not one commit for the whole change unless the change is itself a single unit.
+- Each unit's commit carries its tests and documentation together with the behavior, with a
+  Conventional Commit message in the repo's history style (`git log --oneline -20`). A change is
+  never split artificially just to produce more commits.
+- **Who commits:** the user, or Hermes when the workflow asks for it. The `builder` never commits
+  on its own initiative (`agents/builder.md`); when it is not authorized to commit, it reports the
+  unit as complete with its evidence and Hermes creates the commit.
+- **The progress record** for a unit is the builder's stage-closure report (`templates/final-report.md`)
+  carrying that unit's commit hash — not a chat message and not a separate artifact.
+
+## Authored-lines budget (advisory)
+
+- About **400 authored changed lines** (additions + deletions, generated files excluded) is the
+  advisory planning heuristic for one reviewable delivery. It is **not** a hard cap, an
+  automatic stop, a rework trigger or an acceptance criterion.
+- It never justifies deleting spaces, blank lines or comments for cosmetic savings, omitting or
+  weakening tests, minifying, adding gratuitous abstractions, or splitting a unit artificially.
+- If the correct, clear solution naturally exceeds it, state briefly why and continue — no
+  size-only rework loop.
+- When a change's running count crosses the budget, the delivery strategy is **chosen and
+  recorded** (`single-pr` / `chained-pr` / `split-change`) per
+  `workflows/implement-change.md` — the delivered shape is a decision on record, not an accident
+  of how many commits accumulated.
+
 ## Dependencies and configuration
 
 - Every new dependency is justified in the change's `design.md` (what problem it solves,

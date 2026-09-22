@@ -47,6 +47,35 @@ knowledge is useful for only one project, it lives in that project.
 11. **Hermes never stores client or product requirements in global agent files**
     (rules, workflows, agents, templates, global memory).
 
+## Sensitive paths (deny list)
+
+Some paths are sensitive by nature — credentials, keys, tokens — and no agent, bin or
+workflow may read, print, copy into a report or trace, or commit them. The list is
+**enumerated, never inferred**: an agent consults these literal patterns instead of exercising
+judgment, and no agent may narrow the list on its own initiative (extending it is Hermes' call).
+
+| Pattern | Covers |
+|---|---|
+| `~/.ssh/*` | SSH private keys and config |
+| `**/*.pem`, `**/*.key`, `**/*.p12`, `**/*.pfx` | Private keys and certificates |
+| `**/.env*` | Environment files (`.env`, `.env.local`, …) |
+| `**/secrets/*` | Secret stores checked into a tree |
+| `~/.credentials/*` | Generic credential stores |
+| `~/.aws/credentials` | Cloud provider credentials |
+| `~/.config/gh/hosts.yml` | GitHub CLI auth tokens |
+| `~/Library/Keychains/*` | macOS keychain files |
+
+Rules that hold the list honest:
+
+- **A deny-listed path never appears in a report, a commit or a trace.** If a task seems to
+  need it, the agent refuses the content, names the path it refused, and continues with the
+  rest of the brief — the refusal is reported, never silently absorbed.
+- **Enforcement is on evidence, not intent** (`rules/quality.md`): the `reviewer` greps the
+  paths of the declared diff against this list and reports a match as a `BLOCKER` with
+  `path:line`. An empty grep result is recorded as the evidence line for the check.
+- **The list is a floor, not a ceiling.** Judgment still applies to a sensitive-looking path
+  that is not listed; the enumerated list exists so the common classes never depend on it.
+
 ## How to resolve and verify the root
 
 `openspec` acts on the `openspec/` **closest to the cwd**: if the cwd is the wrong one, the
