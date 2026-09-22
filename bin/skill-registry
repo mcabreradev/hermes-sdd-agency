@@ -127,10 +127,25 @@ desc_continues() {
   '
 }
 
-# A YAML block scalar indicator: `|`, `>`, optionally with chomping (+/-) and an
+# A YAML block/folded scalar indicator: `|`, `>`, optionally with chomping (+/-) and an
 # explicit indentation indicator (digits), in either order — `|2-` and `|-2` are both legal.
+# The indicator alone is NOT the defect: an indicator with an indented body is legal YAML
+# whose value is the text. Only an indicator with no body makes the loader present the
+# literal indicator as the description — the converted-persona failure mode.
 is_block_scalar() {
   printf '%s' "$1" | grep -qE '^[|>]([0-9]+)?([-+])?$|^[|>]([-+])?([0-9]+)?$'
+}
+
+# First indented line of a block/folded scalar's body, after its `description:` header.
+scalar_body_first() {
+  awk '
+    index($0, "description:") == 1 { found = 1; next }
+    found {
+      if ($0 ~ /^[[:space:]]*$/) next
+      if ($0 ~ /^[[:space:]]+/) { sub(/^[[:space:]]+/, ""); sub(/[[:space:]]+$/, ""); print; exit }
+      exit
+    }
+  '
 }
 
 inventory_one() {
@@ -158,11 +173,17 @@ inventory_one() {
   desc=$(strip_quotes "$raw")
   continues=$(printf '%s\n' "$fm" | desc_continues)
 
-  # A block scalar is the defect this command exists to catch: presenting the
-  # literal `|` as the description is exactly the failure mode of a converted skill.
+  # A block/folded scalar indicator is the converted-persona defect ONLY when it has no
+  # body: that is when the loader presents the literal `|`/`>` as the description. An
+  # indicator with an indented body is legal YAML — its description is that body.
   if is_block_scalar "$raw"; then
-    flag="BLOCK-SCALAR"
-    desc="-"
+    body_first=$(printf '%s\n' "$fm" | scalar_body_first)
+    if [ -z "$body_first" ]; then
+      flag="BLOCK-SCALAR"
+      desc="-"
+    else
+      desc="$body_first"
+    fi
   else
     # A multi-line scalar is neither parsed nor silently truncated: it is flagged.
     # Covers an indented continuation block, a quote left unclosed, and a plain
