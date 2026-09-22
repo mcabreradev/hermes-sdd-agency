@@ -40,6 +40,11 @@ reports of each stage.
 <summary output>
 ```
 
+<!-- Each stage's trust depth (rules/orchestration.md, "Trust vocabulary"): how much of the
+     claim Hermes re-verified — verified (re-ran in the repo) / partially_verified (gap
+     declared) / self_reported (not re-verified yet) / blocked. A critical stage (review / QA
+     / release) never closes on self_reported alone. -->
+
 <!-- If the run is traced (runId in the preflight), give the run log reference:
 
      bin/run-trace --file reports/<runId>.jsonl
