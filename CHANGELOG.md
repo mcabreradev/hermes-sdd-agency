@@ -50,7 +50,7 @@ coherent, reviewable increments of the system.
   `docs/sdd-feature-lifecycle.md` with an image that renders in GitHub and in
   any viewer. The generator script is the single source of truth (mermaid's
   `<foreignObject>` output is stripped by GitHub, so the flow is drawn as pure
-  SVG text); `docs/agency-flow.mmd` remains as the editable source. (docs(agency-flow): replace stale mermaid lifecycle with rendered SVG)
+  SVG text); `docs/agency-flow.mmd` remains as the editable source.
 - **`test-driven-development` by hard rule at the build stage** + **`domain-modeling`
   (DDD) when the domain merits it** — every behavior-bearing piece of work — backends,
   business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR);
