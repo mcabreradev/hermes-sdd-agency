@@ -66,12 +66,34 @@ coherent, reviewable increments of the system.
   `document-diataxis` (coverage map), `security-evidence-first` (attacker·boundary·impact·challenge).
 - **`install.sh`** now copies `bin/` into the target home (`PROCESS_DIRS` + INSTALL/README sync).
 
+### Added
+
+- **`workflows/pr-review.md`** — post-open code review stage (`pr-review` agent + domain
+  personas by diff: `backend-developer`/`fullstack-developer`/`typescript-pro`/`code-reviewer`/
+  `security-auditor`), builder↔reviewer alignment loop (max 3 cycles), inline GitHub comments.
+  Registered as `/pr-review`, in the `autonomous-change` closure, and in the orchestration
+  sequence. `pr-review` never merges.
+
 ### Changed
 
 - `workflows/qa-change.md` — report-only mode (`qa-only`): same matrix, no fix loop, with a
   health baseline and the worktree fingerprint; verdict bar unchanged.
 - `workflows/release-change.md` — Diataxis coverage map + doc/architecture-diagram drift
   check + changelog sell-test, and the closed-tree fingerprint comparison against earlier stages.
+- **`pr-review` now requires a formal QA gate before closure** — review approval + green CI
+  are no longer enough to close a PR as QA-confirmed. A `qa-expert` executes the spec
+  scenarios against the running app + real DB (`qa-change`); `pass` is mandatory; post-merge
+  report-only QA recommended for data-layer/runtime/core-dep changes. Wired into
+  `workflows/pr-review.md`, `skill-bundles/pr-review.yaml` and the orchestration skill.
+
+### Fixed
+
+- **Repo→live sync no longer wipes curated skill content.** A `cp` from a repo worktree
+  (thin ~169-line export of `hermes-sdd-orchestration`) overwrote the live `~/.hermes` copy
+  (300+ lines carrying the curated pitfalls) and destroyed that knowledge. Guard written into
+  `sdd-agency-maintenance`: compare source/target line counts before any `cp` into `~/.hermes`,
+  re-apply a single edit with `patch` when the live copy is richer, and verify the count
+  before AND after a sync. The live copy was restored and kept richer.
 
 The skills and rule concepts were adapted from [garrytan/gstack](https://github.com/garrytan/gstack)
 (MIT); only host-agnostic ideas were distilled in, the Claude-specific runtime was left out.
