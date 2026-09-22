@@ -11,6 +11,21 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **Sensitive-path deny list** (`rules/project-boundaries.md`) — the enumerated classes of
+  credentials, keys and token files that no agent, bin or workflow may read, print, copy into a
+  report or commit. Enforced on evidence, not intent: the `reviewer` greps the declared diff's
+  paths against the list (`rules/quality.md`) and a match is a `BLOCKER`.
+- **`bin/skill-registry`** — read-only inventory of installed skills: exact `SKILL.md` path,
+  name, description and tags per skill, plus explicit flags for the frontmatter defects that make
+  a skill load but mis-route (`BLOCK-SCALAR`, `MISSING-DESCRIPTION`, `NO-FRONTMATTER`,
+  `UNCLOSED-FRONTMATTER`). Audits the set the agency actually resolves instead of assuming it.
+- **Work units and the authored-lines budget** (`rules/coding.md`) — one commit per coherent work
+  unit carrying its tests and docs, and an *advisory* ~400-line heuristic for one reviewable
+  delivery that never justifies cosmetic deletions, weakened tests or artificial splits. When a
+  change crosses it, the delivery strategy (`single-pr` / `chained-pr` / `split-change`) is
+  chosen and **recorded** (`workflows/implement-change.md`), so the delivered shape is a decision
+  on record instead of an accident of how many commits accumulated.
+
 - **`test-driven-development` by hard rule at the build stage** + **`domain-modeling`
   (DDD) when the domain merits it** — every behavior-bearing piece of work — backends,
   business logic, API endpoints, bug fixes — is written test-first (RED→GREEN→REFACTOR);
@@ -41,6 +56,11 @@ coherent, reviewable increments of the system.
 
 The skills and rule concepts were adapted from [garrytan/gstack](https://github.com/garrytan/gstack)
 (MIT); only host-agnostic ideas were distilled in, the Claude-specific runtime was left out.
+
+The sensitive-path deny list, the skill registry and the work-unit/budget guidance were adapted
+from [Gentleman-Programming/gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (MIT)
+under the same rule: only host-agnostic ideas, no binary, no runtime and no third-party state
+machine ported.
 
 
 ## [0.1.0] - 2026-09-17

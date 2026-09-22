@@ -68,6 +68,34 @@ git diff --stat
 - [ ] Repo gate green (real, run; if it could not be run ⇒ `blocked`).
 - [ ] Diff limited to the declared scope; no collateral changes.
 - [ ] Specs and `design.md` intact (if the code diverged from the design, it is reported).
+- [ ] Each coherent work unit closed with its own commit carrying its tests and docs
+      (`rules/coding.md`: work units and commit granularity).
+- [ ] Authored-lines budget checked (`git diff --numstat <base>...HEAD`, generated files
+      excluded) and, if the change crossed the advisory ~400-line budget, the **delivery
+      strategy is recorded** — see the section below.
+
+## 4. Delivery strategy when the budget is crossed
+
+The advisory budget (`rules/coding.md`) is only useful if crossing it produces a *decision*.
+Before opening the **next** PR of a change whose running authored-line count has crossed it:
+
+1. Choose one strategy and **write it into the change's artifacts** (`design.md` or
+   `tasks.md`, or the report when the change has neither room):
+
+   | Strategy | When | Shape |
+   |---|---|---|
+   | `single-pr` | the excess is small and the reviewer accepts one larger diff | one PR, the choice recorded |
+   | `chained-pr` | the change is one behavior delivered in slices | a chain of PRs, each based on the previous slice; slice boundaries (which commits each PR holds) recorded |
+   | `split-change` | the excess is independent work, not a slice | stop; the excess becomes its own OpenSpec change per `rules/openspec.md` |
+
+2. For `chained-pr`, cut the slices along the work units already committed — never re-split the
+   work to fit a number, and never deliver a slice whose tests do not pass on its own base.
+3. Record the strategy and the slice boundaries **before** the PR is opened, so the delivered
+   shape is inspectable in review. A `single-pr` choice is a valid outcome; an *unrecorded*
+   choice is the defect this step exists to prevent.
+
+**Scope creep is not a delivery strategy.** Work that the change did not authorize is
+`split-change` (reported, not absorbed), per `rules/coding.md` and `rules/openspec.md`.
 
 ## Output
 
