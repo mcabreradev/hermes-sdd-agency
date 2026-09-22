@@ -13,4 +13,4 @@
 
 - [x] 3.1 `openspec validate "skill-registry-followup" --type change --json` with `failed == 0`. Verifies: the command's JSON totals quoted
 - [x] 3.2 `bash -n` on the bin and the new suite; `bin/no-smoke-worktree` still exits 0; and the REAL tree no longer flags `context-architecture` when run against `~/.hermes/skills`. Verifies: `bin/skill-registry --root ~/.hermes/skills 2>/dev/null | grep -c "context-architecture" ; grep -A1 FLAG` reports the skill WITHOUT `BLOCK-SCALAR`
-- [ ] 3.3 Tick every task against its own verification, then archive + sync as the follow-up PR (same standing rule as the previous chain). Verifies: `openspec instructions apply --change "skill-registry-followup" --json` with `remaining == 0` after archiving
+- [x] 3.3 Tick every task against its own verification, then archive + sync as the follow-up PR (same standing rule as the previous chain). Verifies: `openspec instructions apply --change "skill-registry-followup" --json` with `remaining == 0` after archiving
