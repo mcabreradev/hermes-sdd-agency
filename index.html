@@ -145,11 +145,6 @@
   .stat{background:var(--surface);padding:22px 18px;text-align:left}
   .stat .num{font-family:var(--font-display);font-size:34px;font-weight:700;letter-spacing:-.02em;color:var(--accent);line-height:1;display:block}
   .stat .lbl{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px;letter-spacing:.04em;text-transform:uppercase}
-  /* shipped list */
-  .shipped{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
-  .ship{border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;background:var(--surface);font-size:13.5px;color:var(--text-dim)}
-  .ship .pr{font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:.04em}
-  .ship .pr b{color:var(--accent)}
   /* footer */
   footer{padding:40px 0 60px;border-top:1px solid var(--border)}
   .foot-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:baseline}
@@ -204,7 +199,6 @@
         <a href="#commands">Commands</a>
         <a href="#usage">Usage</a>
         <a href="#real-world">Real world</a>
-        <a href="#shipped">Shipped</a>
         <a href="#faq">FAQ</a>
         <a href="#advanced">Advanced</a>
         <a href="#rules">Principles</a>
@@ -253,26 +247,6 @@
       <div class="stat"><span class="num">15</span><span class="lbl">slash-command bundles</span></div>
       <div class="stat"><span class="num">5</span><span class="lbl">evidence bins</span></div>
       <div class="stat"><span class="num">26</span><span class="lbl">PRs merged, loop intact</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="shipped">
-  <div class="wrap">
-    <div class="sec-label">SHIPPED THIS MONTH</div>
-    <h2>The agency ate its own dogfood — 26 PRs and counting.</h2>
-    <p class="sec-intro">Every line of this repo went through the loop it enforces: spec first, adversarial review, evidence bound to content. These are the recent ones — all merged by the same process that ships your features.</p>
-    <div class="shipped">
-      <div class="ship"><span class="pr">#26</span> — docs: install guide rewrite + 6 real-world use cases on the landing</div>
-      <div class="ship"><span class="pr">#25</span> — docs: README + landing relaunch — badges, 60-skill catalog, dogfood section</div>
-      <div class="ship"><span class="pr">#24</span> — chore: archive skill-registry-followup, sync delta spec (6/6 validations)</div>
-      <div class="ship"><span class="pr">#23</span> — docs: five evidence bins — guide, landing, FAQ, dropped stale run-trace</div>
-      <div class="ship"><span class="pr">#22</span> — fix: skill-registry flags only content-less scalars — false positive killed, suite added</div>
-      <div class="ship"><span class="pr">#20</span> — feat: agency-next — the state machine that reads the next step from files</div>
-      <div class="ship"><span class="pr">#19</span> — feat: evidence bound to frozen candidate + review depth from risk</div>
-      <div class="ship"><span class="pr">#18</span> — feat: sensitive-path deny list, skill registry, work-unit commits</div>
-      <div class="ship"><span class="pr">#15</span> — feat: formal QA gate before any PR closes</div>
-      <div class="ship"><span class="pr">#17</span> — docs: rendered agency-flow diagram replacing stale mermaid</div>
     </div>
   </div>
 </section>
