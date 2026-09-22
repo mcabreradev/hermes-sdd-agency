@@ -120,8 +120,8 @@ git diff --numstat main...HEAD | awk '{a+=$1; d+=$2} END {print "added="a" delet
 git diff --numstat main...HEAD -- openspec/changes/agency-guardrails/ | awk '{a+=$1} END {print "change-artifact lines="a}'
 ```
 
-At the review stage the tree measured **1,065 added / 2 deleted = 1,067 authored lines**, of
-which **452** are the change's own planning artifacts. It is delivered as one PR by explicit
+At the review stage the tree measured **1,120 added / 2 deleted authored lines** across **33
+files**, of which **482** are the change's own planning artifacts. It is delivered as one PR by explicit
 decision, not by momentum:
 
 - The three work units are already separate, reviewable commits (`feat(rules): sensitive-path
