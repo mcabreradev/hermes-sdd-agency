@@ -70,7 +70,7 @@ fi
 
 printf 'run: %s\nchange: %s\nentries: %s\n' "${RUN:-unknown}" "${CHANGE:-unknown}" "$TOTAL"
 printf '\nstages:\n'
-jq -r '"  [\(.stage // "?")] kind=\(.kind // "closed") status=\(.status // "?") at=\(.timestamp // "?") blockers=\((.blockers // []) | tojson) assumed=\((.decisions // []) | tojson)"' "$FILE"
+jq -r '"  [\(.stage // "?")] kind=\(.kind // "closed") status=\(.status // "?") trust=\(.trust // "?") at=\(.timestamp // "?") blockers=\((.blockers // []) | tojson) class=\([.blockers[]?.class // "?"] | tojson) assumed=\((.decisions // []) | tojson)"' "$FILE"
 printf '\nlast:\n'
 jq -rs '.[-1] | "  stage: \(.stage // "?")  kind: \(.kind // "closed")  status: \(.status // "?")"' "$FILE"
 printf '  resume: continue-change reads this entry to resolve the exact stage to resume from (trace is the source of truth; task checkboxes are the cross-check)\n'
