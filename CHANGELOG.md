@@ -11,6 +11,17 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **`hermes-sdd-orchestration` skill back in sync** — the public repo mirror now carries
+  the full live skill: every session-born pitfall (merger one-liner, truncated-result
+  recovery, sibling-noise tripwire, kanban gating, archive reconciliation order) and all
+  six references, including the two live-only guides. The parallelization section now
+  teaches `bin/change-collision` verdicts (`parallelizable` / `collision` /
+  `cannot assess`, high-risk families) instead of the old union-of-paths rule, and the
+  loop section teaches blocker classes (`retryable` / `technical` / `decision`,
+  unclassified → `decision`) plus the trust vocabulary (`verified` /
+  `partially_verified` / `self_reported` / `blocked`) with the hard gate: review, QA and
+  release never close on `self_reported`.
+
 - **`bin/change-collision`** — decides change ordering from the file sets instead of
   by hand: `--base <ref> --a <refA> --b <refB>` prints `parallelizable` (no path
   overlap, no shared high-risk family) / `collision` (overlapping paths, or both

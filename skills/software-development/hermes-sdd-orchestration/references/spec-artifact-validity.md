@@ -40,6 +40,18 @@ validate it, then carry it into the delta as `## MODIFIED`. Never invent a capab
 token. `validate` does not verify MODIFIED targets — that surfaces only as an
 `ℹ [INFO] ... Archive would refuse this delta` line.
 
+## `## MODIFIED` replaces the whole block — carry every scenario forward
+
+A `## MODIFIED` requirement replaces the entire requirement block in the main spec. The delta must
+reproduce **all** scenarios the target requirement currently has, not only the ones you are adding or
+changing. Drop one and `openspec validate <change>` fails with an ERROR naming it:
+`MODIFIED "<req>" omits scenario(s) the current spec still has: "<name>". Copy them into the MODIFIED
+block (a MODIFIED requirement replaces the whole block, so archive refuses to drop them).`
+
+Before writing the delta, `grep '^#### Scenario:'` the target `openspec/specs/<cap>/spec.md` for that
+requirement, copy its full list verbatim, then layer your changes on top — do not rewrite the
+requirement from scratch with only your new scenarios.
+
 ## A valid change is not an implemented change
 
 `validate` only says the artifact is well-formed. The gate for `implement-change` is
