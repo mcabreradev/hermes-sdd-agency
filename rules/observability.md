@@ -22,7 +22,8 @@ envelope does not carry.
 | `status` | the envelope status vocabulary: `done` `blocked` `failed` `needs-context`; `approved` `changes-requested` (reviewer); `pass` `fail` (qa) |
 | `filesCreated` / `filesModified` | absolute paths (or `[]`) |
 | `evidence` | command + output, or `path:line` |
-| `blockers` | what stops the run and the exact decision needed (or `[]`) |
+| `blockers` | what stops the run and the exact decision needed, each with its `class` (`retryable` | `technical` | `decision` — see `rules/orchestration.md`, "Blocker classes"); or `[]` |
+| `trust` | the trust level of the validated outcome: `verified` · `partially_verified` · `self_reported` · `blocked` (assigned by Hermes, never self-declared — `rules/orchestration.md`, "Trust vocabulary") |
 | `decisions` | recorded decisions and `ASSUMED` items (or `[]`) |
 | `nextRecommendedStep` | a proposal only; Hermes decides the transition |
 

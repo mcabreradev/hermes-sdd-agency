@@ -69,7 +69,7 @@ Semantics:
 | `projectRoot` | absolute path of the project that was worked on |
 | `filesCreated` | list of absolute paths created (or `[]`) |
 | `filesModified` | list of absolute paths modified (or `[]`) |
-| `blockers` | what prevents finishing and **what decision** is needed; `[]` if there are none |
+| `blockers` | what prevents finishing and **what decision** is needed, each with its **class** (see "Blocker classes" below); `[]` if there are none |
 | `nextRecommendedStep` | proposed next step; a **proposal**, not an order: Hermes decides |
 | `evidence` | command executed + relevant output; `path:line` of what is claimed |
 | `openQuestions` | doubts that change design, scope or business; `[]` if there are none |
@@ -91,6 +91,24 @@ Contract rules:
 - The long reports (`templates/review-report.md`, `templates/qa-report.md`,
   `templates/final-report.md`) are **artifacts** of the project; the structured block is the
   return message, and its `evidence` field cites the artifact path.
+
+## Blocker classes
+
+Every blocker carries a **class** that selects the allowed response. The response is a
+rule, not a re-reading: the same "blocked" status must not behave differently depending on
+how the situation is summarized.
+
+| Class | What it is | Allowed response |
+|---|---|---|
+| `retryable` | recoverable defect (failed test, implementation error) | bounded retry per the Retry rules table; the retry **consumes an iteration** of the stage's limit |
+| `technical` | the defect contradicts the spec/design, or a change-change conflict | no circular retry: another agent, back a stage, or stop (two-failures rule) |
+| `decision` | data-model change, public contract, architecture choice, cost, business rule | the **human** decides: options + recommendation + impact; no work that depends on it advances while unanswered |
+
+- **Unclassified defaults to `decision`** (recorded as `class: decision`). A blocker
+  recorded without a class is treated as `decision` — the human is consulted, never
+  silently retried or skipped by omission.
+- In the trace (`rules/observability.md`) the same `class` values are recorded per
+  blocker, so the audit surface can reproduce what response the rule selected.
 
 ## Workflow lifecycle
 
@@ -144,6 +162,29 @@ Before advancing to the next stage, Hermes verifies:
    project remained in `~/.hermes/**`.
 
 Failed validation ⇒ the output is not accepted and "Retry rules" apply.
+
+### Trust vocabulary
+
+After validation, Hermes assigns the outcome a **trust level** from this vocabulary. The
+measurement is Hermes's, never the agent's: an agent does not self-declare how much of its
+own report was re-verified (an agent judging its own work is the failure this prevents).
+
+| Level | Meaning |
+|---|---|
+| `verified` | Hermes re-ran the claimed gate/command in the repo with the same result |
+| `partially_verified` | only part of the claim was re-verified — **the unverified part is declared** |
+| `self_reported` | the outcome rests on the agent's report alone (nothing re-verified yet) |
+| `blocked` | a blocker is open; no dependent stage advances |
+
+The assigned level is **recorded**: in the stage's report and, when the run is traced
+(`rules/observability.md`), in the trace entry — so what Hermes actually validated is
+auditable after the fact.
+
+**Critical stages never close on `self_reported`.** The review, QA and release stages
+close only when the decisive claim has been re-verified in the repo (`verified`, or
+`partially_verified` with the unverified part declared). A `self_reported` gate is never
+the last word for a critical stage: Hermes re-runs the claim (or declares the part it
+cannot verify) before the stage advances.
 
 ## Retry rules
 
