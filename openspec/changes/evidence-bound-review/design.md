@@ -91,6 +91,22 @@ rule is that only `reviewer` and `qa` may block, and `pr-review` owns the formal
 - **Consequences:** the exit contract distinguishes "assessed" from "not assessed", and the spec
   carries a scenario for it.
 
+## Delivery strategy (recorded per `workflows/implement-change.md`)
+
+**Choice: `chained-pr`.**
+
+This change is delivered as a chain on top of `agent/agency-guardrails` (PR #18), not as an
+independent PR: the two changes touch the same process files (`rules/quality.md`,
+`workflows/review-change.md`, `agents/reviewer.md`, `README.md`, `INSTALL.md`, `CHANGELOG.md`),
+and the repo's orchestration rule is that changes with overlapping file sets are **serialized,
+never run in parallel** — two builders on one file set clobber each other's half-applied edits.
+The branch is therefore based on the guardrails branch, and this PR's base ref is that branch;
+when guardrails merges, this slice rebases onto `main` and its base retargets.
+
+`split-change` was rejected: the frozen-candidate and tier work is the second half of one
+decision (adopt Gentle-AI's evidence discipline), and it has no lifecycle of its own.
+`single-pr` was rejected: it would duplicate the guardrails diff into this PR.
+
 ## Risks / Trade-offs
 
 - **Risk:** an extra manual step (take the snapshot) gets skipped. **Mitigation:** the
