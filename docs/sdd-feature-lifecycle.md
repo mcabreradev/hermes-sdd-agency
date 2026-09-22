@@ -204,6 +204,11 @@ executing them (edge cases and the full user path):
   `review-snapshot --compare` must report `MATCH` against the frozen candidate (a `MISMATCH`
   bounces the change back for re-review), and the working-tree fingerprint
   (`bin/no-smoke-worktree`) anchoring the report matches the tree being merged.
+- **Trace closed** — each stage recorded its trace entry (`reports/<runId>.jsonl`,
+  gitignored by design so the growing log never changes the fingerprint);
+  `bin/run-trace` emits the audit summary (stages, status, blockers, ASSUMED) and the
+  resume point. The trace is the source of truth for resume and audit
+  (`rules/observability.md`).
 - `git status --porcelain` clean (no unexpected changes or temp files).
 
 ---

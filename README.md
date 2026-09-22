@@ -84,7 +84,7 @@ One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the
 
 Hermes is the only orchestrator: it decides which stage runs, delegates one bounded task per agent, validates every output in the real repo, applies retries and blockers, asks the human on ambiguity, and closes with a final report. Order: `initialize-project → discovery → propose → validate → plan → apply → verify → release`.
 
-## 🔗 The evidence chain (5 bins)
+## 🔗 The evidence chain (6 bins)
 
 One principle: **an agent's report is a self-report, not a fact.** Five small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
 
@@ -94,6 +94,7 @@ One principle: **an agent's report is a self-report, not a fact.** Five small co
 | `review-snapshot` | Which candidate was frozen before the review? | **before** the reviewer/QA read a thing |
 | `review-tier` | How deep should this review go? | from the diff itself, before the review |
 | `agency-next` | What is the single next step, and why? | every checkpoint, from files alone |
+| `run-trace` | What happened in this run — and where did it stop? | resume / audit: reads `reports/<runId>.jsonl` |
 | `skill-registry` | Which skills actually resolve — and which mis-route? | after any install/sync |
 
 - **`no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked + ignored). Reviewer, QA and release record it; a mismatch at delivery means the evidence describes content that no longer exists. Survives rebase/amend; changes when any source changes.
