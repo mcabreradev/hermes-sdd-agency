@@ -64,6 +64,6 @@ properties are unchanged.
 
 ## Delivery strategy (recorded per rules/coding.md)
 
-Measured against `main`: ~240 authored lines (two rule edits, two new specs, one modified
-spec, the reader + fixture updates). Crosses the advisory ~400? **No** — under the
-budget; `single-pr` is the natural shape.
+Measured against `main`: **341 authored lines** (`git diff --numstat main...HEAD` after
+the implementation commits). Under the advisory ~400-line budget; `single-pr` is the
+natural shape.

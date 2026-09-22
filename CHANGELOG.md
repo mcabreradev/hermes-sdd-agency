@@ -11,6 +11,17 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **Blocker classes + trust vocabulary** (`rules/orchestration.md`) — every blocker
+  now carries a `class` that picks the allowed response by rule, not by re-reading the
+  situation: `retryable` (bounded retry, consumes an iteration) · `technical` (no
+  circular retry: back a stage or stop) · `decision` (the human decides, options +
+  recommendation + impact). An unclassified blocker defaults to `decision` — the human
+  is never skipped by omission. And every validated outcome gets a **trust level**
+  (`verified` / `partially_verified` / `self_reported` / `blocked`) assigned by Hermes,
+  never self-declared, recorded in the report and the trace. Hard rule: critical stages
+  (review / QA / release) never close on a self-reported gate. Trace schema and
+  `bin/run-trace` surface both fields.
+
 - **`bin/run-trace` + `rules/observability.md`** — the loop now keeps a structured,
   machine-readable memory of each run: every stage records its closure as a trace
   entry (`reports/<runId>.jsonl`, NDJSON, gitignored so the growing log can never
