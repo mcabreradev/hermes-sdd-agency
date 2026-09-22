@@ -162,11 +162,15 @@ fi
 # --- an in-repo default snapshot path + a remote + gh present, with NO PR open -------------
 # This is the shape that made an EMPTY precision array reachable (bash 3.2 turns `"${arr[@]}"`
 # on an empty array under `set -u` into a fatal error), so it must assert exit 0 explicitly.
+# It MUST have an origin remote: without one agency-next takes the no-remote branch and never
+# reaches the gh/rollup code, which would make the phantom-bullet case below structurally
+# incapable of failing — a test that passes with the bug present.
 D=$(make_repo ready-no-pr)
 ( cd "$D" && "$OPENSPEC" init --tools hermes >/dev/null 2>&1 )
 scaffold_planned "$D" "solo-change" >/dev/null 2>&1
 tick_all "$D" "solo-change"
 ( cd "$D" && printf 'reports/\n' > .gitignore && printf 'work\n' > feature.txt && git add -A && git commit -q -m "feat: work" )
+( cd "$D" && git remote add origin git@github.com:mcabreradev/hermes-sdd-agency.git 2>/dev/null || true )
 ( cd "$D" && "$HERE/../../bin/review-snapshot" --base main --out reports/review-snapshot.json >/dev/null 2>&1 )
 out=$(cd "$D" && "$NEXT" --change "solo-change" 2>&1); rc=$?
 checked=$((checked + 1))
