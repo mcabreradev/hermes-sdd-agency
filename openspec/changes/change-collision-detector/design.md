@@ -61,5 +61,16 @@ with scripted file sets) and assert the three verdicts — that exercises the re
 
 ## Delivery strategy
 
-Measured after implementation; expect ~200-250 authored lines (bin ~110, fixture ~120,
-rule edit + docs). Under the advisory budget; `single-pr`.
+Measured after implementation: **463 authored lines** (`git diff --numstat main...HEAD`),
+over the advisory ~400-line budget. Strategy: **`single-pr`**.
+
+- **Why `single-pr`:** the excess is one coherent capability — a 130-line read-only bin,
+  a 130-line throwaway-repo fixture suite, the delta spec + design + tasks (~150), and
+  ~50 lines of rule/docs wiring. There are no independent slices: the bin is useless
+  without the rule, the fixture tests the bin, the spec pins both. Splitting would turn
+  one reviewable change into reviewable stubs.
+- **Why not `chained-pr`:** no slice is independently shippable — the rule references
+  the bin, the fixture exercises it, the spec owns the contract.
+- **Why not `split-change`:** every piece belongs to the same capability
+  (`parallel-execution`); nothing here is independent work deserving its own OpenSpec
+  change.
