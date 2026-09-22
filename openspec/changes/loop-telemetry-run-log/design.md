@@ -145,3 +145,19 @@ beyond what the repo already has (bash + OpenSpec CLI).
   boundaries at the cost of one id per run. Trace not versioned — accepted because the audit
   summary it powers is reproducible on demand and the fingerprint stability is worth more
   than versioning a mutating log.
+
+## Delivery strategy (recorded per rules/coding.md)
+
+Measured `git diff --numstat main...HEAD`: **422 authored lines**, over the advisory
+~400-line budget for one reviewable delivery. Strategy: **`single-pr`**.
+
+- **Why `single-pr`:** the excess is mechanical — one short rule, one 77-line reader
+  bin, one 97-line fixture suite, and 8 near-identical one-block workflow inserts
+  (~15 added lines each). The diff is one behavior (the run trace); reviewers read it
+  as a whole and the fixture suite pins its contract.
+- **Why not `chained-pr`:** there are no independent slices — the bin is useless
+  without the rule, the fixtures test the bin, and the workflows consume both. A chain
+  would split one coherent change into reviewable stubs.
+- **Why not `split-change`:** every piece is the same capability
+  (`observability/run-trace` + `autonomy/park-and-resume`); nothing here is
+  independent work that deserves its own OpenSpec change.

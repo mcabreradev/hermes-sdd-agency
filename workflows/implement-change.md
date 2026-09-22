@@ -97,6 +97,21 @@ Before opening the **next** PR of a change whose running authored-line count has
 **Scope creep is not a delivery strategy.** Work that the change did not authorize is
 `split-change` (reported, not absorbed), per `rules/coding.md` and `rules/openspec.md`.
 
+## Trace (if the run is traced)
+
+If the preflight minted a `runId`, append this stage's trace entry to the run log
+before closing — schema, `kind`/`status` values and append rules in
+`rules/observability.md`:
+
+```bash
+printf '%s\n' '{"timestamp":"<UTC ISO-8601>","runId":"<runId>","change":"<name>","stage":"implement-change","kind":"closed","status":"<envelope status>","filesCreated":[],"filesModified":[],"evidence":"<command + output>","blockers":[],"decisions":[],"nextRecommendedStep":"<next>"}' >> reports/<runId>.jsonl
+```
+
+- A blocked/failed closure stays `kind: closed` with the defect and the decision
+  needed in `blockers` (`bin/run-trace` surfaces both in the summary).
+- The log is gitignored by design (`reports/run-*.jsonl`); verify the append with
+  `bin/run-trace --file reports/<runId>.jsonl`.
+
 ## Output
 
 Report (`templates/final-report.md`): closed tasks, files touched, gate output,

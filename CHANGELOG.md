@@ -11,6 +11,16 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **`bin/run-trace` + `rules/observability.md`** — the loop now keeps a structured,
+  machine-readable memory of each run: every stage records its closure as a trace
+  entry (`reports/<runId>.jsonl`, NDJSON, gitignored so the growing log can never
+  break the release fingerprint), and `bin/run-trace` emits the audit summary
+  (stages, status, blockers, ASSUMED) and the exact resume point straight from the
+  log. Autonomous mode parks a non-trivial decision as an auditable `parked` entry,
+  and `continue-change` resolves where a run stopped from the trace — checkboxes
+  become the cross-check, not the guess. The envelope gains a `runId` threaded
+  through every brief of a run. Run-level metrics stay out of scope by design.
+
 - **`bin/agency-next`** — answers "which step is next" from **files** instead of a session's
   memory: it reads the OpenSpec CLI's JSON, the git tree, the working-tree fingerprint and the
   review snapshot, and prints one public state (`working` / `checking` / `ready` /

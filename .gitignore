@@ -12,3 +12,8 @@
 # break the very content fingerprint it records (see rules/quality.md, "Frozen review
 # candidate"). A run's snapshot is evidence, not versioned state.
 reports/review-snapshot*.json
+
+# Per-run trace logs: a trace that grows during a run must never enter the working tree
+# included by bin/no-smoke-worktree's git add -A fingerprint, or the reviewer (N entries)
+# and release (N+3) fingerprints never match — rules/observability.md.
+reports/run-*.jsonl

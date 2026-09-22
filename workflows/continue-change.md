@@ -54,10 +54,18 @@ Read the real output. Determine, in this order:
 
 1. **The change** — its name from `openspec list`, its `validate` verdict and
    task state.
-2. **What is already done** — which tasks are `- [x]`, whether
+2. **The trace's last stop point** (`bin/run-trace`) — if the change's run has
+   a trace (`reports/<runId>.jsonl`), read its **last** entry first: it is the
+   authoritative record of where the run stopped (`rules/observability.md`).
+   Resolve the right log as the most recent one whose last entry is `parked` /
+   closed **for the active change** (each entry carries the change name, so a
+   log is filtered deterministically). A `parked` entry names the stage and the
+   decision needed; a closed entry names the next stage. Task checkboxes are
+   the cross-check, never the authoritative stop point.
+3. **What is already done** — which tasks are `- [x]`, whether
    `design.md`/`tasks.md` exist, whether any code is already committed (`git
    diff`).
-3. **Whether a PR draft exists** — if one does, that is the PR to update; never
+4. **Whether a PR draft exists** — if one does, that is the PR to update; never
    open a second one.
 
 From that, resolve the first **pending** stage:

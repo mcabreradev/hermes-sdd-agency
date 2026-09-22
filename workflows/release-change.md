@@ -96,6 +96,24 @@ git diff --stat
 - Code, specs and notes coherent; no stray files or run temporaries.
 - Commit/push/tag only if authorized, following the message style of the history.
 
+## 3b. Trace closure (if the run is traced)
+
+If the preflight minted a `runId` for this run, append the release stage's **trace
+entry** to the run log (`rules/observability.md`, schema + append rules) before the
+final report:
+
+```bash
+printf '%s\n' '{"timestamp":"<UTC ISO-8601>","runId":"<runId>","change":"<name>","stage":"release-change","kind":"closed","status":"done","filesCreated":[],"filesModified":[],"evidence":"openspec validate --archived --json: 0 failed; <fingerprint>","blockers":[],"decisions":[],"nextRecommendedStep":"pr-review-or-human-merge"}' >> reports/<runId>.jsonl
+```
+
+- The log is **gitignored** by design (`reports/run-*.jsonl`): the growing trace must
+  never enter `bin/no-smoke-worktree`'s `git add -A` fingerprint — the fingerprint the
+  release compares against earlier stages must be taken **before** the append, and the
+  append must not be committed. A trace that changes the reviewer/release fingerprints
+  is a blocking defect (`rules/observability.md`, `rules/quality.md`).
+- Verify the append: `bin/run-trace --file reports/<runId>.jsonl` shows the release
+  entry as `last:` (exit 0).
+
 ## Output
 
 Final report (`templates/final-report.md`) with: what was released, version, notes and paths,

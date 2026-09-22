@@ -40,6 +40,14 @@ reports of each stage.
 <summary output>
 ```
 
+<!-- If the run is traced (runId in the preflight), give the run log reference:
+
+     bin/run-trace --file reports/<runId>.jsonl
+     run: <runId> · change: <name> · entries: <N> · last: <stage> <status>
+
+     The trace is gitignored by design; the summary above is the audit surface.
+-->
+
 ## OpenSpec status
 
 - Change: `<name>` — <in-progress | archived in changes/archive/YYYY-MM-DD-<name>>
