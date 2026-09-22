@@ -1,8 +1,8 @@
 ## 1. Detector
 
 - [x] 1.1 Replace the `is_block_scalar` decision in `bin/skill-registry` with a content-aware one: an indicator (`|` / `>-` / `|2-` / …) immediately followed by indented text is legal and yields the folded text as the description; an indicator followed by the next key (or EOF) is `BLOCK-SCALAR`. Verifies: `bin/skill-registry --root fixtures/skill-registry/roots/valid` reports the folded fixture as `FLAG: ok` with its description; the defective root reports `BLOCK-SCALAR`
-- [ ] 1.2 Rewrite `fixtures/skill-registry/roots/defective/fixture-block-scalar/SKILL.md` to the real defect shape: `description: |` followed immediately by the next frontmatter key (no body), and add `fixture-block-trailing-comment` (`>- # …`, also body-less). Verifies: the suite's defective cases assert `BLOCK-SCALAR` against both
-- [ ] 1.3 Add `fixtures/skill-registry/roots/valid/fixture-folded-legal/SKILL.md` — the exact shape that was wrongly flagged (a `>-` with a real body, like `context-architecture`). Verifies: the suite's valid case asserts `FLAG: ok` and the first body line plus `…` as the description preview
+- [x] 1.2 Rewrite `fixtures/skill-registry/roots/defective/fixture-block-scalar/SKILL.md` to the real defect shape: `description: |` followed immediately by the next frontmatter key (no body), and add `fixture-block-trailing-comment` (`>- # …`, also body-less). Verifies: the suite's defective cases assert `BLOCK-SCALAR` against both
+- [x] 1.3 Add `fixtures/skill-registry/roots/valid/fixture-folded-legal/SKILL.md` — the exact shape that was wrongly flagged (a `>-` with a real body, like `context-architecture`). Verifies: the suite's valid case asserts `FLAG: ok` and the first body line plus `…` as the description preview
 
 ## 2. Suite
 
