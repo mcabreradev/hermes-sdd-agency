@@ -36,8 +36,10 @@ coherent, reviewable increments of the system.
   paths against the list (`rules/quality.md`) and a match is a `BLOCKER`.
 - **`bin/skill-registry`** — read-only inventory of installed skills: exact `SKILL.md` path,
   name, description and tags per skill, plus explicit flags for the frontmatter defects that make
-  a skill load but mis-route (`BLOCK-SCALAR`, `MISSING-DESCRIPTION`, `NO-FRONTMATTER`,
-  `UNCLOSED-FRONTMATTER`). Audits the set the agency actually resolves instead of assuming it.
+  a skill load but mis-route (`BLOCK-SCALAR` for a block/folded indicator with no body,
+  `MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). A block/folded scalar
+  **with** a body is legal YAML and inventories as healthy. Audits the set the agency actually
+  resolves instead of assuming it, and is pinned by `fixtures/skill-registry/check.sh` (12 cases).
 - **Work units and the authored-lines budget** (`rules/coding.md`) — one commit per coherent work
   unit carrying its tests and docs, and an *advisory* ~400-line heuristic for one reviewable
   delivery that never justifies cosmetic deletions, weakened tests or artificial splits. When a
