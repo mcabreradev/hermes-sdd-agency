@@ -21,6 +21,10 @@ reports of each stage.
 |---|---|---|---|
 | <stage> | <agent> | <done/blocked> | <path, command, output> |
 
+<!-- For the build stage, one row per coherent work unit, with that unit's commit
+     identity in Evidence (`<hash> <subject>`). The commit is Hermes' action, per
+     rules/coding.md; the builder reports the unit, Hermes records the hash. -->
+
 ## Artifacts
 
 <!-- Files created/modified inside the project (paths), and nothing global unless

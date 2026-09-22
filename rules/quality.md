@@ -143,7 +143,7 @@ paths"). It is enforced on the declared diff, not on the author's intent:
 # paths touched by the declared diff
 git diff --name-only <base>...HEAD > /tmp/diff-paths.txt
 # deny-list grep — the pattern is the machine form of the table in rules/project-boundaries.md
-grep -nE '(^|/)\.ssh/|(^|/)\.env(\.[^/]*)?$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\.aws/credentials|(^|/)\.credentials/|(^|/)\.config/gh/hosts\.yml|(^|/)Library/Keychains/' /tmp/diff-paths.txt
+grep -nE '(^|/)\.ssh/|(^|/)\.env[^/]*$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\.aws/credentials|(^|/)\.credentials/|(^|/)\.config/gh/hosts\.yml|(^|/)Library/Keychains/' /tmp/diff-paths.txt
 ```
 
 - **The table and this pattern are one decision in two forms.** Adding a row to the boundaries

@@ -11,7 +11,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 
 # The pattern as documented in rules/quality.md ("Sensitive-path check (reviewer)").
 # Kept in sync with the table in rules/project-boundaries.md row by row.
-DENY_RE='(^|/)\.ssh/|(^|/)\.env(\.[^/]*)?$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\.aws/credentials|(^|/)\.credentials/|(^|/)\.config/gh/hosts\.yml|(^|/)Library/Keychains/'
+DENY_RE='(^|/)\.ssh/|(^|/)\.env[^/]*$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\.aws/credentials|(^|/)\.credentials/|(^|/)\.config/gh/hosts\.yml|(^|/)Library/Keychains/'
 
 fail=0
 checked=0
@@ -48,6 +48,9 @@ run_case '**/*.pfx'              'private/bundle.pfx'                   match
 run_case '**/.env*'              'config/.env'                          match
 run_case '**/.env* (root)'       '.env'                                 match
 run_case '**/.env* (local)'      'config/.env.local'                    match
+run_case '**/.env* (rc)'         'config/.envrc'                        match
+run_case '**/.env* (rc root)'    '.envrc.prod'                          match
+run_case '**/.env* (suffix)'     'app/.env.production'                  match
 run_case '**/secrets/*'          'secrets/oauth.json'                   match
 run_case '**/secrets/* (nested)' 'secrets/nested/deep.json'            match
 run_case '**/secrets/* (deep)'   'app/secrets/oauth.json'               match

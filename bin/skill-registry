@@ -165,12 +165,13 @@ inventory_one() {
     desc="-"
   else
     # A multi-line scalar is neither parsed nor silently truncated: it is flagged.
-    # Covers an indented continuation block and a quote left unclosed.
-    case "$raw" in
-      '"'*[!\"]) flag="MULTILINE-SCALAR" ;;
-      "'"*[!\']*) flag="MULTILINE-SCALAR" ;;
-      '') [ "$continues" = "yes" ] && flag="MULTILINE-SCALAR" ;;
-    esac
+    # Covers an indented continuation block, a quote left unclosed, and a plain
+    # scalar whose first line carries a value while the value continues below.
+    if [ "$continues" = "yes" ]; then
+      flag="MULTILINE-SCALAR"
+    elif printf '%s' "$raw" | grep -qE '^"[^"]*$|^'"'"'[^'"'"']*$'; then
+      flag="MULTILINE-SCALAR"
+    fi
 
     if [ "$flag" = "MULTILINE-SCALAR" ]; then
       desc="-"

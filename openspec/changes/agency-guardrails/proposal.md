@@ -38,11 +38,17 @@ changes.
 
 ## Impact
 
-- **Files:** `rules/project-boundaries.md`, `rules/quality.md`, `rules/coding.md`,
+- **Files modified:** `rules/project-boundaries.md`, `rules/quality.md`, `rules/coding.md`,
   `workflows/implement-change.md`, `workflows/review-change.md`, `workflows/release-change.md`,
-  `agents/reviewer.md`, `README.md`, `INSTALL.md`, `CHANGELOG.md`.
-- **New:** `bin/skill-registry`, `fixtures/skill-registry/`, `fixtures/sensitive-paths/`.
-- **No runtime dependency added** — bash 3.2 + `find`/`grep`/`sed` only, per the project's
+  `agents/reviewer.md`, `templates/final-report.md`, `README.md`, `INSTALL.md`, `CHANGELOG.md`.
+- **New files:** `bin/skill-registry`; `fixtures/sensitive-paths/` (`check.sh`,
+  `deny-list-match.txt`, `ordinary-paths.txt`); `fixtures/skill-registry/roots/valid/`
+  (`fixture-valid-tagged`, `fixture-valid-quoted`, `fixture-tags-quoted`, `fixture-crlf`) and
+  `fixtures/skill-registry/roots/defective/` (`fixture-block-scalar`,
+  `fixture-block-indicator`, `fixture-missing-description`, `fixture-multiline-continuation`,
+  `fixture-plain-continuation`, `fixture-no-frontmatter`, `fixture-unclosed-frontmatter`), each
+  holding a `SKILL.md`.
+- **No runtime dependency added** — bash 3.2 + `find`/`grep`/`sed`/`awk` only, per the project's
   "no runtime beyond Bash + OpenSpec CLI" architecture principle. `install.sh` needs no
   change: it already copies `bin/` wholesale (verified in QA by a temp-prefix install).
 - **Concepts adapted from** [Gentleman-Programming/gentle-ai](https://github.com/Gentleman-Programming/gentle-ai)

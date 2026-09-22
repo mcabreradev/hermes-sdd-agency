@@ -60,10 +60,34 @@ MUST be reported as such rather than printed with a plausible-looking descriptio
 
 #### Scenario: A skill has no frontmatter
 
-- **WHEN** a `SKILL.md` starts without a frontmatter block, or opens one with `---` and never
-  closes it
-- **THEN** the registry reports the record with the marker for that shape and the skill's exact
+- **WHEN** a `SKILL.md` starts without a frontmatter block
+- **THEN** the registry reports the record with the `NO-FRONTMATTER` marker and the skill's exact
   path, so it can be fixed
+
+#### Scenario: A skill's frontmatter never closes
+
+- **WHEN** a `SKILL.md` opens a frontmatter block with `---` and never closes it before the body
+- **THEN** the registry reports the record with the `UNCLOSED-FRONTMATTER` marker and the skill's
+  exact path, distinct from `NO-FRONTMATTER`, so the two shapes are told apart
+
+### Requirement: Exit status and a pipeable record stream
+
+The command MUST exit 0 on a completed inventory, including one where defects were found, and
+MUST exit non-zero when no given root could be used (missing, unreadable or unresolvable). The
+per-skill records MUST go to stdout and the run summary to stderr, so the record stream stays
+pipeable without the summary contaminating it.
+
+#### Scenario: A defect is found but the inventory completed
+
+- **WHEN** the command walks a root successfully and flags one or more defective skills
+- **THEN** the records and the flagged summary are printed and the exit status is 0 — a defect is
+  a report, not a command failure
+
+#### Scenario: No root could be used
+
+- **WHEN** every given root is missing, unreadable, or cannot be resolved
+- **THEN** the command explains the unusable root on stderr and exits non-zero, so an operator
+  never reads an unreadable tree as an empty one
 
 ### Requirement: Portability and no new dependency
 
