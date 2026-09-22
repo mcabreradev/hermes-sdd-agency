@@ -29,6 +29,8 @@ templates/      openspec-project · proposal · spec · tasks · architecture ·
 docs/           sdd-feature-lifecycle · usage-examples · FAQ
 bin/            no-smoke-worktree — content-fingerprint of the working tree
                 (binds reviewer/QA evidence to the exact tree they validated)
+                skill-registry — read-only inventory of installed skills
+                (exact SKILL.md path + description, flags defective frontmatter)
 skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```

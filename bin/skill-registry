@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+# skill-registry — print the verifiable inventory of installed skills.
+#
+# Read-only diagnostic. For every SKILL.md found under the given roots it prints the
+# exact absolute path, name, description (and tags where present), so the set the
+# agency resolves can be audited instead of assumed.
+#
+# It also flags the frontmatter defects that make a skill load but mis-route:
+#   BLOCK-SCALAR        description declared as a YAML block scalar (`description: |`)
+#   MISSING-DESCRIPTION no description key, or an empty value
+#   NO-FRONTMATTER      the file does not open with a frontmatter block
+#   UNCLOSED-FRONTMATTER the frontmatter opens with `---` and never closes
+#
+# Portability: macOS default bash 3.2, POSIX tools only (find, awk, sed, grep, sort).
+# No jq, no python, no node, no package manager, no network. Writes nothing.
+#
+# Concept adapted from Gentle-AI's `skill-registry` skill (Gentleman-Programming, MIT);
+# implementation is native to this repo's bin/ pattern (bash + zero dependencies).
+set -uo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: skill-registry [--root <dir>]... [--help]
+
+  --root <dir>   directory to walk for SKILL.md files. Repeatable.
+                 Defaults to ~/.hermes/skills when no --root is given.
+
+Prints one record per skill, in stable sorted order:
+
+  PATH: <absolute path to SKILL.md>
+  NAME: <name>
+  DESC: <description>
+  TAGS: <comma-separated tags, or -> 
+  FLAG: ok | <defect marker>
+
+Exit status: 0 on a completed inventory (even when defects are found), 1 when a
+root does not exist or no root is usable.
+EOF
+}
+
+ROOTS=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --root)
+      if [ "$#" -lt 2 ]; then
+        printf 'skill-registry: --root requires a directory\n' >&2
+        exit 1
+      fi
+      ROOTS+=("$2")
+      shift 2
+      ;;
+    --root=*)
+      ROOTS+=("${1#--root=}")
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'skill-registry: unknown argument %s\n' "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "${#ROOTS[@]}" -eq 0 ]; then
+  ROOTS=("$HOME/.hermes/skills")
+fi
+
+# --- helpers -----------------------------------------------------------------
+
+# Strip a surrounding pair of quotes from a scalar value.
+strip_quotes() {
+  printf '%s' "$1" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//"
+}
+
+# Collapse whitespace/newlines so a record stays one line.
+one_line() {
+  printf '%s' "$1" | tr '\n\r\t' '   ' | sed -e 's/  */ /g' -e 's/^ //' -e 's/ $//'
+}
+
+# Read the frontmatter block of a SKILL.md (between the first two `---` lines).
+frontmatter() {
+  awk '
+    NR == 1 && $0 !~ /^---[[:space:]]*$/ { exit }
+    NR == 1 { infm = 1; next }
+    infm && /^---[[:space:]]*$/ { closed = 1; exit }
+    infm { print }
+    END { if (infm && !closed) print "@@UNCLOSED@@" }
+  ' "$1"
+}
+
+# Value of a top-level scalar key from frontmatter text read on stdin.
+scalar_value() {
+  local key="$1"
+  awk -v key="$key" '
+    index($0, key ":") == 1 {
+      v = substr($0, length(key) + 2)
+      sub(/^[[:space:]]+/, "", v)
+      sub(/[[:space:]]+$/, "", v)
+      print v
+      exit
+    }
+  '
+}
+
+inventory_one() {
+  local file="$1" fm flag name desc tags raw
+
+  if ! head -n 1 "$file" | grep -q '^---[[:space:]]*$'; then
+    printf 'PATH: %s\nNAME: -\nDESC: -\nTAGS: -\nFLAG: NO-FRONTMATTER\n\n' "$file"
+    return
+  fi
+
+  fm=$(frontmatter "$file")
+
+  if printf '%s\n' "$fm" | grep -q '^@@UNCLOSED@@$'; then
+    printf 'PATH: %s\nNAME: -\nDESC: -\nTAGS: -\nFLAG: UNCLOSED-FRONTMATTER\n\n' "$file"
+    return
+  fi
+
+  flag="ok"
+
+  name=$(printf '%s\n' "$fm" | scalar_value name)
+  name=$(strip_quotes "$name")
+  [ -z "$name" ] && name="-"
+
+  raw=$(printf '%s\n' "$fm" | scalar_value description)
+  desc=$(strip_quotes "$raw")
+
+  # A block scalar is the defect this command exists to catch: presenting the
+  # literal `|` as the description is exactly the failure mode of a converted skill.
+  case "$raw" in
+    '|'|'|-'|'|+'|'>'|'>-'|'>+')
+      flag="BLOCK-SCALAR"
+      desc="-"
+      ;;
+    '')
+      flag="MISSING-DESCRIPTION"
+      desc="-"
+      ;;
+  esac
+
+  tags=$(printf '%s\n' "$fm" | awk '
+    /^[[:space:]]*tags:/ {
+      v = $0
+      sub(/^[[:space:]]*tags:[[:space:]]*/, "", v)
+      gsub(/^\[/, "", v); gsub(/\]$/, "", v)
+      gsub(/[[:space:]]*,[[:space:]]*/, ", ", v)
+      sub(/[[:space:]]+$/, "", v)
+      print v
+      exit
+    }
+  ')
+  tags=$(strip_quotes "$tags")
+  [ -z "$tags" ] && tags="-"
+
+  printf 'PATH: %s\nNAME: %s\nDESC: %s\nTAGS: %s\nFLAG: %s\n\n' \
+    "$file" "$name" "$(one_line "$desc")" "$tags" "$flag"
+}
+
+# --- walk --------------------------------------------------------------------
+
+usable=0
+count=0
+defects=0
+
+for root in "${ROOTS[@]}"; do
+  if [ ! -d "$root" ]; then
+    printf 'skill-registry: root not found: %s\n' "$root" >&2
+    continue
+  fi
+  usable=$((usable + 1))
+  abs_root=$(cd "$root" && pwd -P)
+
+  # `sort` for a deterministic order; heavy irrelevant trees are pruned.
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    abs_file=$(cd "$(dirname "$file")" && pwd -P)/$(basename "$file")
+    record=$(inventory_one "$abs_file")
+    if [ "$count" -gt 0 ]; then
+      printf '\n'
+    fi
+    printf '%s\n' "$record"
+    count=$((count + 1))
+    case "$record" in
+      *'FLAG: ok'*) : ;;
+      *) defects=$((defects + 1)) ;;
+    esac
+  done <<EOF
+$(find "$abs_root" \
+      \( -name node_modules -o -name .git -o -name .venv -o -name venv \) -prune -o \
+      -name SKILL.md -type f -print 2>/dev/null | LC_ALL=C sort)
+EOF
+done
+
+if [ "$usable" -eq 0 ]; then
+  printf 'skill-registry: no usable root\n' >&2
+  exit 1
+fi
+
+# Summary goes to stderr so the record stream on stdout stays pipeable.
+printf 'skill-registry: %s skills inventoried, %s flagged\n' "$count" "$defects" >&2
+exit 0
