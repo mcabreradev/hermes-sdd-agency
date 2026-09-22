@@ -57,8 +57,11 @@ Hermes imposes the process and the prohibitions.
 - Each unit's commit carries its tests and documentation together with the behavior, with a
   Conventional Commit message in the repo's history style (`git log --oneline -20`). A change is
   never split artificially just to produce more commits.
-- The unit's commit identity is the evidence of that unit's progress: it belongs in the change's
-  progress record, not in a chat message.
+- **Who commits:** the user, or Hermes when the workflow asks for it. The `builder` never commits
+  on its own initiative (`agents/builder.md`); when it is not authorized to commit, it reports the
+  unit as complete with its evidence and Hermes creates the commit.
+- **The progress record** for a unit is the builder's stage-closure report (`templates/final-report.md`)
+  carrying that unit's commit hash — not a chat message and not a separate artifact.
 
 ## Authored-lines budget (advisory)
 

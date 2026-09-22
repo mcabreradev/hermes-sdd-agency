@@ -38,9 +38,10 @@ changes.
 
 ## Impact
 
-- **Files:** `rules/project-boundaries.md`, `rules/coding.md`,
-  `workflows/implement-change.md`, `README.md`, `INSTALL.md`, `CHANGELOG.md`.
-- **New:** `bin/skill-registry`, `fixtures/skill-registry/`.
+- **Files:** `rules/project-boundaries.md`, `rules/quality.md`, `rules/coding.md`,
+  `workflows/implement-change.md`, `workflows/review-change.md`, `workflows/release-change.md`,
+  `agents/reviewer.md`, `README.md`, `INSTALL.md`, `CHANGELOG.md`.
+- **New:** `bin/skill-registry`, `fixtures/skill-registry/`, `fixtures/sensitive-paths/`.
 - **No runtime dependency added** — bash 3.2 + `find`/`grep`/`sed` only, per the project's
   "no runtime beyond Bash + OpenSpec CLI" architecture principle. `install.sh` needs no
   change: it already copies `bin/` wholesale (verified in QA by a temp-prefix install).

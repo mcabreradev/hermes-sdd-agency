@@ -74,16 +74,19 @@ declared list.
 
 - **What:** the command walks each `--root` for `SKILL.md`, extracts the YAML frontmatter block
   (name, description, tags) with `sed`/`awk`, and prints a stable, human-readable record per
-  skill; defective frontmatter (block-scalar description, missing/empty description, missing
-  block) is marked explicitly.
+  skill; defective frontmatter (block scalar in any legal form, multi-line scalar, missing/empty
+  description, missing or unclosed block) is marked explicitly.
 - **Why:** it must run everywhere the agency runs, including a bare macOS shell, exactly like
   `bin/no-smoke-worktree` (the established `bin/` pattern: bash + zero dependencies). `jq`
   exists on this machine but the project's constraint is portability, not what this laptop has.
 - **Discarded alternative:** Python (present as `python3`, but the repo's bins are bash and
   Python adds a runtime the spec excludes). YAML parsing via a real parser — rejected: a full
   YAML library is a dependency; the frontmatter subset used here (three scalar keys) is safely
-  parseable line-wise, and the block-scalar case is precisely the defect to *detect*, not to
-  parse correctly.
+  parseable line-wise, and the non-scalar cases are precisely what gets *flagged*, not parsed.
+- **The policy on an unparseable value is "flag it, never guess":** a shape the line-wise parser
+  cannot read faithfully (a value continued on indented lines, an unclosed quote) is marked with
+  its own explicit marker rather than printed truncated or reported as missing — a truncated
+  description is a wrong description, and a valid skill reported as defective is a false finding.
 - **Consequences:** the awk parser must be tolerant of unknown extra keys (it ignores them) and
   must not mistake a `description:` inside the body for frontmatter. Detection rules are
   documented in the command's `--help`.
@@ -109,9 +112,16 @@ declared list.
 
 **Choice: `single-pr`.**
 
-This change crossed the advisory ~400-authored-line budget: `git diff --numstat main...HEAD`
-totals **875 added / 2 deleted = 877 authored lines** (~398 of them the change's own planning
-artifacts under `openspec/changes/agency-guardrails/`). It is delivered as one PR by explicit
+This change crossed the advisory ~400-authored-line budget. The figures below come from the
+command quoted with them, so they cannot go stale silently:
+
+```bash
+git diff --numstat main...HEAD | awk '{a+=$1; d+=$2} END {print "added="a" deleted="d" total="a+d}'
+git diff --numstat main...HEAD -- openspec/changes/agency-guardrails/ | awk '{a+=$1} END {print "change-artifact lines="a}'
+```
+
+At the review stage the tree measured **1,065 added / 2 deleted = 1,067 authored lines**, of
+which **452** are the change's own planning artifacts. It is delivered as one PR by explicit
 decision, not by momentum:
 
 - The three work units are already separate, reviewable commits (`feat(rules): sensitive-path

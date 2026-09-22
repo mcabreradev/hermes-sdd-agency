@@ -9,23 +9,27 @@ guidance that applies to any project the agency runs.
 
 ### Requirement: One commit per coherent work unit
 
-The `builder` MUST close each coherent work unit of a change with its own commit, carrying the
-unit's behavior together with its tests and documentation, using a Conventional Commit message.
-A work unit is the smallest coherent behavior plus the tests and docs that make it verifiable —
-not a checkpoint, not every edited file, not one commit for the whole change unless the change
-is itself a single unit.
+Each coherent work unit of a change MUST land as its own commit, carrying the unit's behavior
+together with its tests and documentation, using a Conventional Commit message. A work unit is
+the smallest coherent behavior plus the tests and docs that make it verifiable — not a
+checkpoint, not every edited file, not one commit for the whole change unless the change is
+itself a single unit. Commits are created **outside the `builder` stage**: by the user, or by
+Hermes per `rules/coding.md` (the builder never commits unless the workflow explicitly
+authorizes it). The work unit's commit hash is reported to Hermes as part of the builder's
+stage closure, and that report is the change's progress evidence.
 
 #### Scenario: A multi-unit change is committed unit by unit
 
-- **WHEN** the builder implements a change that comprises more than one coherent behavior
-- **THEN** each unit lands as its own commit with its tests and documentation, and the commit
-  identity of each unit is recorded in the change's progress evidence
+- **WHEN** a change that comprises more than one coherent behavior is delivered
+- **THEN** each unit lands as its own commit with its tests and documentation, created by the
+  user or by Hermes (never by the `builder` on its own initiative), and each unit's commit hash
+  is reported to Hermes in the builder stage closure, which is where the progress record lives
 
 #### Scenario: The work is a single coherent unit
 
 - **WHEN** the change implements one indivisible behavior with no meaningful internal boundary
-- **THEN** the builder commits once for that unit, with its tests and docs, and does not split
-  it artificially to satisfy a granularity ritual
+- **THEN** it lands as one commit with its tests and docs, and is not split artificially to
+  satisfy a granularity ritual
 
 ### Requirement: Authored-lines budget is an advisory heuristic
 

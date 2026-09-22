@@ -12,3 +12,5 @@ app/secrets/oauth.json
 .credentials/gcloud.json
 .config/gh/hosts.yml
 Library/Keychains/login.keychain-db
+secrets/oauth.json
+secrets/nested/deep.json

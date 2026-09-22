@@ -142,10 +142,14 @@ paths"). It is enforced on the declared diff, not on the author's intent:
 ```bash
 # paths touched by the declared diff
 git diff --name-only <base>...HEAD > /tmp/diff-paths.txt
-# deny-list grep (patterns from rules/project-boundaries.md)
-grep -nE '(^|/)(\.ssh/|\.env)|\.(pem|key|p12|pfx)$|/secrets/|\.aws/credentials|\.credentials/|gh/hosts\.yml|Library/Keychains/' /tmp/diff-paths.txt
+# deny-list grep — the pattern is the machine form of the table in rules/project-boundaries.md
+grep -nE '(^|/)\.ssh/|(^|/)\.env(\.[^/]*)?$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\.aws/credentials|(^|/)\.credentials/|(^|/)\.config/gh/hosts\.yml|(^|/)Library/Keychains/' /tmp/diff-paths.txt
 ```
 
+- **The table and this pattern are one decision in two forms.** Adding a row to the boundaries
+  table without extending the pattern (or the reverse) is a defect the reviewer raises: the
+  fixture `fixtures/sensitive-paths/check.sh` carries one case per table row, so a row with no
+  matching pattern shows up as a failing case.
 - **A match is a `BLOCKER`**, recorded with `path:line` of the offending declaration; the stage
   does not advance regardless of what the file appears to contain.
 - **An empty result is the evidence line** for this check: record the command and its empty
