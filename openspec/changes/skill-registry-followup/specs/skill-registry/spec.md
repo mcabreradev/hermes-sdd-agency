@@ -14,7 +14,7 @@ as such rather than printed with a plausible-looking description.
 #### Scenario: A skill carries a block scalar description
 
 - **WHEN** a `SKILL.md` declares its description as a YAML block scalar, including one with an
-  explicit indentation indicator, and **no content follows the indicator**
+  explicit indentation indicator or a trailing comment, and **no content follows the indicator**
 - **THEN** the registry marks that record with its block-scalar marker and never presents the
   literal indicator (for example `|` or `|2-`) as the skill's description
 
@@ -22,8 +22,9 @@ as such rather than printed with a plausible-looking description.
 
 - **WHEN** a `SKILL.md` declares `description: >-` (or `|`, `|2-`, `>-`, `>2-`, …) and indented
   text follows it as the scalar's content
-- **THEN** the registry reports the record as healthy, with a description drawn from that text —
-  the indicator alone is never treated as a defect
+- **THEN** the registry reports the record as healthy, with a description that is the body's
+  first line, joined with `…` when the body spans more than one line — the indicator or the
+  comment after it is never treated as a defect
 
 #### Scenario: A skill's description continues on indented lines
 

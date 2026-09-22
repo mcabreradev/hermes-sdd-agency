@@ -43,11 +43,15 @@ run_case fixture-valid-tagged     ok
 run_case fixture-valid-quoted     ok
 run_case fixture-tags-quoted       ok
 run_case fixture-crlf              ok
-run_case fixture-folded-legal      ok   "A folded scalar with a real body"
+# legal folded scalar, multi-line body: DESC must be the first line + "…" (a preview).
+# This pins the truncation contract: a detector printing only the first line (no "…"),
+# the bare indicator, or a wrong first line, fails here.
+run_case fixture-folded-legal      ok   "A folded scalar with a real body — legal YAML whose description is this text, exactly…"
 
 # defective/ — each shape must be flagged with its marker
 run_case fixture-block-scalar        BLOCK-SCALAR
 run_case fixture-block-indicator     BLOCK-SCALAR
+run_case fixture-block-trailing-comment BLOCK-SCALAR
 run_case fixture-missing-description MISSING-DESCRIPTION
 run_case fixture-multiline-continuation MULTILINE-SCALAR
 run_case fixture-plain-continuation  MULTILINE-SCALAR

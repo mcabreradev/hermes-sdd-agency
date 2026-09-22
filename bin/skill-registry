@@ -129,22 +129,29 @@ desc_continues() {
 
 # A YAML block/folded scalar indicator: `|`, `>`, optionally with chomping (+/-) and an
 # explicit indentation indicator (digits), in either order — `|2-` and `|-2` are both legal.
+# A trailing comment after the indicator (`>- # text`) is legal YAML and still an indicator.
 # The indicator alone is NOT the defect: an indicator with an indented body is legal YAML
 # whose value is the text. Only an indicator with no body makes the loader present the
 # literal indicator as the description — the converted-persona failure mode.
 is_block_scalar() {
-  printf '%s' "$1" | grep -qE '^[|>]([0-9]+)?([-+])?$|^[|>]([-+])?([0-9]+)?$'
+  printf '%s' "$1" | grep -qE '^[|>]([0-9]+)?([-+])?( [[:space:]]*#.*)?$|^[|>]([-+])?([0-9]+)?[[:space:]]*(#.*)?$'
 }
 
-# First indented line of a block/folded scalar's body, after its `description:` header.
-scalar_body_first() {
+# Body of a block/folded scalar: `N|first` — N lines of indented content after the
+# `description:` header, and the first line trimmed of leading/trailing space.
+scalar_body() {
   awk '
     index($0, "description:") == 1 { found = 1; next }
     found {
       if ($0 ~ /^[[:space:]]*$/) next
-      if ($0 ~ /^[[:space:]]+/) { sub(/^[[:space:]]+/, ""); sub(/[[:space:]]+$/, ""); print; exit }
+      if ($0 ~ /^[[:space:]]+/) {
+        n++
+        if (n == 1) { sub(/^[[:space:]]+/, ""); sub(/[[:space:]]+$/, ""); first = $0 }
+        next
+      }
       exit
     }
+    END { printf "%d|%s", n, first }
   '
 }
 
@@ -177,10 +184,14 @@ inventory_one() {
   # body: that is when the loader presents the literal `|`/`>` as the description. An
   # indicator with an indented body is legal YAML — its description is that body.
   if is_block_scalar "$raw"; then
-    body_first=$(printf '%s\n' "$fm" | scalar_body_first)
+    body=$(printf '%s\n' "$fm" | scalar_body)
+    body_n=${body%%|*}
+    body_first=${body#*|}
     if [ -z "$body_first" ]; then
       flag="BLOCK-SCALAR"
       desc="-"
+    elif [ "$body_n" -gt 1 ]; then
+      desc="${body_first}…"
     else
       desc="$body_first"
     fi
