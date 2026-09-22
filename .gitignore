@@ -7,3 +7,8 @@
 
 # Local state (never exported — machine-specific)
 .local/
+
+# Review snapshots: a snapshot of a moving tree would otherwise enter the working tree and
+# break the very content fingerprint it records (see rules/quality.md, "Frozen review
+# candidate"). A run's snapshot is evidence, not versioned state.
+reports/review-snapshot*.json

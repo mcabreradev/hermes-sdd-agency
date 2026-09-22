@@ -31,6 +31,10 @@ bin/            no-smoke-worktree — content-fingerprint of the working tree
                 (binds reviewer/QA evidence to the exact tree they validated)
                 skill-registry — read-only inventory of installed skills
                 (exact SKILL.md path + description, flags defective frontmatter)
+                review-snapshot — freezes the review candidate before anything reads it
+                (content fingerprint + diff hash; --compare detects that the tree moved)
+                review-tier — derives review depth (low/medium/high) from the diff
+                (declared rules in rules/quality.md; informational, never a gate)
 skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
 skills/agents/  domain-expertise personas installed from aitmpl.com
 ```

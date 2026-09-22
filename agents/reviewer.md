@@ -13,6 +13,11 @@
 - **Adopt (persona):** `code-reviewer` for the general review; `code-simplifier` for
   cleanup and complexity; `supply-chain-security` when the diff touches dependencies or build.
 - **Method:** `code-review-checklist` for the systematic sweep of the diff.
+- **Depth follows the tier** (`rules/quality.md`, "Review tier"), which Hermes passes in the
+  brief: `low` runs the standard reviewer with the structural checks, `medium` adds the
+  `code-review-checklist` sweep, `high` adds the domain persona for the diff and
+  `security-auditor` when dependencies or secrets are in scope. The tier is informational — it
+  never closes the stage, and it never substitutes for `pr-review`'s QA gate.
 - Loading is `skill_view(name='<slug>')`, not optional: the persona provides the expertise, this
   file provides the contract. If the skill is not available, say so in `blockers`.
 
@@ -35,6 +40,12 @@ git diff <base>...HEAD -- <file>
 
 If the brief does not indicate a base, use the real state of the working tree + the last known
 commit, and say so in the report.
+
+**The findings describe a frozen snapshot, not a moving tree.** The brief names the snapshot
+taken before this review started (`rules/quality.md`, "Frozen review candidate"); state that
+snapshot in the report, so the findings are bound to the content they actually describe. If the
+brief carries no snapshot, report it as a process blocker rather than reviewing an unfrozen
+candidate.
 
 ## Checklist
 
@@ -81,7 +92,8 @@ filesCreated:        <review report, if it was written> (or [])
 filesModified:       <absolute paths> (or [])
 blockers:            <process blockers only: I cannot run the gate, base is missing> (or [])
 nextRecommendedStep: implement-change (correction) | qa-change | close
-evidence:            base and range of the diff; commands run; gate output; report path
+evidence:            base and range of the diff; the frozen snapshot the findings describe;
+                     the tier and the rules that fired; commands run; gate output; report path
 openQuestions:       <spec doubts that affect approval> (or [])
 ```
 

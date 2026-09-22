@@ -156,3 +156,75 @@ grep -nE '(^|/)\.ssh/|(^|/)\.env[^/]*$|(^|/)secrets/|\.(pem|key|p12|pfx)$|(^|/)\
   output. Do not report "verified" without the command that produced it.
 - This check is additive to the other security findings (secrets in code, sensitive logs); it
   does not replace judgment about a sensitive path that is not enumerated.
+
+## Frozen review candidate (snapshot before review)
+
+A review whose findings describe content that moved mid-review is unfalsifiable. The candidate
+is therefore frozen **before** anything reads it:
+
+```bash
+# in the project root, before the reviewer is dispatched
+<agency-bin>/review-snapshot --base <base-ref>            # writes reports/review-snapshot.json
+# at delivery, after the fixes, on the tree to be closed
+<agency-bin>/review-snapshot --compare reports/review-snapshot.json
+```
+
+- **The reviewer and QA briefs cite the snapshot path**, and their report states the snapshot
+  they worked against. The snapshot — not the reviewer's memory of what it read — is what the
+  findings describe.
+- **The comparison is content-based, never commit-based.** It checks the working-tree
+  fingerprint **and** the diff hash, and re-verifies the snapshot's own recorded base — so a
+  rebase, amend or squash that preserves content still matches and is never blocked, while a
+  manifest whose base or diff hash was forged (or whose base no longer resolves) is reported
+  as a mismatch or as "cannot assess", never as MATCH. Comparing commit shas would block
+  exactly the legitimate rewrites the existing fingerprint rule avoids.
+- **A `MISMATCH` is a blocker of the existing fingerprint class**: the evidence belongs to
+  different content, so re-review or re-test before closing. The command only reports it —
+  what to do next (re-review, revert, re-snapshot) is the orchestrator's and the user's call.
+- **The snapshot is never written into the tracked worktree.** Its default path is gitignored,
+  and a `--out` inside the repository that is not verifiably ignored is **refused** (exit 2,
+  naming the missing entry) — writing it there would change the very content fingerprint it
+  records, producing a false `MISMATCH` at delivery with nobody having touched anything.
+  `install.sh` does not carry this repo's `.gitignore` into a consuming project, so **a project
+  adopting the agency adds `reports/review-snapshot*.json` to its own `.gitignore` before its
+  first snapshot**; the tool enforces the condition rather than relying on the entry existing.
+
+## Review tier (depth follows the diff)
+
+Review depth follows the diff's own shape instead of the reviewer's judgment. The declared
+rules are the table below, implemented by `<agency-bin>/review-tier` (default base `main`):
+
+| Tier | When | Review shape |
+|---|---|---|
+| `low` | only documentation/process paths, no behavior-bearing path | one reviewer, structural checks, no persona fan-out |
+| `medium` | behavior-bearing, no high-consequence path, within the size bound | reviewer + `code-review-checklist` sweep |
+| `high` | any high-consequence path, or over the size bound | deeper persona set (domain persona + `code-simplifier`, `security-auditor` when deps or secrets are in scope) |
+
+**High-consequence path classes** (any one forces `high`, however few lines):
+
+| Class | Matches |
+|---|---|
+| `schema-migration` | `*.sql`, migrations dirs, Prisma schema |
+| `auth` | auth/login/session/permission/rbac code |
+| `security-config` | `.env*`, CORS/helmet/CSRF config, `.npmrc`, `.netrc` |
+| `dependency-manifest` | `package.json`, lockfiles, `Cargo.toml`/`go.mod`/`requirements.txt`/`Gemfile`/`pyproject.toml` |
+
+**Size bound:** 400 authored changed lines (additions + deletions) — the same advisory figure
+as `rules/coding.md`, applied here as the exact tier boundary: **at or under 400 is `medium`,
+over 400 is `high`**. The bound is declared here and hard-coded in the bin; it is deliberately
+**not** an environment knob, because a variable that can silently lower a tier would be an
+implementation branch with no rule behind it.
+
+- **The tier selects depth and nothing else.** It never blocks a stage, closes a change,
+  authorizes a merge, or substitutes for the formal QA gate that `workflows/pr-review.md`
+  mandates. Delivery stays human-owned.
+- **An unassessable diff is never `low`.** The command reports "cannot assess" and exits
+  non-zero when the diff cannot be measured (not a repository, missing git, an unknown base)
+  **or when the diff is empty** — a base that equals `HEAD` (work committed onto the base
+  branch, or a wrong ref) yields no paths and no lines, which is not evidence that the change
+  is documentation-only. The review then proceeds at the higher depth or reports a blocker —
+  never on an optimistic default.
+- **The tier and its reasons are printed together**, and each rule that fired is named together
+  with the paths that produced it, so a reviewer can contradict the tier by pointing at the
+  table instead of arguing about judgment. Changing the classes or the bound is a rule change
+  here, not a code change in the bin.

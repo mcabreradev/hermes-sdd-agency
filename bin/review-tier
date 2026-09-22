@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# review-tier — derive review depth from the diff's own shape.
+#
+# Prints a tier (low | medium | high) plus the rule(s) that fired, from declared rules over
+# the diff: authored changed lines and the paths the diff touches. The tier selects how deep
+# the review inside review-change goes, and NOTHING else — it never blocks, closes, authorizes
+# a merge, or replaces the formal QA gate of workflows/pr-review.md. The tier table lives in
+# rules/quality.md ("Review tier"); this command implements it and prints its reasons so the
+# assessment can be contradicted by pointing at a rule instead of arguing about judgment.
+#
+# An unmeasurable diff reports "cannot assess" and exits non-zero — never `low`. A failed
+# assessment silently becoming an optimistic default is the failure mode this refuses, and an
+# EMPTY diff is the most common way to reach it: a base that equals HEAD (work committed onto
+# the base branch, or a wrong ref) yields no paths and no lines, which is not evidence that the
+# change is documentation-only.
+#
+# Read-only. bash 3.2 + git only. The size bound is the declared figure in rules/quality.md;
+# it is deliberately NOT an environment knob (an env var that can silently lower a tier is an
+# implementation branch with no declared rule).
+#
+# Concept adapted from Gentle-AI's risk-proportional review depth (Gentleman-Programming,
+# MIT); implementation is native to this repo's bin/ pattern (bash + zero dependencies).
+set -uo pipefail
+
+SIZE_BOUND=400
+
+usage() {
+  cat <<EOF
+Usage: review-tier [--base <ref>] [--help]
+
+  --base <ref>   the change's fork point (default: main). Must be the ref the change
+                 branched from — a base that equals HEAD produces an empty diff and is
+                 reported as "cannot assess", never as a tier.
+
+Prints the tier and each rule that fired:
+
+  low      only documentation/process paths, no behavior-bearing path
+  medium   behavior-bearing, no high-consequence path, at or under the bound ($SIZE_BOUND authored lines)
+  high     a high-consequence path, or over the bound (> $SIZE_BOUND authored lines)
+
+HIGH-CONSEQUENCE PATH CLASSES (any one forces high, regardless of size):
+  schema-migration, auth, security-config, dependency-manifest
+
+Exit status: 0 when a tier was assessed; 2 when it could not be assessed (no repository, an
+unknown base, a missing tool, or an empty diff) — the verdict line then reads "cannot assess"
+and no tier is printed.
+EOF
+}
+
+BASE="main"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --base) [ "$#" -ge 2 ] || { printf 'review-tier: --base requires a ref\n' >&2; exit 2; }; BASE="$2"; shift 2 ;;
+    --base=*) BASE="${1#--base=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) printf 'review-tier: unknown argument %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+not_assessed() {
+  printf 'tier: cannot assess\nreason: %s\n' "$1"
+  printf 'review-tier: could not assess the diff (%s) — this is NOT a low tier\n' "$1" >&2
+  exit 2
+}
+
+command -v git >/dev/null 2>&1 || not_assessed "git not found"
+TOP=$(git rev-parse --show-toplevel 2>/dev/null) || not_assessed "not a git repository"
+git -C "$TOP" rev-parse --verify --quiet "$BASE^{commit}" >/dev/null 2>&1 || not_assessed "unknown base ref: $BASE"
+
+PATHS=$(git -C "$TOP" diff --name-only "$BASE...HEAD" 2>/dev/null) || not_assessed "diff could not be listed"
+LINES=$(git -C "$TOP" diff --numstat "$BASE...HEAD" 2>/dev/null | awk '{a+=$1; d+=$2} END {print a+0+d+0}')
+[ -n "$LINES" ] || not_assessed "authored line count could not be measured"
+
+FILE_COUNT=$(printf '%s\n' "$PATHS" | grep -c .)
+
+# An empty diff is not a documentation-only change: it means the base is not the change's fork
+# point (work committed onto the base branch, or a ref that already contains HEAD). Reading it
+# as `low` would hand a migration-plus-auth change the shallowest review shape.
+if [ "$FILE_COUNT" -eq 0 ] && [ "$LINES" -eq 0 ]; then
+  not_assessed "the diff is empty: base '$BASE' equals HEAD, is not the change's fork point, or the change's work is still uncommitted (the diff measures committed content only)"
+fi
+
+REASONS=""
+HIGH_CLASS=""
+
+# --- high-consequence classes (the declared table in rules/quality.md) -----------------
+# Any single match forces `high`, however few lines the diff carries. Patterns mirror the
+# prose of the declared rows: a word class fires on a basename prefix, its own directory, or
+# a hyphen/underscore/dot segment (require-auth.ts, check-permissions.ts, db/migrate/...).
+check_class() {
+  local label="$1" pattern="$2" hit
+  hit=$(printf '%s\n' "$PATHS" | grep -E -m 1 "$pattern")
+  if [ -n "$hit" ]; then
+    HIGH_CLASS="$label"
+    REASONS="${REASONS}HIGH  class=$label  path=$hit
+"
+  fi
+}
+
+check_class "schema-migration" '(^|/)(prisma/)?(schema\.prisma|migrate|migrations?/|db/migrate)|\.sql$|(^|/)(migration|migrations)/'
+check_class "auth" '(^|/)(auth|oauth|login|session|permission|permissions|rbac|acl)([-_./]|$)|[-_](auth|oauth|login|session|permission|permissions|rbac|acl)\.'
+check_class "security-config" '(^|/)(\.env[^/]*|security[-_.a-z]*\.[a-z]+|cors[-_.a-z]*|helmet[-_.a-z]*|csrf[-_.a-z]*|\.npmrc|\.netrc)$'
+check_class "dependency-manifest" '(^|/)(package\.json|bun\.lockb?|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|Cargo\.(toml|lock)|go\.(mod|sum)|requirements\.txt|Gemfile(\.lock)?|pyproject\.toml)$'
+
+# --- size bound ------------------------------------------------------------------------
+if [ "$LINES" -gt "$SIZE_BOUND" ]; then
+  HIGH_CLASS="${HIGH_CLASS:-size}"
+  REASONS="${REASONS}HIGH  size=$LINES authored lines over the bound ($SIZE_BOUND)
+"
+fi
+
+# --- which paths are documentation/process (anchored, never a basename prefix) ----------
+# `docs?` as a prefix would classify a `document.ts` behavior module as documentation.
+DOCS_RE='\.(md|txt|rst|adoc)$|(^|/)docs?/|(^|/)(README|CHANGELOG|LICENSE|CONTRIBUTING|AUTHORS|NOTES)(\.[a-z]+)?$|(^|/)\.(github|gitlab)/'
+BEHAVIOR_PATHS=$(printf '%s\n' "$PATHS" | grep -vE "$DOCS_RE" || true)
+DOCS_PATHS=$(printf '%s\n' "$PATHS" | grep -E "$DOCS_RE" || true)
+
+# --- low: only documentation/process paths ---------------------------------------------
+if [ -z "$HIGH_CLASS" ] && [ -z "$BEHAVIOR_PATHS" ]; then
+  REASONS="${REASONS}LOW   documentation/process paths only: $(printf '%s ' $DOCS_PATHS)
+"
+  printf 'tier: low\n'
+  printf 'reason: every touched path is documentation or process (%s file(s)): %s\n' "$FILE_COUNT" "$(printf '%s ' $DOCS_PATHS)"
+  printf 'rules:\n%s' "$REASONS"
+  printf 'paths: %s file(s)\nauthored: %s line(s)\n' "$FILE_COUNT" "$LINES"
+  exit 0
+fi
+
+# --- high -------------------------------------------------------------------------------
+if [ -n "$HIGH_CLASS" ]; then
+  printf 'tier: high\n'
+  printf 'reason: %s\n' "$(printf '%s' "$REASONS" | head -n 1 | sed 's/^[A-Z]*  //')"
+  printf 'rules:\n%s' "$REASONS"
+  printf 'paths: %s file(s)\nauthored: %s line(s)\n' "$FILE_COUNT" "$LINES"
+  exit 0
+fi
+
+# --- medium -----------------------------------------------------------------------------
+REASONS="${REASONS}MEDIUM  behavior-bearing ($(printf '%s ' $BEHAVIOR_PATHS)), no high-consequence class fired, $LINES authored lines at or under the bound ($SIZE_BOUND)
+"
+printf 'tier: medium\n'
+printf 'reason: behavior-bearing diff, no high-consequence path, %s authored lines at or under the bound (%s)\n' "$LINES" "$SIZE_BOUND"
+printf 'rules:\n%s' "$REASONS"
+printf 'paths: %s file(s)\nauthored: %s line(s)\n' "$FILE_COUNT" "$LINES"
+exit 0

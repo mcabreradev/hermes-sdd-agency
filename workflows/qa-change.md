@@ -46,7 +46,9 @@ authorized), the `qa` agent produces the same matrix **without fixing anything**
 - The report's verdict is `fail` if any `BLOCKER`/`MAJOR` defect exists, `pass` only when the
   matrix is clean — report-only does not change the closure bar, it only skips the fix loop.
 - Record the **`no-smoke-worktree` fingerprint** so the report is bound to the exact tree
-  that was exercised (see `rules/quality.md`).
+  that was exercised (see `rules/quality.md`). QA is one of the stages the frozen-candidate rule
+  names: the brief carries the review snapshot path, and the report states the snapshot the
+  scenarios were executed against.
 
 ## 2. Validation of the report (Hermes)
 

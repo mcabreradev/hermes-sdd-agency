@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# review-snapshot — freeze the review candidate BEFORE anything reads it.
+#
+# A review whose findings describe a tree that moved mid-review is unfalsifiable. This
+# command writes a snapshot of the content under review (base ref, HEAD for context, the
+# working-tree content fingerprint and the diff hash) so a reviewer/QA reports *against*
+# that snapshot, and delivery can re-compute it and detect that the content moved.
+#
+# The comparison is CONTENT-based, never commit-identity-based: the fingerprint is
+# `git write-tree` over the working tree (see bin/no-smoke-worktree), which is stable
+# across rebase/amend/squash that preserve content. Comparing shas would block a
+# legitimate history rewrite — exactly the false positive the fingerprint avoids.
+#
+# Read-only with respect to the repository: it never touches the index, the refs or any
+# tracked file. It writes only the snapshot file named by --out.
+#
+# Concept adapted from Gentle-AI's frozen review candidate (Gentleman-Programming, MIT);
+# implementation is native to this repo's bin/ pattern (bash + zero dependencies).
+set -uo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  review-snapshot [--base <ref>] [--out <path>]
+  review-snapshot --compare <snapshot.json>
+
+  --base <ref>     diff base (default: main)
+  --out <path>     where to write the snapshot (default: reports/review-snapshot.json)
+  --compare <file> re-compute the current content and compare it against a snapshot
+
+Prints, for a snapshot run, the resolved base, HEAD, the content fingerprint and the
+diff hash. With --compare it prints MATCH or MISMATCH naming both fingerprints; a
+MISMATCH exits non-zero so a delivery step can fail on it.
+
+Exit status: 0 when the snapshot was written or the comparison matched; 1 on a
+comparison mismatch; 2 when the assessment could not be performed (not a repository,
+unknown base, missing tool).
+EOF
+}
+
+BASE="main"
+OUT="reports/review-snapshot.json"
+COMPARE=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --base) [ "$#" -ge 2 ] || { printf 'review-snapshot: --base requires a ref\n' >&2; exit 2; }; BASE="$2"; shift 2 ;;
+    --base=*) BASE="${1#--base=}"; shift ;;
+    --out) [ "$#" -ge 2 ] || { printf 'review-snapshot: --out requires a path\n' >&2; exit 2; }; OUT="$2"; shift 2 ;;
+    --out=*) OUT="${1#--out=}"; shift ;;
+    --compare) [ "$#" -ge 2 ] || { printf 'review-snapshot: --compare requires a path\n' >&2; exit 2; }; COMPARE="$2"; shift 2 ;;
+    --compare=*) COMPARE="${1#--compare=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) printf 'review-snapshot: unknown argument %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+command -v git >/dev/null 2>&1 || { printf 'review-snapshot: cannot assess (git not found)\n' >&2; exit 2; }
+TOP=$(git rev-parse --show-toplevel 2>/dev/null) || { printf 'review-snapshot: cannot assess (not a git repository)\n' >&2; exit 2; }
+
+# Fingerprint first: this is the property the snapshot exists to record.
+FINGERPRINT=$(cd "$TOP" && "$(dirname "$0")/no-smoke-worktree" 2>/dev/null) || FINGERPRINT=""
+[ -n "$FINGERPRINT" ] || { printf 'review-snapshot: cannot assess (fingerprint could not be computed)\n' >&2; exit 2; }
+
+HEAD_SHA=$(git -C "$TOP" rev-parse HEAD 2>/dev/null) || { printf 'review-snapshot: cannot assess (no HEAD)\n' >&2; exit 2; }
+
+field() {
+  # Extract a string field from a snapshot file without jq.
+  sed -n "s/.*\"$2\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" "$1" | head -n 1
+}
+
+# The diff hash for a given base, as the snapshot run computes it.
+diff_hash_for() {
+  git -C "$TOP" diff "$1...HEAD" 2>/dev/null | git -C "$TOP" hash-object --stdin 2>/dev/null
+}
+
+if [ -n "$COMPARE" ]; then
+  if [ ! -f "$COMPARE" ]; then
+    printf 'review-snapshot: cannot assess (snapshot not found: %s)\n' "$COMPARE" >&2
+    exit 2
+  fi
+  WAS=$(field "$COMPARE" fingerprint)
+  WAS_BASE=$(field "$COMPARE" base)
+  WAS_DIFF=$(field "$COMPARE" diffHash)
+  if [ -z "$WAS" ]; then
+    printf 'review-snapshot: cannot assess (snapshot has no fingerprint: %s)\n' "$COMPARE" >&2
+    exit 2
+  fi
+  if [ -z "$WAS_BASE" ] || [ -z "$WAS_DIFF" ]; then
+    printf 'review-snapshot: cannot assess (snapshot is incomplete: base and diffHash are required for a comparison)\n' >&2
+    exit 2
+  fi
+  # Re-verify the recorded base itself: a snapshot whose base no longer resolves cannot be
+  # compared at all. Reporting MATCH here would validate a manifest nobody can re-derive.
+  if ! git -C "$TOP" rev-parse --verify --quiet "$WAS_BASE^{commit}" >/dev/null 2>&1; then
+    printf 'review-snapshot: cannot assess (the snapshot base does not resolve here: %s)\n' "$WAS_BASE" >&2
+    exit 2
+  fi
+
+  NOW_DIFF=$(diff_hash_for "$WAS_BASE")
+  [ -n "$NOW_DIFF" ] || { printf 'review-snapshot: cannot assess (diff hash could not be recomputed for base %s)\n' "$WAS_BASE" >&2; exit 2; }
+
+  # Both fields must agree. Checking only the fingerprint would let a manifest with a forged
+  # base or diff hash (the two fields that say WHAT was reviewed) pass as MATCH.
+  if [ "$WAS" = "$FINGERPRINT" ] && [ "$WAS_DIFF" = "$NOW_DIFF" ]; then
+    printf 'MATCH    snapshot=%s current=%s  diffHash=%s base=%s\n' "$WAS" "$FINGERPRINT" "$WAS_DIFF" "$WAS_BASE"
+    exit 0
+  fi
+
+  if [ "$WAS" != "$FINGERPRINT" ]; then
+    printf 'MISMATCH fingerprint  snapshot=%s current=%s  base=%s\n' "$WAS" "$FINGERPRINT" "$WAS_BASE"
+    printf 'review-snapshot: the working-tree content moved since the review was recorded — the evidence belongs to different content\n' >&2
+  else
+    printf 'MISMATCH diffHash     snapshot=%s current=%s  base=%s\n' "$WAS_DIFF" "$NOW_DIFF" "$WAS_BASE"
+    printf 'review-snapshot: the diff against base %s changed since the review was recorded — the reviewed range is no longer the same\n' "$WAS_BASE" >&2
+  fi
+  exit 1
+fi
+
+# The diff hash must be measured over a real base; an unknown base is "cannot assess",
+# never a silent empty diff.
+if ! git -C "$TOP" rev-parse --verify --quiet "$BASE^{commit}" >/dev/null 2>&1; then
+  printf 'review-snapshot: cannot assess (unknown base ref: %s)\n' "$BASE" >&2
+  exit 2
+fi
+
+DIFF_HASH=$(git -C "$TOP" diff "$BASE...HEAD" 2>/dev/null | git -C "$TOP" hash-object --stdin 2>/dev/null) || DIFF_HASH=""
+[ -n "$DIFF_HASH" ] || { printf 'review-snapshot: cannot assess (diff hash could not be computed)\n' >&2; exit 2; }
+
+DIFF_LINES=$(git -C "$TOP" diff --numstat "$BASE...HEAD" 2>/dev/null | awk '{a+=$1; d+=$2} END {print a+0 "+" d+0}')
+
+OUT_DIR=$(dirname "$OUT")
+# A snapshot written INTO the worktree becomes part of the content it fingerprints (the
+# fingerprint is `git add -A` over the working tree), so the mandated delivery compare would
+# report MISMATCH with nobody having changed anything. Refuse a target inside the repo unless
+# it is verifiably gitignored — and say which .gitignore entry is missing.
+#
+# Both sides are resolved PHYSICALLY: on macOS `git rev-parse --show-toplevel` returns the
+# realpath (/private/var/...) while $PWD may be the symlinked form (/var/...), and a plain
+# string prefix test then misses the repo entirely (the macOS /tmp -> /private/tmp trap).
+case "$OUT" in
+  /*) OUT_ABS="$OUT" ;;
+  *) OUT_ABS="$PWD/$OUT" ;;
+esac
+# Resolve through the nearest EXISTING ancestor: a target whose parent directory does not
+# exist yet (a fresh reports/) must still be classified as inside the repo, otherwise the
+# guard silently passes and the first snapshot writes into the worktree unignored.
+OUT_RESOLVED=$(OUT_ABS="$OUT_ABS" bash -c '
+  p="$OUT_ABS"; tail=""
+  while [ ! -d "$p" ] && [ "$p" != "/" ] && [ -n "$p" ]; do
+    tail="/$(basename "$p")$tail"
+    p=$(dirname "$p")
+  done
+  cd "$p" 2>/dev/null && printf "%s%s" "$(pwd -P)" "$tail"
+') || OUT_RESOLVED=""
+OUT_ABS="${OUT_RESOLVED:-$OUT_ABS}"
+TOP_PHYS=$(cd "$TOP" 2>/dev/null && pwd -P) || TOP_PHYS="$TOP"
+case "$OUT_ABS" in
+  "$TOP_PHYS"/*|"$TOP"/*)
+    if [ "$(git -C "$TOP" rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ] && \
+       ! git -C "$TOP" check-ignore -q "$OUT_ABS" 2>/dev/null; then
+      printf 'review-snapshot: cannot write the snapshot to %s\n' "$OUT" >&2
+      printf '  it is inside the repository and NOT gitignored, so writing it would change the very\n' >&2
+      printf '  content fingerprint it records (the delivery compare would then report a false MISMATCH).\n' >&2
+      HINT=$(printf '%s' "${OUT_ABS#$TOP_PHYS/}" | sed 's/[^/]*$/*/')
+      case "$HINT" in
+        */*) ;;
+        *) HINT='reports/review-snapshot*.json' ;;
+      esac
+      printf '  Add to .gitignore:  %s\n' "$HINT" >&2
+      printf '  or pass --out with a path outside the repository.\n' >&2
+      exit 2
+    fi
+    ;;
+esac
+[ -d "$OUT_DIR" ] || mkdir -p "$OUT_DIR" || { printf 'review-snapshot: cannot write snapshot to %s\n' "$OUT" >&2; exit 2; }
+
+# The manifest is JSON: a quote in a value would silently corrupt it, so refuse rather than
+# emit a file no JSON parser can read.
+case "$BASE$OUT" in
+  *'"'*) printf 'review-snapshot: cannot assess (a value containing a double quote cannot be recorded)\n' >&2; exit 2 ;;
+esac
+
+# The manifest must actually land: `cat > path` silently fails (rc 1, discarded) when the
+# target is a directory, which would print a full snapshot summary and exit 0 for a record
+# that does not exist — a false success the delivery compare would only discover later.
+if ! cat > "$OUT" <<EOF
+{
+  "base": "$BASE",
+  "head": "$HEAD_SHA",
+  "fingerprint": "$FINGERPRINT",
+  "diffHash": "$DIFF_HASH",
+  "authoredLines": "$DIFF_LINES",
+  "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+then
+  printf 'review-snapshot: could not write the snapshot to %s (is it a directory?)\n' "$OUT" >&2
+  exit 2
+fi
+
+printf 'snapshot: %s\nbase:      %s\nhead:      %s\nfingerprint: %s\ndiffHash:  %s\nauthored:  %s\n' \
+  "$OUT" "$BASE" "$HEAD_SHA" "$FINGERPRINT" "$DIFF_HASH" "$DIFF_LINES"
+exit 0

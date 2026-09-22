@@ -76,7 +76,8 @@ filesCreated:        <QA report, declared disposable scripts> (or [])
 filesModified:       <absolute paths> (or [])
 blockers:            <environment that prevents execution; non-verifiable scenarios> (or [])
 nextRecommendedStep: implement-change (correction) | release-change
-evidence:            scenario → case → result matrix; commands and output; report path
+evidence:            scenario → case → result matrix; commands and output; the review snapshot
+                     the scenarios were executed against; report path
 openQuestions:       <ambiguous spec scenarios> (or [])
 ```
 

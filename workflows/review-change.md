@@ -17,17 +17,29 @@ openspec context --json                                 # root.path == <project-
 git status --porcelain
 git diff --stat
 openspec instructions apply --change "<name>" --json      # task progress
+<agency-bin>/review-snapshot --base <base>                # freeze the candidate BEFORE review
+<agency-bin>/review-tier --base <base>                    # depth follows the diff, not judgment
 ```
 
 - There is a real diff to review and the change's tasks are implemented (or the brief indicates
   reviewing a specific batch).
 - Hermes fixes the **base** of the comparison (`<base>` = reference commit/branch) and
   includes it in the brief. Without an explicit base, the review is not reproducible.
+- **The candidate is frozen before anything reads it** (`rules/quality.md`, "Frozen review
+  candidate"): the snapshot path goes into the reviewer brief, and the reviewer reports the
+  snapshot its findings describe. Re-run `--compare` at delivery; a mismatch means the evidence
+  belongs to different content.
+- **The tier selects the review's depth** (`rules/quality.md`, "Review tier"): `low` runs the
+  standard reviewer with structural checks, `medium` adds the `code-review-checklist` sweep,
+  `high` adds the domain persona and `security-auditor` when deps or secrets are in scope. The
+  tier never blocks and never replaces `pr-review`'s QA gate; an unassessable diff is never
+  treated as `low` — proceed at the higher depth or report the blocker.
 
 ## 1. Review (`reviewer` agent)
 
 Brief: project root, diff base, OpenSpec change, spec/design paths, repo
-rules, and the criterion: findings with `path:line`, severity and impact; without implementing
+rules, the **snapshot path** the findings describe, the **tier** that sets the depth, and the
+criterion: findings with `path:line`, severity and impact; without implementing
 fixes; without writing to the project except the report.
 
 The agent reviews: spec compliance, diff scope, correctness and edge cases,

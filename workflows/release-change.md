@@ -56,6 +56,11 @@ for a decision if it is not declared), writes the changelog in the format the re
   against the reviewer/QA fingerprints recorded in earlier stages. A mismatch against those
   stages is evidence the shipped tree was validated on different content → stop and
   re-review/re-test before closing (see `rules/quality.md`).
+- **Compare the review snapshot** (`rules/quality.md`, "Frozen review candidate") on the tree
+  being closed: `<agency-bin>/review-snapshot --compare <snapshot>` must report `MATCH`. A
+  `MISMATCH` (or a "cannot assess" for a record that no longer reproduces) is the same blocker
+  class as the fingerprint mismatch above — the review describes content that is not being
+  released.
 - Confirm the delivered shape matches the **recorded delivery strategy** (work units and the
   authored-lines budget, `rules/coding.md` / `workflows/implement-change.md`): a `chained-pr`
   change closes as its recorded chain of PRs, not as one merged blob, and an unrecorded
