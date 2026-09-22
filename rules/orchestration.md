@@ -54,6 +54,12 @@ evidence:
 openQuestions:
 ```
 
+With the trace log (`rules/observability.md`), **every brief and every entry of a run
+also carries `runId`** — the run id (`run-<UTC ISO-8601 compact>`) minted once at the
+workflow's preflight and threaded through every stage brief, so a run's trace entries
+can be grouped and resumed deterministically. It is present on every stage
+brief/entry of a run — not optional.
+
 Semantics:
 
 | Field | Content |
