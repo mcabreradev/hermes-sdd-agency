@@ -205,8 +205,8 @@
   <div class="wrap">
     <div>
       <div class="hero-kicker">A SPEC-DRIVEN DEVELOPMENT LOOP FOR HERMES AGENT</div>
-      <h1>One orchestrator. Eight roles. A gate that stops code without a validated spec.</h1>
-      <p class="lede">Reusable rules, workflows, agent contracts, skill bundles and personas that run software projects end to end. Hermes is the only bus — it decides, delegates, re-verifies and closes. OpenSpec holds the requirements inside each project&rsquo;s repo.</p>
+      <h1>One orchestrator. Nine roles. Evidence you can point at.</h1>
+      <p class="lede">Reusable rules, workflows, agent contracts, skill bundles and personas that run software projects end to end. Hermes is the only bus — it decides, delegates, re-verifies and closes. Every claim becomes a hash; OpenSpec holds the requirements inside each project&rsquo;s repo.</p>
       <div class="hero-cta">
         <a class="btn btn-solid" href="https://github.com/mcabreradev/hermes-sdd-agency">Browse the repo</a>
         <a class="btn" href="#install">Install guide</a>
@@ -223,9 +223,10 @@
         <div class="stp"><span class="n">5</span><span class="t">builder · code + tests</span><span class="w code">writes</span><span class="bar"></span></div>
         <div class="stp"><span class="n">6</span><span class="t">reviewer · adversarial diff</span><span class="w block">can block</span><span class="bar"></span></div>
         <div class="stp"><span class="n">7</span><span class="t">qa · execute scenarios</span><span class="w block">can block</span><span class="bar"></span></div>
-        <div class="stp"><span class="n">8</span><span class="t">release · notes + archive + sync</span><span class="w code">close</span></div>
+        <div class="stp"><span class="n">8</span><span class="t">pr-review · formal QA gate on the PR</span><span class="w block">can block</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">9</span><span class="t">release · notes + archive + sync</span><span class="w code">close</span></div>
       </div>
-      <div class="loop-note">gate: validate passes → no ERROR · archive + sync specs · final report</div>
+      <div class="loop-note">gate: validate passes → no ERROR · freeze → tier → review → compare · archive + sync · final report</div>
     </div>
   </div>
 </section>
@@ -242,6 +243,7 @@
       <div class="role"><h3>planner</h3><p>Breaks the change into granular, verifiable tasks.</p></div>
       <div class="role"><h3>builder</h3><p>The only stage that writes code, in batches of tasks — behavior-bearing work is <strong>test-first</strong> by rule (TDD, backend included).</p></div>
       <div class="role"><h3>reviewer</h3><p>Adversarial review of the diff against the spec.<span class="flag block">blocks</span></p></div>
+      <div class="role"><h3>pr-reviewer</h3><p>Formal QA gate on the PR itself before it closes — domain review + adversarial + QA.<span class="flag block">blocks</span></p></div>
       <div class="role"><h3>qa</h3><p>Validates real behavior against the spec scenarios by executing them.<span class="flag block">blocks</span></p></div>
       <div class="role"><h3>release</h3><p>Release notes, OpenSpec archive, final repo state.</p></div>
     </div>

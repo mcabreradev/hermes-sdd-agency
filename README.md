@@ -1,211 +1,262 @@
-# Hermes SDD Agency
+# Hermes SDD Agency — the AI dev shop that audits itself
 
-[![MIT License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
-[![OpenSpec](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg)](INSTALL.md)
-[![Made for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg)](https://hermes-agent.nousresearch.com/)
-[![Site](https://img.shields.io/badge/website-live-teal.svg)](https://mcabreradev.github.io/hermes-sdd-agency/)
-![Status: public](https://img.shields.io/badge/status-public-brightgreen.svg)
+> An opinionated, Spec-Driven Development orchestration system for [**Hermes Agent**](https://hermes-agent.nousresearch.com/). One orchestrator, nine agent roles, and a review chain that turns "trust me" into hashes — OpenSpec holds the requirements **inside each project's repo**.
 
-An opinionated **Spec-Driven Development** orchestration system for [Hermes
-Agent](https://hermes-agent.nousresearch.com/). Hermes is the sole orchestrator;
-eight agent roles do the work; [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-holds the requirements **inside each project repo**.
+![MIT](https://img.shields.io/badge/license-MIT-purple.svg) ![OpenSpec 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg) ![for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg) ![5 evidence bins](https://img.shields.io/badge/evidence%20bins-5-teal.svg) ![60 skills](https://img.shields.io/badge/skills-60-brightgreen.svg) ![15 bundles](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![install 1 command](https://img.shields.io/badge/install-1%20command-success)
 
-Process is global, product is local: this repo ships the **process** (rules, agents,
-workflows, templates, skill bundles, personas). It contains **no project's
-requirements** — OpenSpec lives in each project's own `openspec/`.
+## 📖 Contents
 
-## What's inside
+- [⚡ TL;DR](#-tldr)
+- [🎯 The pitch](#-the-pitch)
+- [📁 Repository layout](#-repository-layout)
+- [🔄 The loop & the gate](#-the-loop--the-gate)
+- [🔗 The evidence chain (5 bins)](#-the-evidence-chain-5-bins)
+- [🤖 Agent roles](#-agent-roles)
+- [🎚️ Task levels](#-task-levels)
+- [🧠 Skill catalog (60 skills · 23 personas + 37 process)](#-skill-catalog-60-skills--23-personas--37-process)
+- [🧪 Fixture suites](#-fixture-suites)
+- [📜 Operating rules](#-operating-rules)
+- [🚀 Quick start](#-quick-start)
+- [🐕 How this repo eats its own dogfood](#-how-this-repo-eats-its-own-dogfood)
+
+## ⚡ TL;DR
+
+| | |
+|---|---|
+| **What** | The **process** of a Spec-Driven Development agency: rules, agent contracts, workflows, templates, skills and 15 slash-command bundles — reusable in any project |
+| **Orchestrator** | Hermes is the **only bus**. Agents never talk to each other; every output returns to Hermes and is **re-verified in the repo** |
+| **The gate** | No implementation code before a **validated OpenSpec change** exists in the project |
+| **Who can block** | Only the **reviewer** and **qa** — open BLOCKER/MAJOR or `qa: fail` halts the loop |
+| **Evidence** | 5 bins turn claims into hashes: a stage validates content it can point at, or it doesn't advance |
+| **Product vs process** | This repo ships **process only**; no project's requirements live here — those live in each project's own `openspec/` |
+| **Install** | `bash <(curl -fsSL …/install.sh)` — one command, guarded against overwrites |
+| **Autonomous** | `/do` runs the whole loop end-to-end and ends in a PR for your morning review |
+
+## 🎯 The pitch
+
+AI coding agents forget, improvise, and self-report. Three failures break every AI-assisted workflow unless you build against them:
+
+1. **Context amnesia** — a new session starts from zero and asks you what the files already answer. State lives in memory instead of the repo.
+2. **Smoke** — an agent says "I tested it" about content it may never have seen, or a tree that changed five minutes later. The review describes code that no longer exists.
+3. **Depth by mood** — big migrations get skimmed, small fixes get three passes, because review depth follows whoever is on shift instead of the diff's real risk.
+
+The fix is structural: **state in files, evidence as hashes, review depth derived from the diff.** An agent's output is a self-report until a command proves it — always re-verify in the repo.
+
+## 📁 Repository layout
 
 ```
-agents/         role contracts (discovery · openspec · architect · planner ·
-                builder · reviewer · qa · release) + README entry point
+agents/         agent contracts (discovery · openspec · architect · planner ·
+                builder · reviewer · pr-reviewer · qa · release) + README
+bin/            the 5 evidence bins: no-smoke-worktree · skill-registry ·
+                review-snapshot · review-tier · agency-next
+rules/          orchestration · openspec · sdd · quality · coding · testing ·
+                project-boundaries
 workflows/      initialize-project · idea-to-openspec · openspec-to-architecture ·
-                plan-change · implement-change · review-change · qa-change · release-change
-rules/          orchestration · project-boundaries · openspec · sdd · quality ·
-                coding · testing
-templates/      openspec-project · proposal · spec · tasks · architecture · adr ·
-                review-report · qa-report · initialize-project-report · final-report
-docs/           sdd-feature-lifecycle · usage-examples · FAQ
-bin/            no-smoke-worktree — content-fingerprint of the working tree
-                (binds reviewer/QA evidence to the exact tree they validated)
-                skill-registry — read-only inventory of installed skills
-                (exact SKILL.md path + description, flags defective frontmatter)
-                review-snapshot — freezes the review candidate before anything reads it
-                (content fingerprint + diff hash; --compare detects that the tree moved)
-                review-tier — derives review depth (low/medium/high) from the diff
-                (declared rules in rules/quality.md; informational, never a gate)
-                agency-next — the derived state + the one valid next transition
-                (read from files; informational, never blocks or authorizes)
-skill-bundles/  /agency /feature /bugfix /fix and per-stage slash commands
-skills/agents/  domain-expertise personas installed from aitmpl.com
+                plan-change · implement-change · review-change · qa-change ·
+                release-change · pr-review · autonomous-change · continue-change
+templates/      final-report · review-report · qa-report · adr · spec · tasks · …
+docs/           evidence-bins · sdd-feature-lifecycle · usage-examples · FAQ
+skill-bundles/  15 slash-command bundles: /agency /feature /do /review /qa …
+skills/         60 process skills (23 agency personas + 37 workflow skills)
+fixtures/       5 runnable test suites that pin the bins themselves
+openspec/specs/ 7 capability specs — the agency's own requirements, versioned
 ```
 
-One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the
-process; the project provides the product.** Global instructions are reusable and never
-carry a product requirement; product knowledge lives in the project's repo.
+One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the process; the project provides the product.** Global instructions are reusable and never carry a product requirement; product knowledge lives in the project's repo.
 
-## The central gate
+## 🔄 The loop & the gate
 
-> **No implementation code is written before a validated OpenSpec change exists in the
-> project.** `rules/openspec.md`
+```
+┌─────────────── the canonical loop ───────────────────────────────┐
+│  0 initialize-project   (no code)                                │
+│  1 discovery · idea / PRD                                        │
+│  2 openspec · proposal + deltas     ◄── GATE: validate, no ERROR │
+│  3 architect · design + ADRs                                     │
+│  4 planner · tasks.md                                            │
+│  5 builder · code + tests (TDD by hard rule)                     │
+│  6 reviewer · adversarial diff    ◄── can BLOCK (BLOCKER/MAJOR)  │
+│  7 qa · executes the scenarios   ◄── can BLOCK (qa: fail)        │
+│  8 release · notes + archive + sync + evidence-comparison         │
+└──────────────────────────────────────────────────────────────────┘
+   gate: no code without a validated change · two failures with the
+   same error ⇒ the spec is wrong, go back a stage — never in circles
+```
 
-Order: `explore → propose → validate → apply → verify → archive`.
+Hermes is the only orchestrator: it decides which stage runs, delegates one bounded task per agent, validates every output in the real repo, applies retries and blockers, asks the human on ambiguity, and closes with a final report. Order: `initialize-project → discovery → propose → validate → plan → apply → verify → release`.
 
-Three task levels, decided by Hermes (`rules/openspec.md` "Task size and fast path"):
+## 🔗 The evidence chain (5 bins)
+
+One principle: **an agent's report is a self-report, not a fact.** Five small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
+
+| Bin | Question it answers | When it runs |
+|---|---|---|
+| `no-smoke-worktree` | What is the exact content of this tree, right now? | every stage that claims evidence |
+| `review-snapshot` | Which candidate was frozen before the review? | **before** the reviewer/QA read a thing |
+| `review-tier` | How deep should this review go? | from the diff itself, before the review |
+| `agency-next` | What is the single next step, and why? | every checkpoint, from files alone |
+| `skill-registry` | Which skills actually resolve — and which mis-route? | after any install/sync |
+
+- **`no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked + ignored). Reviewer, QA and release record it; a mismatch at delivery means the evidence describes content that no longer exists. Survives rebase/amend; changes when any source changes.
+- **`review-snapshot`** — freezes the candidate **before** anything reads it (base, HEAD, fingerprint, diff hash). Findings bind to that snapshot; `--compare` at delivery is content-based, so a clean rebase matches while a real change trips the alarm.
+- **`review-tier`** — depth from the diff's shape: ≤400 authored lines ⇒ `medium`; schema/migration, auth, security config or dependency manifests ⇒ `high`; an unmeasurable diff ⇒ `cannot assess`, **never** a rubber-stamp `low`. Informational — never blocks.
+- **`agency-next`** — the derived state + the single valid next transition, read from files. A missing input **narrows** the answer; it never defaults to optimistic, and it never blocks, merges or archives.
+- **`skill-registry`** — read-only inventory: exact `SKILL.md` path, description, tags, and flags for the frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR` content-less indicator, `MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). Pinned by its own fixture suite.
+
+All five are informational or evidence-bound: they surface truth, they never silently approve. The gates remain the reviewer's and QA's verdicts.
+
+## 🤖 Agent roles
+
+| Role | Responsibility | Writes code? | Can block? |
+|---|---|---|---|
+| `discovery` | Explores the domain, writes the PRD, bounds vague ideas | No | — |
+| `openspec` | Scaffolds the validated change: proposal, delta specs, scenarios | No | — |
+| `architect` | Boundaries, contracts, rejected alternatives, ADRs | No | — |
+| `planner` | Breaks the change into granular, verifiable tasks | No | — |
+| `builder` | **The only stage that writes code** — test-first by hard rule | **Yes** | — |
+| `reviewer` | Adversarial review of the diff against the spec, design, rules | No | **Yes** |
+| `pr-reviewer` | Formal QA gate on the **PR itself** before it closes | No | **Yes** |
+| `qa` | Validates **real behavior** against the spec scenarios by executing them | No | **Yes** |
+| `release` | Release notes, archive, spec sync, evidence-comparison, final report | No | — |
+
+Every output returns in the mandatory envelope (`status / summary / projectRoot / filesCreated / filesModified / blockers / nextRecommendedStep / evidence / openQuestions`), and Hermes re-verifies every claim against the real repo before the next stage.
+
+## 🎚️ Task levels
 
 | Level | Examples | Path |
 |---|---|---|
-| **Cosmetic** — no behavior change | typo, indentation, local rename | Direct edit, no OpenSpec change |
+| **Cosmetic** — no behavior change | typo, indentation, local rename | direct edit, no OpenSpec change |
 | **Minimal** — bounded, with behavior | bug fix + regression test, error message | OpenSpec change with `skip_specs: true` |
-| **Feature** — business rules / contract / architecture | new functionality, API change | **Full loop** with delta spec, personas, formal QA |
+| **Feature** — business rules / contract / architecture | new functionality, API change | **full loop** with delta spec, personas, formal QA + PR gate |
 
-Language contract (`rules/sdd.md`): **everything the system produces is written in
-English** — specs, code, branches, commits, PRs, documentation. The only exception is
-the conversation with the user.
+Language contract (`rules/sdd.md`): **everything the system produces is English** — specs, code, branches, commits, PRs, docs. The only exception is the conversation with the user.
 
-## Install (into another Hermes)
+## 🧠 Skill catalog (60 skills · 23 personas + 37 process)
 
-**One command:**
+Descriptions read from each skill's own `SKILL.md` frontmatter — generated by the repo's own `skill-registry` bin, so the catalog can't drift from what ships.
+
+<details>
+<summary><b>🧠 Agency personas — the roles that do the work</b> — 23 skills</summary>
+
+| Skill | What it does |
+|---|---|
+| `architect-reviewer` | Review code for architectural consistency and patterns. |
+| `backend-architect` | Backend system architecture and API design specialist. |
+| `backend-developer` | Building server-side APIs, microservices |
+| `code-architect` | Designs feature architectures by analyzing existing... |
+| `code-reviewer` | Conduct comprehensive code reviews focusing on code quality |
+| `code-simplifier` | Simplifies and refines code for clarity, consistency |
+| `codebase-explorer` | Deep-dive analysis of unfamiliar codebases; mental model |
+| `debugger` | Diagnose and fix bugs, identify root causes of failures |
+| `error-detective` | Diagnose why errors are occurring in your system |
+| `fullstack-developer` | Build complete features spanning database, API |
+| `git-workflow-manager` | Design, establish, or optimize Git workflows |
+| `legacy-modernizer` | Modernizing legacy systems that need incremental... |
+| `pragmatic-architect` | Build, review, and refactor code based on the Pragmatic... |
+| `prd` | Generate a comprehensive Product Requirements Document... |
+| `qa-expert` | Validates real behavior against the spec scenarios by executing them. |
+| `research-technical-spike` | Systematically research and validate technical spike... |
+| `sdd-spec-writer` | Spec-driven development specs: executable contracts. |
+| `security-auditor` | Conducting comprehensive security audits |
+| `supply-chain-security` | Audit software supply chain: deps, artifacts, SLSA. |
+| `task-decomposition-expert` | Break down a complex, multi-step goal into an... |
+| `technical-debt-manager` | Expert technical debt analyst for code health |
+| `test-engineer` | Test automation and quality assurance specialist. |
+| `typescript-pro` | Implementing TypeScript code requiring advanced type... |
+</details>
+
+<details>
+<summary><b>⚙️ Process & workflow skills — loaded on demand inside the stages</b> — 37 skills</summary>
+
+| Skill | What it does |
+|---|---|
+| `architecture-decision-records` | Comprehensive patterns for creating, maintaining |
+| `code-health` | Score repo quality 0-10 from real tool output, with befor... |
+| `code-review-checklist` | Comprehensive checklist for conducting thorough code... |
+| `commit-smart` | Analyze staged/unstaged changes and create semantic... |
+| `context-architecture` | Audit a codebase and bind every claim it makes about itself to a mechanism that fails when the claim... |
+| `design-exploration` | Generate multiple design variants, compare, and collect s... |
+| `design-to-html` | Turn an approved design or description into clean, depend... |
+| `developer-experience-review` | Audit a developer-facing surface: onboarding, docs, CLI; ... |
+| `diagram-triplet` | Turn a description/mermaid source into excalidraw + SVG/P... |
+| `dispatching-parallel-agents` | Facing 2+ independent tasks that can be worked on... |
+| `document-diataxis` | Generate complete, structured docs with the Diataxis quar... |
+| `e2e-testing-patterns` | Build reliable, fast, and maintainable end-to-end test... |
+| `executing-plans` | You have a written implementation plan to execute in a... |
+| `openspec-apply-change` | Implement tasks from an OpenSpec change. Use when the use... |
+| `openspec-archive-change` | Archive a completed change in the experimental workflow. ... |
+| `openspec-bulk-archive-change` | Archive multiple completed changes at once. Use when arch... |
+| `openspec-continue-change` | Continue working on an OpenSpec change by creating the ne... |
+| `openspec-explore` | Enter explore mode - a thinking partner for exploring ide... |
+| `openspec-ff-change` | Fast-forward through OpenSpec artifact creation. Use when... |
+| `openspec-new-change` | Start a new OpenSpec change using the experimental artifa... |
+| `openspec-onboard` | Guided onboarding for OpenSpec - walk through a complete ... |
+| `openspec-propose` | Propose a new change with all artifacts generated in one ... |
+| `openspec-sync-specs` | Sync delta specs from a change to main specs. Use when th... |
+| `openspec-update-change` | Update an OpenSpec change by revising its existing planni... |
+| `openspec-verify-change` | Verify implementation matches change artifacts. Use when ... |
+| `plan-scope-review` | Choose a scope mode for a plan before planning: expand, h... |
+| `project-learnings` | Persistent per-project learnings, versioned with the code... |
+| `qa-test-planner` | Generate comprehensive test plans, manual test cases |
+| `requirements-clarity` | Clarify ambiguous requirements through focused dialogue... |
+| `review-structural` | Scan a diff for structural defects before landing; SQL, t... |
+| `security-evidence-first` | Security review: evidence before assurance; attacker, bou... |
+| `software-development` | Invoke the SDD agency: /agency and per-stage bundles. |
+| `verification-before-completion` | About to claim work is complete, fixed, or passing |
+| `visual-design-review` | Visual QA of a live UI: catch slop, fix with before/after... |
+| `web-performance-benchmark` | Baseline Core Web Vitals and bundle size; before/after on... |
+| `writing-plans` | You have a spec or requirements for a multi-step task |
+</details>
+
+> Generated from `skills/**/SKILL.md` frontmatter by `bin/skill-registry` — the catalog's source of truth is the repo.
+
+## 🧪 Fixture suites
+
+The bins are pinned by **runnable suites**, not by fixtures that never run. A suite that can't run fails loudly (exit 3), never passes silently.
+
+| Suite | Pins |
+|---|---|
+| `fixtures/sensitive-paths/check.sh` | the deny-list matches every documented row |
+| `fixtures/skill-registry/check.sh` | 13 detector cases incl. the false-positive shapes it was fixed for |
+| `fixtures/review-tier/check.sh` | tier derivation (26 cases) |
+| `fixtures/review-snapshot/check.sh` | freeze/compare semantics (10 cases) |
+| `fixtures/agency-next/check.sh` | the state machine (15 cases, throwaway repos) |
+
+## 📜 Operating rules
+
+| Rule | Purpose |
+|---|---|
+| `orchestration.md` | Hermes is the only orchestrator; agents never talk to each other, never read each other's state |
+| `openspec.md` | **The gate**: no code without a validated OpenSpec change — no exceptions |
+| `sdd.md` | When the full loop runs vs the fast path; language contract (everything produced is English) |
+| `quality.md` | Quality is verifiability — evidence binds to content, never to claims; frozen-candidate + review tier |
+| `coding.md` | Work-unit commits (~400-line heuristic for one reviewable delivery); scope declared and diffed |
+| `testing.md` | Behavior-bearing work is **test-first** (TDD) by hard rule; only behavior-free code is exempted with a reason |
+| `project-boundaries.md` | Strict isolation: process vs product vs `~/.hermes`; sensitive-path deny list enforced on evidence |
+
+## 🚀 Quick start
+
+**One command** installs the process tree, skills and 15 bundles into a Hermes home (default `~/.hermes`; interactive menu, guarded against accidental overwrites, idempotent):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/mcabreradev/hermes-sdd-agency/main/install.sh)
 ```
 
-It asks where to install (default `~/.hermes`) via an interactive menu when
-run in a terminal — arrow keys to navigate, space to toggle bundles, type to
-filter, Enter to confirm, Esc/Ctrl+C to cancel; nothing is written until you
-confirm the summary. On that final Yes/No confirm, `↑/←` picks **Yes**, `↓/→`
-picks **No**, and the keys **y**/**n** work too — it defaults to **No** so an
-overwrite can't ride a stray Enter. It merges the process tree, skills and
-bundles, and is idempotent — safe to re-run. Piped runs (like the one-command
-form above, stdin not a TTY) skip the menu and use the defaults. Flags:
-`-p <home>` target (also honors
-`$HERMES_HOME`), `--bundles a,b,c` subset, `--no-bundles`, `--dry-run`, `-y` to skip the
-overwrite confirmation on non-interactive runs. Or clone and run `./install.sh` to skip the
-re-download. Full guide in `INSTALL.md`.
-
-### Enabling `/feature` (discovery skills)
-
-`/feature` runs a **discovery-first** loop: it loads `superpowers:brainstorming`,
-`grill-with-docs`, `grilling` and `domain-modeling` before any planning or code
-(HARD-GATE: no implementation until the design is approved). Those four skills are
-**not** shipped by this repo. Install them once on the target:
+Then, in any project:
 
 ```bash
-hermes plugins install obra/superpowers --enable       # brainstorming
-npx skills@latest add mattpocock/skills                # the other three (entire set)
-# or just the three:
-#   npx skills@latest add mattpocock/skills -a hermes-agent \
-#     --skill grilling --skill grill-with-docs --skill domain-modeling
+hermes        # > let's run SDD: add SSO login to the web app
+/agency       # run the loop stage by stage
+/feature      # feature-level (full loop, discovery-first)
+/do           # autonomous: run the whole loop, end in a PR for your morning review
+/continue     # resume an existing change from its pending stage, update the PR
 ```
 
-The `install.sh` warns (never installs) when `/feature` is selected and these skills
-are missing. Without them, `/feature` still runs the SDD loop; only its discovery step
-cannot resolve its skills. `/agency` and the other stage bundles are unaffected.
+For `/feature`'s discovery step, install the four discovery skills once (`superpowers:brainstorming` + mattpocock's `grilling`, `grill-with-docs`, `domain-modeling`) — the installer warns, never installs. Full guide: `INSTALL.md`.
 
-### `/do` — autonomous mode (run the loop while you sleep)
+## 🐕 How this repo eats its own dogfood
 
-`/do` runs the full agency loop end-to-end with minimal human input — discovery,
-spec, plan, build, review, bugfix loop, QA, and a final **PR (draft)** awaiting your
-review. You merge in the morning. It never publishes, tags or merges itself.
+This repository is maintained **by the process it ships**: every feature here went through the same loop — an OpenSpec change, adversarial review, a formal PR QA gate (#15), a frozen-candidate evidence chain (#19), and the fix of a false positive (`skill-registry`) that a real reviewer caught because the loop demands evidence over assertion. The skill catalog above is generated by one of the bins it ships. If one day this README becomes a self-report, the loop is designed to notice.
 
-It is governed by a **confidence gate**: routine decisions (follow the existing
-stack, minimal behavior, don't expand scope) run automatically with every decision
-recorded as an ADR and flagged `ASSUMED — verify in PR`. The moment a stage hits a
-**non-trivial** decision — a contract/API change, data-model change, real security
-risk (auth/secrets/exposure), an ambiguous business rule that changes visible
-behaviour, or something costly to revert — it stops that stage and waits for you.
-"Routine sleeps, non-trivial wakes."
+---
 
-Every run ends with `templates/autonomous-report.md` in the project listing what
-ran and every `ASSUMED` decision, so the PR is auditable. For routine, well-scoped
-features this is exactly "go to sleep, wake up to a feature"; for a new domain or
-anything touching a contract/security it stops and asks. Try it first on a toy
-project, then read the first PR's ASSUMED list cover-to-cover before trusting it
-overnight. See `workflows/autonomous-change.md`.
-
-### `/continue` — continue an existing change
-
-`/continue` continues when a **validated OpenSpec change already exists**
-(proposal/spec/tasks, e.g. via `/feature`) and you want the rest of the loop run:
-code → review → QA → archive+sync, ending with the **existing PR draft updated**.
-It detects the state (`openspec list`/`status`, git, PR) rather than assuming it,
-so it never re-runs discovery/spec already done and never opens a second PR. Same
-confidence gate as `/do` (routine sleeps, non-trivial wakes). See
-`workflows/continue-change.md`.
-
-## Evidence you can verify: five bins, one chain
-
-Agent outputs are **self-reports**, not facts — so the loop ships five commands that turn
-claims into hashes. They read **files**, never memory, and a fresh session gets the same
-truthful answer. The chain: **freeze → tier → review → compare**. Full guide with step-by-step
-examples and real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
-
-- **`bin/no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked +
-  ignored). Reviewer, QA and release record the fingerprint of the tree they worked on; a
-  mismatch at delivery means the evidence describes content that no longer exists.
-- **`bin/review-snapshot`** — freezes the review candidate **before** anything reads it (base,
-  HEAD, fingerprint, diff hash). Findings bind to that snapshot; `--compare` at delivery
-  reports a `MISMATCH` (non-zero) when the tree moved. Content-based, so a rebase/amend that
-  preserves content still matches.
-- **`bin/review-tier`** — derives review depth (`low`/`medium`/`high`) from the diff's own
-  shape using the declared table in `rules/quality.md` (≤400 authored lines ⇒ `medium`;
-  schema/migration, auth, security config or dependency manifests ⇒ `high`; an unmeasurable
-  diff ⇒ `cannot assess`, never a rubber-stamp `low`). Informational — never blocks.
-- **`bin/agency-next`** — the derived state + the one valid next transition, read from files
-  (OpenSpec JSON, git tree, fingerprint, snapshot). A missing input **narrows** the answer;
-  it never defaults to optimistic, and it never blocks, merges or archives.
-- **`bin/skill-registry`** — read-only inventory of installed skills: exact `SKILL.md` path,
-  name, description and tags, and flags for the frontmatter defects that make a skill load
-  but mis-route (`BLOCK-SCALAR` content-less indicator, `MISSING-DESCRIPTION`,
-  `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). Pinned by `fixtures/skill-registry/check.sh`.
-
-## Complementary skills (`skills/`)
-
-Beyond the personas and OpenSpec mechanics, the repo ships process skills for the loop:
-
-- **implement** `test-driven-development` — **hard rule at the build stage**:
-  behavior-bearing work — backends, business logic, API endpoints, bug fixes — is written
-  test-first (RED→GREEN→REFACTOR) with no agent discretion to skip it; only
-  behavior-free code is declared `not applicable` with a reason.
-  `domain-modeling` — DDD the architect applies when the domain merits it. Both wired
-  into `rules/testing.md`, `agents/builder.md` and `agents/architect.md`.
-- **review** `review-structural` — diff scan for SQL, LLM trust-boundary, conditional side effects.
-- **qa** `code-health` (0-10 score), report-only mode in `qa-change`.
-- **plan** `plan-scope-review` — pick a scope mode (expand / hold / strip) before planning.
-- **reliability** `web-performance-benchmark` (Core Web Vitals), `project-learnings`
-  (`.context/learnings.jsonl`), `developer-experience-review` (plan vs reality).
-- **design** `visual-design-review`, `design-exploration`, `design-to-html`, `diagram-triplet`.
-- **docs / security** `document-diataxis` (coverage map, used by `release-change`),
-  `security-evidence-first` (attacker·boundary·impact·challenge).
-
-For a full walkthrough of the idea → release path, see `docs/sdd-feature-lifecycle.md`
-(the orchestration flow at a glance: ![flow](docs/agency-flow.svg)).
-For copy-paste scenarios (feature, bug fix, cosmetic, init, resume) see
-`docs/usage-examples.md`. Frequently asked questions: `docs/FAQ.md`. For a complete
-study change showing the real `proposal.md` / `spec.md` / `tasks.md` shape, see
-`docs/example-change/`. A rendered landing page is live at
-**[mcabreradev.github.io/hermes-sdd-agency/](https://mcabreradev.github.io/hermes-sdd-agency/)**.
-
-See also `CONTRIBUTING.md` (how to change the agency) and `CHANGELOG.md` (release
-history).
-
-Always re-verify an agent's claim in the repo (`git status --porcelain`,
-`git diff --stat`, re-run the gate) — **an agent's output is a self-report, not a fact**.
-
-## Rules that are never broken
-
-1. No implementation code without a validated OpenSpec change.
-2. OpenSpec lives in each project's repo, never in Hermes.
-3. Hermes operates against the current project root; never mixes sibling-project context.
-4. Agents never talk to each other; every output goes to Hermes, which validates.
-5. Product requirements are never global truth.
-6. Evidence > assertion; outputs are re-verified in the repo.
-7. Every report declares `projectRoot`.
-8. `openspec/project.md` is mandatory in the project.
-
-## License
-
-MIT — see `LICENSE`. The persona skills under `skills/agents/` are installed from
-aitmpl.com and keep their upstream provenance in their `SKILL.md` frontmatter.
+*The process is the product. [MIT](LICENSE) — the persona skills under `skills/agents/` keep their upstream provenance (aitmpl.com) in their frontmatter.*
