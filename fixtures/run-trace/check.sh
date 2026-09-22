@@ -53,6 +53,16 @@ else
   fail=$((fail + 1))
 fi
 
+# class and trust surface per entry (the blocker-classification + trust payload)
+checked=$((checked + 1))
+if printf '%s' "$out" | grep -q 'trust=verified' && printf '%s' "$out" | grep -q 'trust=blocked' \
+   && printf '%s' "$out" | grep -q '"class":"decision"'; then
+  printf 'OK     %-40s trust + blocker class surfaced\n' "class/trust surfaced"
+else
+  printf 'FAIL   %-40s out=%s\n' "class/trust surfaced" "$(printf '%s' "$out" | grep -E 'trust=|class=' | tr '\n' '|')"
+  fail=$((fail + 1))
+fi
+
 # determinism
 checked=$((checked + 1))
 if diff <(bash "$TRACE" --file "$SAMPLE" 2>&1) <(bash "$TRACE" --file "$SAMPLE" 2>&1) >/dev/null; then
