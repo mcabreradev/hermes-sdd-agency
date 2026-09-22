@@ -192,6 +192,7 @@
         <a href="#levels">Task levels</a>
         <a href="#commands">Commands</a>
         <a href="#usage">Usage</a>
+        <a href="#real-world">Real world</a>
         <a href="#faq">FAQ</a>
         <a href="#advanced">Advanced</a>
         <a href="#rules">Principles</a>
@@ -353,6 +354,40 @@
 &gt; let&rsquo;s run SDD: add SSO login to the web app
 &gt; fix the invoice total — it rounds wrong when the tax is 21% with decimals
 &gt; rename the local variable dat to data in src/parser.ts</div>
+  </div>
+</section>
+
+<section id="real-world">
+  <div class="wrap">
+    <div class="sec-label">PUT IT TO WORK</div>
+    <h2>Real situations it actually solves.</h2>
+    <p class="sec-intro">The loop is the same; the trigger changes with the risk. These are the everyday moments where the agency earns its keep — no setup beyond the one-command install.</p>
+    <div class="usage-cards">
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 1 0-3.5 5.4M9 15l-3 3M14 15l4-1.5-1.5-4"/></svg><span class="adv-title">&ldquo;Ship a feature while I sleep&rdquo;</span></div>
+        <p>Run <code>/do</code> before bed. It discovers, specs, plans, builds, reviews and QA&rsquo;d the change by morning — every <code>ASSUMED</code> decision flagged in an ADR. You wake up to a PR, not a fire. Routine sleeps; non-trivial decisions (contracts, security) wake you mid-run.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h12M3 18h7"/></svg><span class="adv-title">&ldquo;Prove the review wasn&rsquo;t smoke&rdquo;</span></div>
+        <p>Before <code>/review</code>, the candidate is frozen (<code>review-snapshot</code>) and the depth derived from the diff (<code>review-tier</code>). At delivery, <code>--compare</code> catches a tree that moved since the evidence was recorded. &ldquo;Approved&rdquo; means <em>this exact content</em>.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg><span class="adv-title">&ldquo;Pick up where I left off, from scratch&rdquo;</span></div>
+        <p>Session died? New machine? <code>/continue</code> reads the state from files (OpenSpec JSON, git tree, fingerprint, snapshot) and resumes at the exact pending stage — it never re-runs what&rsquo;s done, never opens a second PR.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg><span class="adv-title">&ldquo;My skills silently stopped routing&rdquo;</span></div>
+        <p>Run <code>skill-registry --root ~/.hermes/skills</code>. It inventories every skill and flags the frontmatter defects that make one load but route wrong — no more trusting that &ldquo;the install worked.&rdquo;</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7-7 7s-7-2-7-7 3.5-7 7-7c2.8 0 4.8 1 5.5 3"/><path d="M14 8 20 7l-1-6"/></svg><span class="adv-title">&ldquo;A rebase moved everything&rdquo;</span></div>
+        <p>Fingerprints survive rebase/amend when the content is preserved, and change when it isn&rsquo;t. <code>no-smoke-worktree</code> + <code>review-snapshot --compare</code> tell you whether the evidence still describes the tree — before you merge, not after.</p>
+      </div>
+      <div class="use">
+        <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg><span class="adv-title">&ldquo;Small team, many parallel changes&rdquo;</span></div>
+        <p>Each project is a separate workflow with its own root and change; independent stages fan out via <code>delegate_task</code> over git worktrees. Hermes never mixes context across projects — scale without contamination.</p>
+      </div>
+    </div>
   </div>
 </section>
 
