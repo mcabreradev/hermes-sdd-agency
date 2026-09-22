@@ -30,4 +30,4 @@
 - [x] 4.2 Run the repo's real checks on everything touched: `bash -n` on every `bin/` script and fixture script, both fixture checks green, and `bin/no-smoke-worktree` still exits 0. Verifies: quoted exit codes and the fingerprint value
 - [x] 4.3 QA the installer still carries the new bins to a temp prefix. Verifies: `test -x <temp-prefix>/bin/review-snapshot` and `test -x <temp-prefix>/bin/review-tier` plus the installer's exit code
 - [x] 4.4 Update `CHANGELOG.md` `[Unreleased]` with one short entry per bin, keeping the Gentle-AI (MIT) attribution. Verifies: `grep -q 'review-snapshot' CHANGELOG.md && grep -q 'review-tier' CHANGELOG.md`
-- [ ] 4.5 Tick every task only against its own verification command, then archive + sync as a separate follow-up. Verifies: `openspec instructions apply --change "evidence-bound-review" --json` with `progress.remaining == 0`
+- [x] 4.5 Tick every task only against its own verification command, then archive + sync as a separate follow-up. Verifies: `openspec instructions apply --change "evidence-bound-review" --json` with `progress.remaining == 0`

@@ -21,4 +21,4 @@
 - [x] 3.2 Run the repo's real checks on everything touched: `bash -n` on every `bin/` script and fixture script, all fixture checks green, and `bin/no-smoke-worktree` still exits 0. Verifies: quoted exit codes for all four fixture suites (each `failures=0`, non-zero if nothing ran) and the fingerprint value
 - [x] 3.3 QA the installer still carries the new bin to a temp prefix. Verifies: `install.sh --prefix "$(mktemp -d)" --yes` exits 0 and `test -x <temp-prefix>/bin/agency-next` passes
 - [x] 3.4 Update `CHANGELOG.md` `[Unreleased]` with one short entry, keeping the Gentle-AI (MIT) attribution. Verifies: `grep -q 'agency-next' CHANGELOG.md`
-- [ ] 3.5 Tick every task only against its own verification command, then archive + sync as a separate follow-up. Verifies: `openspec instructions apply --change "agency-state-machine" --json` with `progress.remaining == 0`
+- [x] 3.5 Tick every task only against its own verification command, then archive + sync as a separate follow-up. Verifies: `openspec instructions apply --change "agency-state-machine" --json` with `progress.remaining == 0`
