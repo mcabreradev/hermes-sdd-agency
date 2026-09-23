@@ -9,6 +9,14 @@ coherent, reviewable increments of the system.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Public surfaces back in sync**: README, the GitHub Pages homepage (`index.html`) and
+  INSTALL now count the real tree — 7 evidence bins (`run-trace`, `change-collision`
+  added), 65 skills, 108 pinned test cases, 39 merged PRs. The homepage's loop diagram
+  runs `release` before `pr-review` (the canonical order) and `docs/evidence-bins.md`
+  documents the two new bins.
+
 ### Added
 
 - **The full agency skill set is now public** — the mirror gains the five process
