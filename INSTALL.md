@@ -2,13 +2,13 @@
 
 > Get the whole agency running on another Hermes in minutes — one command, guarded against accidental overwrites, idempotent.
 
-![install: 1 command](https://img.shields.io/badge/install-1%20command-success) ![bundles: 15](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![skills: 60](https://img.shields.io/badge/skills-60-brightgreen.svg) ![OpenSpec: 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue)
+![install: 1 command](https://img.shields.io/badge/install-1%20command-success) ![bundles: 15](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![skills: 65](https://img.shields.io/badge/skills-65-brightgreen.svg) ![OpenSpec: 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue)
 
 ## ⚡ TL;DR
 
 | | |
 |---|---|
-| **One command** | `bash <(curl -fsSL …/install.sh)` → process tree, 60 skills, 15 bundles into `~/.hermes` |
+| **One command** | `bash <(curl -fsSL …/install.sh)` → process tree, 65 skills, 15 bundles into `~/.hermes` |
 | **Guarded** | never overwrites existing config without an explicit **Yes**; idempotent — safe to re-run |
 | **Interactive** | arrow-key menu in a terminal; **piped/CI runs skip the menu** and use defaults |
 | **`/feature` ready?** | install the 4 discovery skills once (`superpowers:brainstorming` + mattpocock's 3) |
@@ -60,7 +60,7 @@ cd hermes-sdd-agency
 The overwrite guard: an existing home with other data stops and asks (interactive) or aborts
 (non-interactive, unless `--yes`). Reinstalling into an existing agency prints an update warning.
 
-### The 5 bins that ship with it (`bin/` → `<home>/bin/`)
+### The 7 bins that ship with it (`bin/` → `<home>/bin/`)
 
 ```bash
 no-smoke-worktree                      # content fingerprint of the working tree
@@ -69,6 +69,8 @@ review-snapshot --base main            # freeze the candidate before the review
 review-snapshot --compare <path>       # at delivery: MATCH or MISMATCH
 review-tier --base main                # low | medium | high, with the rules that fired
 agency-next                            # the next step, read from files
+run-trace --file reports/<runId>.jsonl # the run's stages/statuses/blockers, for resume + audit
+change-collision --base main --a <a> --b <b>  # parallelizable | collision | cannot assess
 ```
 
 - `no-smoke-worktree` — binds reviewer/QA/release evidence to the exact tree they validated
