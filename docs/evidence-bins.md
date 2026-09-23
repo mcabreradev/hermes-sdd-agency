@@ -1,6 +1,6 @@
-# The Evidence Chain — five bins that make the agency's claims verifiable
+# The Evidence Chain — seven bins that make the agency's claims verifiable
 
-> An agent's report is a **self-report**, not a fact. These five tools turn every claim into
+> An agent's report is a **self-report**, not a fact. These seven tools turn every claim into
 > something you can confirm or refute with a command — before you trust it overnight.
 
 ## The problem this solves
@@ -22,6 +22,8 @@ The fix is five small commands that read **files**, print **hashes**, and never 
 | `review-snapshot` | "Which candidate was frozen before the review?" | Before the reviewer/QA read a thing |
 | `review-tier` | "How deep should this review go?" | Before the review, from the diff itself |
 | `agency-next` | "What is the single next step, and why?" | Every checkpoint, from files alone |
+| `run-trace` | "What happened in this run — and where did it stop?" | Resume / audit: reads `reports/<runId>.jsonl` |
+| `change-collision` | "Can these two changes run in parallel?" | Before dispatching two changes concurrently |
 | `skill-registry` | "Which skills actually resolve — and any that mis-route?" | After any install/sync |
 
 The chain: **freeze → tier → review → compare**. Read the sections in order and run the
@@ -191,13 +193,57 @@ indicator's presence. Run it against your real tree:
 $ bin/skill-registry --root ~/.hermes/skills | tail -3
 PATH: …/.hermes/skills/context-architecture/SKILL.md
 FLAG: ok
-# 183 skills inventoried, 0 defects
+# 185 skills inventoried, 0 defects
 ```
 
 **Why it matters:** "the skills were installed" and "the skills load correctly" are different
 claims. This checks the second — and its pinned suite (`fixtures/skill-registry/check.sh`)
 runs the command against both healthy and defective fixtures, so the detector itself cannot
 silently drift.
+
+---
+
+## 6 · `run-trace` — what happened in the run, from the record
+
+The loop writes an NDJSON trace: every stage appends one line to `reports/<runId>.jsonl`
+(`runId` rides in the report envelope). `run-trace` reads that file and prints the run's
+stages, statuses, blockers and assumed decisions — the resume and audit view:
+
+```bash
+$ bin/run-trace --file reports/run-b6e9f.jsonl
+stage=implement   status=done     trust=verified     0 blockers
+stage=review      status=blocked  class=["decision"] 1 blocker
+stage=qa          status=pending
+```
+
+**Why it matters:** a session that dies mid-stage resumes from the record, and an audit
+reads what actually happened — not what someone recounts. It is fail-closed: an absent
+file or a malformed line reports *that* (exit non-zero), never an optimistic "nothing
+happened". Metrics beyond state (durations, retry counts) are an explicit non-goal.
+
+---
+
+## 7 · `change-collision` — parallel or sequential, from the file sets
+
+Two changes can run concurrently only when their file sets cannot corrupt each other's
+intermediate state. `change-collision` decides mechanically:
+
+```bash
+$ bin/change-collision --base main --a agent/topic-a --b agent/topic-b
+verdict: parallelizable
+reason: no overlapping paths and no shared high-risk family
+$ bin/change-collision --base main --a agent/schema --b agent/migrations
+verdict: collision
+reason: no literal overlap, but both changes touch high-risk families: …
+```
+
+The verdict is `parallelizable` | `collision` | `cannot assess`. A `collision` fires on
+overlapping paths **or** when both changes touch the same high-risk family (schema/
+migrations, `openspec/`, contracts/auth, dependency manifests) even without literal
+overlap. `cannot assess` (empty diff, bad base, unresolved ref) is non-zero **and is
+never read as `parallelizable`**. Wired into `rules/orchestration.md` ("Parallel
+execution of changes"): the verdict decides ordering, never approval — the gates stay
+the reviewer's and QA's.
 
 ---
 
@@ -212,6 +258,14 @@ silently drift.
    change back for re-review, because the evidence described different content.
 5. Every checkpoint answers "what next?" from **files** via `agency-next`; a dead session
    resumes from the same truth instead of asking you what was happening.
+6. The run keeps an NDJSON trace: every stage appends to `reports/<runId>.jsonl`, and
+   `run-trace` reads it back — stages, statuses, blockers and assumed decisions — so a
+   session that died mid-stage resumes against the same record, and an audit reads what
+   actually happened in the run, not what someone says happened.
+7. Before two changes are dispatched in parallel, `change-collision` decides from the file
+   sets: overlapping paths or a shared high-risk family (schema/migrations, `openspec/`,
+   contracts/auth, dependency manifests) ⇒ sequential; an unmeasurable diff ⇒ `cannot
+   assess`, never a silent green light.
 
 ## Copy-paste quick reference
 
@@ -221,9 +275,11 @@ review-snapshot --base origin/main --out reports/snap.json   # freeze before rev
 review-snapshot --compare reports/snap.json            # evidence still current?
 review-tier --base origin/main                         # how deep should review go?
 agency-next                                            # next step, from files
+bin/run-trace --file reports/<runId>.jsonl             # what happened in the run
+bin/change-collision --base main --a <refA> --b <refB> # parallel or sequential?
 bin/skill-registry --root ~/.hermes/skills             # what actually resolves
 ```
 
-All five are informational or evidence-bound: they surface truth, they never silently
+All seven are informational or evidence-bound: they surface truth, they never silently
 approve. The gates remain the reviewer's and QA's verdicts — and now those verdicts describe
 a tree you can point at.
