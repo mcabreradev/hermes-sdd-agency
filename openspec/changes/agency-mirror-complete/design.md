@@ -57,9 +57,9 @@ pinned by the second scenario.
 
 ## Delivery strategy
 
-Measured after implementation; expect ~1,200 authored lines (five SKILL.md + eleven
-references). Over the advisory ~400: **`single-pr` still** — the five files are a
-1:1 copy of one coherent system (the agency's process skills), there are no independent
-slices, and splitting five near-identical copy commits into stacked PRs would only
-multiply the review ceremony for zero risk reduction (the diff is a copy, reviewer reads
-one of each kind).
+Measured after implementation: **1865 authored lines** (`git diff --numstat main...HEAD`),
+well over the advisory ~400 (the `sdd-agency-maintenance` skill alone is 687 lines).
+Strategy: **`single-pr`** — it is a 1:1 byte-identical copy of 12 files from live,
+verified by `diff -r` (readable in one pass as a copy), not 1865 lines of novel
+reasoning. There are no independent slices; an export that omits one skill produces a
+less-complete repo than the packaging skill itself describes.

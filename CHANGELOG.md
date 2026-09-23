@@ -11,6 +11,15 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **The full agency skill set is now public** — the mirror gains the five process
+  skills that previously lived only under `~/.hermes`: `agency-invocation` (the
+  `/agency` and per-stage bundle cheat sheet), `sdd-agency-maintenance` (extending and
+  auditing the agency instance, task-size levels), `release-closure` (the merge →
+  changelog → cleanup tail of the loop), `sdd-agency-export` (how this mirror itself is
+  built and sanitized) and `hermes-sdd-packaging` (the portable packaging set), each
+  with its references. A reader who follows `sdd-agency-export` to fork a working
+  agency now gets a repo that contains the definition of "complete".
+
 - **`hermes-sdd-orchestration` skill back in sync** — the public repo mirror now carries
   the full live skill: every session-born pitfall (merger one-liner, truncated-result
   recovery, sibling-noise tripwire, kanban gating, archive reconciliation order) and all
