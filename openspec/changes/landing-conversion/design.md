@@ -114,3 +114,13 @@ Same primary CTA, repeated.
 - Each section one idea; no section longer than its idea needs.
 - All copy passes the humanizer run (no "not X but Y", no one-line closers, no forced
   triads, no AI stock words).
+
+## Delivery strategy
+
+Measured after implementation: **808 authored lines** (`git diff --numstat main...HEAD`),
+well over the advisory ~400. Strategy: **`single-pr`** — a full-page rebuild of
+`index.html` (48KB → 19KB) is one coherent artifact: the copy is indivisible (hero,
+pain, proof, scenes, outcomes, FAQ all serve one argument), and there are no
+independently shippable slices. Splitting would produce reviewable chunks of a page no
+reader sees until the last chunk lands. The change's delta spec pins the five
+requirements; the diff is the copy plus the spec.
