@@ -19,6 +19,12 @@ coherent, reviewable increments of the system.
 
 ### Added
 
+- **Homepage rebuilt as a conversion landing** — the GitHub Pages site now sells the
+  outcome, not the inventory: "your AI developer, with receipts" above the fold, the
+  three failures it solves (memory, smoke, mood) named before the product, a
+  verifiable proof (this repo is the demo), the loop as four plain scenes, and one
+  install CTA that closes the page. Same hum theme, still a single static file.
+
 - **The full agency skill set is now public** — the mirror gains the five process
   skills that previously lived only under `~/.hermes`: `agency-invocation` (the
   `/agency` and per-stage bundle cheat sheet), `sdd-agency-maintenance` (extending and
