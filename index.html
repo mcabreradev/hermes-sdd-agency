@@ -230,8 +230,8 @@
         <div class="stp"><span class="n">5</span><span class="t">builder · code + tests</span><span class="w code">writes</span><span class="bar"></span></div>
         <div class="stp"><span class="n">6</span><span class="t">reviewer · adversarial diff</span><span class="w block">can block</span><span class="bar"></span></div>
         <div class="stp"><span class="n">7</span><span class="t">qa · execute scenarios</span><span class="w block">can block</span><span class="bar"></span></div>
-        <div class="stp"><span class="n">8</span><span class="t">pr-review · formal QA gate on the PR</span><span class="w block">can block</span><span class="bar"></span></div>
-        <div class="stp"><span class="n">9</span><span class="t">release · notes + archive + sync</span><span class="w code">close</span></div>
+        <div class="stp"><span class="n">8</span><span class="t">release · notes + archive + sync</span><span class="w code">close</span><span class="bar"></span></div>
+        <div class="stp"><span class="n">9</span><span class="t">pr-review · formal QA gate on the PR</span><span class="w block">can block</span></div>
       </div>
       <div class="loop-note">gate: validate passes → no ERROR · freeze → tier → review → compare · archive + sync · final report</div>
     </div>
@@ -241,12 +241,12 @@
 <section aria-label="the agency in numbers">
   <div class="wrap" style="padding:44px 28px">
     <div class="stats">
-      <div class="stat"><span class="num">92</span><span class="lbl">pinned test cases, all green</span></div>
-      <div class="stat"><span class="num">0</span><span class="lbl">false positives on a real 184-skill tree</span></div>
-      <div class="stat"><span class="num">60</span><span class="lbl">process skills shipped</span></div>
+      <div class="stat"><span class="num">108</span><span class="lbl">pinned test cases, all green</span></div>
+      <div class="stat"><span class="num">0</span><span class="lbl">false positives on a real 185-skill tree</span></div>
+      <div class="stat"><span class="num">65</span><span class="lbl">skills shipped</span></div>
       <div class="stat"><span class="num">15</span><span class="lbl">slash-command bundles</span></div>
-      <div class="stat"><span class="num">5</span><span class="lbl">evidence bins</span></div>
-      <div class="stat"><span class="num">26</span><span class="lbl">PRs merged, loop intact</span></div>
+      <div class="stat"><span class="num">7</span><span class="lbl">evidence bins</span></div>
+      <div class="stat"><span class="num">39</span><span class="lbl">PRs merged, loop intact</span></div>
     </div>
   </div>
 </section>
@@ -502,7 +502,7 @@
       </div>
       <div class="use adv">
         <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7-7 7s-7-2-7-7 3.5-7 7-7c2.8 0 4.8 1 5.5 3"/><path d="M14 8 20 7l-1-6"/></svg><span class="adv-title">Verifiable evidence</span></div>
-        <p><code>bin/no-smoke-worktree</code> fingerprints the working tree (a content hash that survives rebase/amend but changes on any source change); <code>review-snapshot</code> freezes the review candidate before anything reads it and <code>--compare</code> at delivery catches the tree having moved; <code>review-tier</code> derives review depth from the diff's own risk. Reviewer, QA and release record these in their evidence — no smoke, no &ldquo;I validated it&rdquo; over older content.</p>
+        <p><code>bin/no-smoke-worktree</code> fingerprints the working tree (a content hash that survives rebase/amend but changes on any source change); <code>review-snapshot</code> freezes the review candidate before anything reads it and <code>--compare</code> at delivery catches the tree having moved; <code>review-tier</code> derives review depth from the diff's own risk; <code>run-trace</code> replays the run from its NDJSON log (resume and audit); <code>change-collision</code> decides whether two changes may run in parallel, or must run sequentially. Reviewer, QA and release record these in their evidence — no smoke, no &ldquo;I validated it&rdquo; over older content.</p>
       </div>
       <div class="use adv">
         <div class="adv-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="adv-title">State from files, not memory</span></div>
