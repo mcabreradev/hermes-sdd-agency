@@ -2,7 +2,7 @@
 
 > An opinionated, Spec-Driven Development orchestration system for [**Hermes Agent**](https://hermes-agent.nousresearch.com/). One orchestrator, nine agent roles, and a review chain that turns "trust me" into hashes — OpenSpec holds the requirements **inside each project's repo**.
 
-![MIT](https://img.shields.io/badge/license-MIT-purple.svg) ![OpenSpec 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg) ![for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg) ![5 evidence bins](https://img.shields.io/badge/evidence%20bins-5-teal.svg) ![60 skills](https://img.shields.io/badge/skills-60-brightgreen.svg) ![15 bundles](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![install 1 command](https://img.shields.io/badge/install-1%20command-success)
+![MIT](https://img.shields.io/badge/license-MIT-purple.svg) ![OpenSpec 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg) ![for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg) ![7 evidence bins](https://img.shields.io/badge/evidence%20bins-7-teal.svg) ![65 skills](https://img.shields.io/badge/skills-65-brightgreen.svg) ![15 bundles](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![install 1 command](https://img.shields.io/badge/install-1%20command-success)
 
 ## 📖 Contents
 
@@ -10,10 +10,10 @@
 - [🎯 The pitch](#-the-pitch)
 - [📁 Repository layout](#-repository-layout)
 - [🔄 The loop & the gate](#-the-loop--the-gate)
-- [🔗 The evidence chain (5 bins)](#-the-evidence-chain-5-bins)
+- [🔗 The evidence chain (7 bins)](#-the-evidence-chain-7-bins)
 - [🤖 Agent roles](#-agent-roles)
 - [🎚️ Task levels](#-task-levels)
-- [🧠 Skill catalog (60 skills · 23 personas + 37 process)](#-skill-catalog-60-skills--23-personas--37-process)
+- [🧠 Skill catalog (65 skills · 23 personas + 42 process)](#-skill-catalog-65-skills--23-personas--42-process)
 - [🧪 Fixture suites](#-fixture-suites)
 - [📜 Operating rules](#-operating-rules)
 - [🚀 Quick start](#-quick-start)
@@ -27,7 +27,7 @@
 | **Orchestrator** | Hermes is the **only bus**. Agents never talk to each other; every output returns to Hermes and is **re-verified in the repo** |
 | **The gate** | No implementation code before a **validated OpenSpec change** exists in the project |
 | **Who can block** | Only the **reviewer** and **qa** — open BLOCKER/MAJOR or `qa: fail` halts the loop |
-| **Evidence** | 5 bins turn claims into hashes: a stage validates content it can point at, or it doesn't advance |
+| **Evidence** | 7 bins turn claims into hashes: a stage validates content it can point at, or it doesn't advance |
 | **Product vs process** | This repo ships **process only**; no project's requirements live here — those live in each project's own `openspec/` |
 | **Install** | `bash <(curl -fsSL …/install.sh)` — one command, guarded against overwrites |
 | **Autonomous** | `/do` runs the whole loop end-to-end and ends in a PR for your morning review |
@@ -47,8 +47,9 @@ The fix is structural: **state in files, evidence as hashes, review depth derive
 ```
 agents/         agent contracts (discovery · openspec · architect · planner ·
                 builder · reviewer · pr-reviewer · qa · release) + README
-bin/            the 5 evidence bins: no-smoke-worktree · skill-registry ·
-                review-snapshot · review-tier · agency-next
+bin/            the 7 evidence bins: no-smoke-worktree · skill-registry ·
+                review-snapshot · review-tier · agency-next · run-trace ·
+                change-collision
 rules/          orchestration · openspec · sdd · quality · coding · testing ·
                 project-boundaries
 workflows/      initialize-project · idea-to-openspec · openspec-to-architecture ·
@@ -84,9 +85,9 @@ One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the
 
 Hermes is the only orchestrator: it decides which stage runs, delegates one bounded task per agent, validates every output in the real repo, applies retries and blockers, asks the human on ambiguity, and closes with a final report. Order: `initialize-project → discovery → propose → validate → plan → apply → verify → release`.
 
-## 🔗 The evidence chain (6 bins)
+## 🔗 The evidence chain (7 bins)
 
-One principle: **an agent's report is a self-report, not a fact.** Five small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
+One principle: **an agent's report is a self-report, not a fact.** Seven small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
 
 | Bin | Question it answers | When it runs |
 |---|---|---|
@@ -95,6 +96,7 @@ One principle: **an agent's report is a self-report, not a fact.** Five small co
 | `review-tier` | How deep should this review go? | from the diff itself, before the review |
 | `agency-next` | What is the single next step, and why? | every checkpoint, from files alone |
 | `run-trace` | What happened in this run — and where did it stop? | resume / audit: reads `reports/<runId>.jsonl` |
+| `change-collision` | Can these two changes run in parallel? | before dispatching two changes concurrently |
 | `skill-registry` | Which skills actually resolve — and which mis-route? | after any install/sync |
 
 - **`no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked + ignored). Reviewer, QA and release record it; a mismatch at delivery means the evidence describes content that no longer exists. Survives rebase/amend; changes when any source changes.
@@ -102,8 +104,10 @@ One principle: **an agent's report is a self-report, not a fact.** Five small co
 - **`review-tier`** — depth from the diff's shape: ≤400 authored lines ⇒ `medium`; schema/migration, auth, security config or dependency manifests ⇒ `high`; an unmeasurable diff ⇒ `cannot assess`, **never** a rubber-stamp `low`. Informational — never blocks.
 - **`agency-next`** — the derived state + the single valid next transition, read from files. A missing input **narrows** the answer; it never defaults to optimistic, and it never blocks, merges or archives.
 - **`skill-registry`** — read-only inventory: exact `SKILL.md` path, description, tags, and flags for the frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR` content-less indicator, `MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). Pinned by its own fixture suite.
+- **`run-trace`** — reads `reports/<runId>.jsonl` (the NDJSON the loop appends at every stage) and prints the run's stages, statuses, blockers and assumed decisions — so a dead session resumes and an audit reads the same truth the runner wrote. Honest by design: an absent file or an invalid line reports that, never an optimistic "nothing happened".
+- **`change-collision`** — prints `parallelizable` / `collision` / `cannot assess` for two changes given a base: overlapping paths, or both touching a high-risk family (schema/migrations, `openspec/`, contracts/auth, dependency manifests) → `collision`; unmeasurable input → `cannot assess`, never a silent `parallelizable`. Wired into `rules/orchestration.md` ("Parallel execution of changes"): the verdict decides ordering, never approval.
 
-All five are informational or evidence-bound: they surface truth, they never silently approve. The gates remain the reviewer's and QA's verdicts.
+All seven are informational or evidence-bound: they surface truth, they never silently approve. The gates remain the reviewer's and QA's verdicts.
 
 ## 🤖 Agent roles
 
@@ -131,7 +135,7 @@ Every output returns in the mandatory envelope (`status / summary / projectRoot 
 
 Language contract (`rules/sdd.md`): **everything the system produces is English** — specs, code, branches, commits, PRs, docs. The only exception is the conversation with the user.
 
-## 🧠 Skill catalog (60 skills · 23 personas + 37 process)
+## 🧠 Skill catalog (65 skills · 23 personas + 42 process)
 
 Descriptions read from each skill's own `SKILL.md` frontmatter — generated by the repo's own `skill-registry` bin, so the catalog can't drift from what ships.
 
@@ -166,7 +170,7 @@ Descriptions read from each skill's own `SKILL.md` frontmatter — generated by 
 </details>
 
 <details>
-<summary><b>⚙️ Process & workflow skills — loaded on demand inside the stages</b> — 37 skills</summary>
+<summary><b>⚙️ Process & workflow skills — loaded on demand inside the stages</b> — 42 skills</summary>
 
 | Skill | What it does |
 |---|---|
@@ -201,7 +205,13 @@ Descriptions read from each skill's own `SKILL.md` frontmatter — generated by 
 | `requirements-clarity` | Clarify ambiguous requirements through focused dialogue... |
 | `review-structural` | Scan a diff for structural defects before landing; SQL, t... |
 | `security-evidence-first` | Security review: evidence before assurance; attacker, bou... |
-| `software-development` | Invoke the SDD agency: /agency and per-stage bundles. |
+| `agency-invocation` | Invoke the SDD agency: /agency and per-stage bundles. |
+| `sdd-agency-maintenance` | Use when maintaining Migue's SDD agency under ~/.hermes. |
+| `release-closure` | Use when merging an approved SDD release and cleaning up. |
+| `sdd-agency-export` | Use when mirroring the Hermes SDD agency to a git repo. |
+| `hermes-sdd-packaging` | Use when exporting the Hermes SDD agency to a repo. |
+| `hermes-sdd-orchestration` | Use when running the Hermes SDD agent agency on a project. |
+| `openspec-sdd` | Use when doing spec-driven work with OpenSpec. |
 | `verification-before-completion` | About to claim work is complete, fixed, or passing |
 | `visual-design-review` | Visual QA of a live UI: catch slop, fix with before/after... |
 | `web-performance-benchmark` | Baseline Core Web Vitals and bundle size; before/after on... |
@@ -218,9 +228,11 @@ The bins are pinned by **runnable suites**, not by fixtures that never run. A su
 |---|---|
 | `fixtures/sensitive-paths/check.sh` | the deny-list matches every documented row |
 | `fixtures/skill-registry/check.sh` | 13 detector cases incl. the false-positive shapes it was fixed for |
-| `fixtures/review-tier/check.sh` | tier derivation (26 cases) |
-| `fixtures/review-snapshot/check.sh` | freeze/compare semantics (10 cases) |
-| `fixtures/agency-next/check.sh` | the state machine (15 cases, throwaway repos) |
+| `fixtures/review-tier/check.sh` | tier derivation (27 cases) |
+| `fixtures/review-snapshot/check.sh` | freeze/compare semantics (11 cases) |
+| `fixtures/agency-next/check.sh` | the state machine (16 cases, throwaway repos) |
+| `fixtures/run-trace/check.sh` | run-log semantics — resume, statuses, blockers, `class`/`trust` (9 cases) |
+| `fixtures/change-collision/check.sh` | parallel/collision/cannot-assess verdicts over throwaway repos (7 cases) |
 
 ## 📜 Operating rules
 
