@@ -102,12 +102,14 @@ Hermes imposes the process and the prohibitions.
 
 ## Domain model
 
-When the architect shaped the change's domain with **Domain-Driven Design**
-(`agents/architect.md`), the builder implements **following that model**: entities,
-aggregates, value objects, repositories and bounded contexts as designed — not a
-deviating structure improvised inside the code. Domain rules live in the domain model,
-not spread implicitly across the implementation. On changes the architect chose not to
-model with DDD, this rule does not apply.
+When the architect's trigger fired with Domain-Driven Design (`agents/architect.md`,
+`methodology/ddd-domain-discipline`), the builder implements **following that model**: the
+entities, aggregates, value objects, repositories and bounded contexts of the design's
+`## Domain` section — not a deviating structure improvised inside the code. The **ubiquitous
+language is the project's `CONTEXT.md`**: the terms the code uses are the ones the glossary
+defines, and a business concept the glossary already names is never renamed in the code.
+Domain rules live in the domain model, not spread implicitly across the implementation. On
+changes where the trigger did not fire, this rule does not apply.
 
 ## Closing the builder stage
 

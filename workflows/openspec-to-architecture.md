@@ -7,7 +7,7 @@ code".
 - **Agents:** `architect`
 - **Rules:** `rules/openspec.md`, `rules/coding.md`, `rules/quality.md`
 - **Output:** the change's `design.md` and/or architecture docs + ADRs in the project.
-- **Personas/method:** `code-architect` + `architect-reviewer` · `architecture-decision-records` when recording each ADR.
+- **Personas/method:** `code-architect` + `architect-reviewer` · `architecture-decision-records` when recording each ADR · `domain-modeling` when the DDD trigger fires (the signal list in `agents/architect.md`).
 
 ## 0. Preflight (Hermes)
 
@@ -36,6 +36,13 @@ The agent produces, at minimum:
 - **Discarded alternatives:** at least one, with the concrete reason.
 - **Compatibility/migration:** what breaks and how it is handled.
 - **Risks** with mitigation.
+- **Domain:** the DDD trigger evaluation (the five signals of `agents/architect.md`, and which
+  one fired — or all five evaluated and absent), and when the trigger fired, the `## Domain`
+  section: the vocabulary resolution, the entities/aggregates with the invariants that must hold
+  on them, and the boundaries between the change's business capabilities. The vocabulary
+  resolution is written into the project's `CONTEXT.md` in the `domain-modeling` glossary format
+  (term, what it **is**, the rejected synonyms under `_Avoid_`) — it belongs to the project,
+  never to `~/.hermes/**`.
 - **Location of each requirement:** requirement → module/contract. A requirement without a location is
   incomplete design.
 
@@ -45,6 +52,16 @@ It is written into the project: `openspec/changes/<name>/design.md` (structure f
 ## 2. Design validation (Hermes)
 
 - [ ] Every requirement of the delta has a technical location.
+- [ ] The domain trigger was evaluated: the design records which signal fired, or the signals
+      evaluated and found absent. An unrecorded or partially evaluated trigger is not a valid
+      skip and the design goes back to the architect.
+- [ ] When the trigger fired: the `## Domain` section is not hollow (it carries the vocabulary
+      resolution, the invariants that must hold on the model, and the capability boundaries), no
+      requirement of the delta is left unlocated in the model, and every stated invariant names
+      the test that must fail when it is violated.
+- [ ] When the trigger fired: the vocabulary resolution is written in the project's `CONTEXT.md`
+      in glossary format, and the design does not redefine a term that `CONTEXT.md` already
+      defines (a contradiction is a blocker, not a silent redefinition).
 - [ ] Every decision has a reason + a discarded alternative; the lasting ones have an ADR.
 - [ ] There are no new dependencies without justification.
 - [ ] There are no open decisions that force the planner to decide.

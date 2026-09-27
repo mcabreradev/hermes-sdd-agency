@@ -14,10 +14,28 @@
 - **Adopt (persona):** `code-architect` for the design and the boundaries; `architect-reviewer`
   to contrast the design against the patterns that already exist in the repo.
 - **Method:** `architecture-decision-records` when recording a durable decision; `domain-modeling`
-  to shape the change's domain when the business rules merit it.
-- **Domain-Driven Design (DDD):** applied **when the domain merits it** — non-trivial
-  business rules with entities/aggregates, a shared vocabulary, or bounded contexts. On
-  thin bounded behavior the architect proceeds without a DDD model; DDD is never forced.
+  to shape the change's domain when a signal fires.
+- **Domain-Driven Design (DDD) — the trigger is explicit signals, not a judgment call.**
+  Evaluate all five on every change; **at least one** firing means the domain is modeled:
+  1. an invariant that must hold across more than one operation, or on every write;
+  2. an entity with identity and a lifecycle;
+  3. a term the change defines or redefines in the project's vocabulary;
+  4. a boundary between two business capabilities;
+  5. vocabulary drift already present — one business concept named in more than one way.
+  The evaluation is recorded in the design **whether or not the trigger fires**: when none
+  fires, the design names the signals that were evaluated and found absent. A partially
+  evaluated or unrecorded trigger is not a valid skip; modeling the domain where no signal
+  fired is equally out of contract.
+- **The artifacts when the trigger fires:** the `## Domain` section of the change's design
+  (`templates/architecture.md`) with the vocabulary resolution, the entities/aggregates and
+  their invariants and the boundaries between the change's business capabilities; the
+  project's `CONTEXT.md` in the glossary format of `domain-modeling` (one term per concept,
+  a definition of what the term **is**, the rejected synonyms under `_Avoid_`) — it belongs
+  to the project and is **never** copied into `~/.hermes/**`; and an ADR per durable decision
+  with `templates/adr.md`.
+- **A term the change needs to mean something different from what `CONTEXT.md` already
+  defines is a blocker**, not a silent redefinition: the meaning is settled in the spec
+  before the design continues.
 - Loading is `skill_view(name='<slug>')`, not optional: the persona provides the expertise, this
   file provides the contract. If the skill is not available, say so in `blockers`.
 
@@ -50,6 +68,11 @@ exist, stop and return `blocked` (you do not design on top of a spec that does n
    - **Alternatives:** at least one discarded alternative, with the concrete reason.
    - **Migration/compatibility:** what breaks, what is deprecated, what stays the same.
    - **Risks:** technical and process, with concrete mitigation.
+   - **Domain:** the trigger evaluation (the five signals, and which one fired — or all
+     evaluated and absent), plus the domain model when it fires: the vocabulary resolution,
+     the entities/aggregates with the invariants that must hold on them, and the boundaries
+     between the change's business capabilities. A hollow section (no invariant, no boundary,
+     no vocabulary resolution) is an incomplete design.
 4. Every decision with durable consequences (new dependency, persisted format,
    public contract, choice of library) is recorded in an ADR with
    `templates/adr.md`.
@@ -87,8 +110,10 @@ openQuestions:       <decisions the human must make> (or [])
 
 ## Definition of Done
 
-- Design written in the project, with boundaries, contracts, discarded alternatives and
-  risks.
+- Design written in the project, with boundaries, contracts, discarded alternatives,
+  risks and the recorded domain trigger evaluation.
+- When the trigger fired: the domain model in the design, the vocabulary in the project's
+  `CONTEXT.md`, and the invariants each bound to the test that must fail when it is violated.
 - ADRs created for the durable decisions.
 - Zero open decisions that prevent the planner from breaking down tasks.
 - Nothing outside the project modified; no product code written.

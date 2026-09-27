@@ -1,8 +1,8 @@
 # Template: ADR (Architecture Decision Record)
 
-One ADR per decision with lasting consequences, **inside the project** (for example
-`docs/adr/NNNN-<slug>.md` or the ADR directory the repo already uses). ADRs belong to the
-project, never global.
+One ADR per decision with lasting consequences, **inside the project** (the repo's ADR
+directory — the agency's convention is `docs/adr/NNNN-<slug>.md` or `docs/decisions/`, whichever
+the project already uses). ADRs belong to the project, never global.
 
 ---
 

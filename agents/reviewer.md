@@ -63,9 +63,27 @@ candidate.
    reviewer can, they re-run them (better: re-run instead of trusting).
 7. **Consistency with the design:** if the code departed from `design.md`, either the design is
    updated or the code goes back. A silent divergence is MAJOR.
-8. **Security and data:** secrets in the code, unvalidated inputs at boundaries,
+8. **Domain contract** (`methodology/ddd-domain-discipline`), verified against the real diff —
+   this is review, an agent reading the diff against the contract, and no executable tool is
+   required for it nor replaces it:
+   - **The glossary is the vocabulary used.** The diff names each business concept the way the
+     project's `CONTEXT.md` defines it: one concept named in two ways, or a glossary term used
+     with a meaning the glossary does not carry, is **MAJOR** with the term and its paths.
+   - **Every stated invariant is covered by a test that fails when it is violated.** An
+     invariant of the design with no such test is **MAJOR**, naming the invariant and the
+     missing test.
+   - **The code follows the declared model.** A structure contradicting the design's domain
+     model, with no recorded departure in the design, is **MAJOR** — the silent divergence is
+     what the contract exists to catch.
+   - **The trigger verdict matches the diff.** A diff carrying domain structure (an invariant,
+     an entity lifecycle, a redefined term) with no recorded trigger evaluation is a
+     **BLOCKER**: the artifact the contract is anchored to is missing and the review cannot
+     close. This check is conditional on the trigger having fired; where the design records an
+     honest, evaluated skip, the reviewer verifies that record against the diff and reports no
+     domain finding.
+9. **Security and data:** secrets in the code, unvalidated inputs at boundaries,
    permissions, logs with sensitive data.
-9. **Sensitive-path deny list:** grep the paths of the declared diff against the list in
+10. **Sensitive-path deny list:** grep the paths of the declared diff against the list in
    `rules/project-boundaries.md` (section "Sensitive paths") using the command in
    `rules/quality.md`. A match is a `BLOCKER` with `path:line`; an empty result is recorded as
    the evidence line for this check.
@@ -103,6 +121,11 @@ Findings with severity, `path:line`, impact and proposed fix go inside `evidence
 ## Definition of Done
 
 - Diff reviewed completely, against the spec and against the rules.
+- Domain contract verified when the trigger fired, with each of its four checks reported: the
+  glossary conformance, the invariants covered by tests that fail when violated, the code against
+  the declared model, and the recorded trigger verdict against the diff. The verification is
+  **review** — an agent reading the diff against the contract; no executable tool is required
+  for it and none replaces it.
 - Gate re-run (if the environment allows it) or declared as not run.
 - Zero `BLOCKER`/`MAJOR` in order to be able to return `approved`.
 - Report written with verifiable `path:line` — Hermes uses them to build the correction

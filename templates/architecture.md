@@ -35,6 +35,24 @@ Two uses, same structure:
 - **Discarded alternative:** <which one> — <why not>
 - **Consequences:** <what it enables, what it restricts, what becomes difficult>
 
+## Domain
+
+<!-- ONLY when a signal of the DDD trigger fires (agents/architect.md); otherwise record the
+     evaluated signals under "Goals / Non-Goals" or delete this section. Never leave it empty
+     to satisfy the structure: a hollow Domain section is an incomplete design. -->
+
+**Vocabulary resolution:**
+<!-- The terms this change defines or redefines, as they go into the project's CONTEXT.md
+     (one term per concept, what it IS, the rejected synonyms under _Avoid_). --> 
+
+**Model:**
+<!-- Entities and aggregates with the invariants that must hold on them. Each invariant names
+     the test that fails when it is violated. No invariant, no boundary or no vocabulary
+     resolution left out. -->
+
+**Boundaries:**
+<!-- The business capabilities this change separates or touches, and what is out of each. -->
+
 ## Risks / Trade-offs
 
 <!-- Technical and process risks with concrete mitigation. Trade-offs explicitly
@@ -43,6 +61,18 @@ Two uses, same structure:
 
 ## Filling rules
 
+- The `## Domain` section is populated **only when a signal of the DDD trigger fires**
+  (`agents/architect.md`), and its elements are the change's real vocabulary resolution, its
+  entities/aggregates with the invariants that must hold on them, and its capability
+  boundaries — every one of them verifiable against the diff the change produces. A section
+  filled to satisfy the structure, with no invariant, no boundary or no vocabulary resolution,
+  is a hollow section and an incomplete design.
+- When **no** signal fires, the trigger evaluation still lands in this document: name the
+  signals that were evaluated and found absent. A skip that does not say what was evaluated
+  is not a skip, it is a gap.
+- The vocabulary resolution is written into the **project's** `CONTEXT.md` in the glossary
+  format (the term, what it **is**, the rejected synonyms under `_Avoid_`) — never into this
+  document alone and never into global memory.
 - Every decision with lasting consequences (new dependency, public contract, persisted
   format, choice of library/pattern) generates an **ADR** with `templates/adr.md`.
 - Explicit boundaries: which modules/files are touched and which are NOT. A design with no
