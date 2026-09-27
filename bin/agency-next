@@ -157,6 +157,33 @@ FP_BIN=$(resolve_bin no-smoke-worktree || true)
 SNAP_BIN=$(resolve_bin review-snapshot || true)
 [ -n "$SNAP_BIN" ] || PRECISION+=("whether the review evidence is current (review-snapshot was not found) — assuming it is would be the optimistic default")
 
+# The project's declared phase is an input like any other, and an unreadable one narrows the answer
+# instead of permitting implementation: an undeclared phase is not an open one.
+#
+# The phase VALUE matters, not only a violation. `phase-gate` exits 0 both for an implementation
+# phase and for a documentation phase whose tree is still clean (nothing to refuse yet) — but the
+# second must still withhold implement-change, because implementing is what would introduce the
+# code the phase forbids. So the value is read from the command's own output, and the exit code is
+# read as the violation signal.
+PHASE_BIN=$(resolve_bin phase-gate || true)
+PHASE_VERDICT=""     # implementation | documentation | refuse | unknown
+PHASE_REASON=""
+if [ -n "$PHASE_BIN" ]; then
+  PHASE_OUT=$("$PHASE_BIN" 2>/dev/null); PHASE_RC=$?
+  PHASE_VALUE=$(printf '%s' "$PHASE_OUT" | sed -n 's/^phase:[[:space:]]*//p' | head -1)
+  case "$PHASE_RC" in
+    0) case "$PHASE_VALUE" in
+         documentation) PHASE_VERDICT="documentation" ;;
+         implementation) PHASE_VERDICT="implementation" ;;
+         *) PHASE_VERDICT="unknown" ;;
+       esac ;;
+    1) PHASE_VERDICT="refuse"; PHASE_REASON="${PHASE_VALUE:-documentation}" ;;
+    *) PHASE_VERDICT="unknown" ;;
+  esac
+fi
+[ -n "$PHASE_VERDICT" ] || PHASE_VERDICT="unknown"
+[ "$PHASE_VERDICT" = "unknown" ] && PRECISION+=("whether the project's phase permits implementation (phase-gate refused to assess or was not found) — assuming implementation is permitted would be the optimistic default")
+
 # Candidate changes: the names in `openspec list --json`.
 CANDIDATES=$(printf '%s' "$LIST" | "$JQ" -r '.changes[]?.name' 2>/dev/null)
 
@@ -346,6 +373,27 @@ if [ "$APPLY_OK" = "0" ]; then
 fi
 
 if [ "$TOTAL" -gt 0 ] && [ "$COMPLETE" -lt "$TOTAL" ]; then
+  # The phase outranks the task progress: an apply-ready change in a documentation-phase project
+  # is not implementable, and proposing implement-change there is exactly the transition this
+  # gate exists to withhold. A documentation phase covers both its clean state (nothing to refuse
+  # YET — implementing is what would introduce the code) and its violated one.
+  if [ "$PHASE_VERDICT" = "refuse" ] || [ "$PHASE_VERDICT" = "documentation" ]; then
+    emit "needs-decision" "PHASE_GATED" "open the implementation phase (the human's call)" \
+      "${PHASE_BIN:-phase-gate}" \
+      "the project's declared phase forbids application code; a validated change is not authorization to write it"
+    print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+    say "  phase:      ${PHASE_REASON:-documentation}"
+    emit_precision
+    exit 0
+  fi
+  if [ "$PHASE_VERDICT" = "unknown" ]; then
+    emit "needs-decision" "PHASE_UNDETERMINED" "declare the project's phase" \
+      "openspec/project.md  (add a '## Phase' block; see docs/phase-gate.md)" \
+      "the declared phase could not be read, so the implementation transition cannot be called valid"
+    print_evidence "$TOP" "$CHANGE" "$FINGERPRINT" "$SNAPSHOT"
+    emit_precision
+    exit 0
+  fi
   if [ "$COMPLETE" -eq 0 ]; then
     emit "working" "READY_TO_APPLY" "implement the first task" \
       "implement-change  (or /openspec-apply-change)" \

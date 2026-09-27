@@ -60,7 +60,7 @@ cd hermes-sdd-agency
 The overwrite guard: an existing home with other data stops and asks (interactive) or aborts
 (non-interactive, unless `--yes`). Reinstalling into an existing agency prints an update warning.
 
-### The 7 bins that ship with it (`bin/` → `<home>/bin/`)
+### The 8 bins that ship with it (`bin/` → `<home>/bin/`)
 
 ```bash
 no-smoke-worktree                      # content fingerprint of the working tree
@@ -71,6 +71,7 @@ review-tier --base main                # low | medium | high, with the rules tha
 agency-next                            # the next step, read from files
 run-trace --file reports/<runId>.jsonl # the run's stages/statuses/blockers, for resume + audit
 change-collision --base main --a <a> --b <b>  # parallelizable | collision | cannot assess
+phase-gate                             # pass | refuse | cannot assess — is code allowed yet?
 ```
 
 - `no-smoke-worktree` — binds reviewer/QA/release evidence to the exact tree they validated
@@ -83,6 +84,34 @@ change-collision --base main --a <a> --b <b>  # parallelizable | collision | can
 - `review-tier` — depth from the diff's shape; **informational, never a gate**.
 - `agency-next` — `working` / `checking` / `ready` / `needs-decision` + the single next
   transition + the command; a missing input **narrows** the answer, never optimistic.
+- `phase-gate` — the project declares its phase in `openspec/project.md` (`## Phase`), and this
+  refuses application code under the declared paths while the phase is `documentation`. Exit `0`
+  pass · `1` refuse · `2` cannot assess. **An undeclared phase is not an open one** — a project
+  without the block gets `cannot assess`, never a pass. A validated OpenSpec change is necessary,
+  never sufficient. Full guide: `docs/phase-gate.md`.
+
+### Declaring the phase in each project (one time)
+
+The agency ships the mechanism; the **project** declares its phase, and the declaration is the
+human's — an agent that edits it to unblock its own work defeats the gate:
+
+```bash
+cat >> openspec/project.md <<'EOF'
+
+## Phase
+
+phase: documentation
+application-code: src/**, test/**
+EOF
+```
+
+Change `phase` to `implementation` when the documentation phase is closed and you open coding.
+Wire `bin/phase-gate` into the project's own gate before its build/test steps so a change that
+reached a branch some other way is still stopped before it merges.
+
+**Existing projects carry no declaration** and therefore report `cannot assess` (exit 2) rather
+than passing — deliberately: a silent pass would leave every project silently treated as open for
+implementation. Declare the phase before the next stage that would write code.
 
 Consumer precondition for `review-snapshot --out <in-repo-path>`: the in-repo target is refused
 unless the project already gitignores it (that's by design — evidence lives outside the diff):

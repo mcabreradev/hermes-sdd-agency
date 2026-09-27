@@ -18,6 +18,7 @@ only after preflight enables it.
 cd <project-root>
 test -f openspec/project.md                 # if missing → initialize-project (blocking)
 openspec context --json                     # root.path == <project-root>
+bin/phase-gate                              # exit 0 required: the declared phase must permit implementation
 openspec status --change "<name>" --json
 openspec validate "<name>" --type change --json            # without ERROR
 openspec instructions apply --change "<name>" --json       # state: ready | all_done
@@ -27,6 +28,15 @@ openspec instructions apply --change "<name>" --json       # state: ready | all_
 `idea-to-openspec`; if the project root or `openspec/project.md` is missing, run
 `initialize-project` (`rules/project-boundaries.md`). This is the system's hard rule: there
 is no code without a validated change.
+
+**And the phase gate is the second half of that rule.** A validated change is not permission to
+implement: `bin/phase-gate` must exit 0 for the project root. A project in a **documentation**
+phase refuses application code — including in a change that is complete, `apply-ready` and
+validated — because that is exactly how a phase gets crossed one increment at a time. A refusal
+(exit 1) or an unassessable phase (exit 2, a missing declaration never counting as a pass) stops
+the workflow as a `blocked` whose blocker class is `decision`: opening the phase is the human's
+call, not a threshold to retry, narrow or reclassify around, and the `## Phase` block is never
+edited by an agent to unblock itself.
 
 In addition, read from the repo (do not invent): the real build, test, lint, typecheck
 commands, and the state of the working tree (`git status --porcelain`) to know where you are starting from.

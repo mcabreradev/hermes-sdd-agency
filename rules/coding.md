@@ -8,6 +8,11 @@ Hermes imposes the process and the prohibitions.
 - Not a line of implementation is written without a validated OpenSpec change in the
   project (see `rules/openspec.md`). Reading, exploration and analysis always; writing
   code, no.
+- **The project's declared phase must permit implementation, verified mechanically:**
+  `bin/phase-gate` exits 0 for the project root. A validated change does not open the phase —
+  a project in a **documentation** phase refuses application code however complete and valid the
+  change is, and the refusal is the human's decision to close, not a threshold to work around.
+  Opening the phase is never the agent's act.
 - The code implements **the change**, not the idea that the agent thinks is best. If the spec is
   incorrect or insufficient, stop and go back to the openspec/architect stage; the decision is
   not improvised inside the code.

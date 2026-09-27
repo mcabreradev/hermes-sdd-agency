@@ -264,7 +264,8 @@ with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
 ## See also
 
 - `docs/sdd-feature-lifecycle.md` — the full internal path, stage by stage.
-- `docs/evidence-bins.md` — the five evidence bins, step by step with real outputs.
+- `docs/evidence-bins.md` — the eight evidence bins, step by step with real outputs.
+- `docs/phase-gate.md` — the project phase declaration and the gate that reads it.
 - `docs/FAQ.md` — common questions and answers.
 - `README.md` — system overview, gate, install, rules.
 - `INSTALL.md` — installation and verification.

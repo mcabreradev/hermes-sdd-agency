@@ -10,6 +10,15 @@ project and is validated.** It applies to features, fixes, refactors and configu
 changes. Before that, only the following are allowed: exploration, writing the change and
 reading the existing code.
 
+**A validated change is a necessary condition, never a sufficient one: the project's declared
+phase must also permit implementation.** A change being complete, `apply-ready` and validated is
+not an authorization to write code — that is the failure this rule already failed to prevent once.
+A project declares its phase in `openspec/project.md` (`## Phase`) and `bin/phase-gate` derives
+the verdict from the resulting tree: in a **documentation** phase, application code paths SHALL be
+absent, and a change that introduces them is refused however valid it is. The phase is the
+human's to open; an agent SHALL NOT set or change it to unblock its own work. A missing or
+unrecognized declaration is `cannot assess` (exit 2), never a pass.
+
 Mandatory order:
 
 ```
@@ -19,7 +28,12 @@ explore → propose → validate → apply → verify → archive
 ## Task size and fast path
 
 Three levels, decided by Hermes (never by the agent), to keep strictness where it
-protects without turning small work into ceremony:
+protects without turning small work into ceremony.
+
+**The phase gate cuts across all three levels and none of them bypasses it.** The fast path is
+about which artifacts a change carries, never about whether the project is open for
+implementation: a cosmetic edit or a `skip_specs` fix in a documentation-phase project is refused
+the same way a feature is.
 
 | Level | Examples | Path |
 |---|---|---|
@@ -54,6 +68,7 @@ openspec validate "<name>" --type change --json          # must pass
 
 Enabling criterion for implementing (all):
 
+- [ ] The project's declared phase permits implementation: `bin/phase-gate` exits 0 (see "Hard rule").
 - [ ] `openspec/changes/<name>/` exists, created by the CLI (`openspec new change`), never by hand.
 - [ ] `applyRequires` complete (`tasks` as a minimum).
 - [ ] `validate` passes without `ERROR`. The `ℹ [INFO]` are read, not ignored.

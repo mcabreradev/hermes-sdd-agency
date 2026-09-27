@@ -1,6 +1,6 @@
-# The Evidence Chain — seven bins that make the agency's claims verifiable
+# The Evidence Chain — eight bins that make the agency's claims verifiable
 
-> An agent's report is a **self-report**, not a fact. These seven tools turn every claim into
+> An agent's report is a **self-report**, not a fact. These eight tools turn every claim into
 > something you can confirm or refute with a command — before you trust it overnight.
 
 ## The problem this solves
@@ -14,7 +14,7 @@ Three failures happen in every AI-assisted workflow if you let them:
 3. **Depth by mood** — small fixes get a rubber-stamp review and big migrations get a skim,
    because review depth follows whoever happened to be on shift, not the diff's real risk.
 
-The fix is five small commands that read **files**, print **hashes**, and never trust a memory:
+The fix is eight small commands that read **files**, print **hashes**, and never trust a memory:
 
 | Bin | The question it answers | When it runs |
 |---|---|---|
@@ -25,6 +25,7 @@ The fix is five small commands that read **files**, print **hashes**, and never 
 | `run-trace` | "What happened in this run — and where did it stop?" | Resume / audit: reads `reports/<runId>.jsonl` |
 | `change-collision` | "Can these two changes run in parallel?" | Before dispatching two changes concurrently |
 | `skill-registry` | "Which skills actually resolve — and any that mis-route?" | After any install/sync |
+| `phase-gate` | "Is this project open for implementation yet?" | Before any stage that would write code |
 
 The chain: **freeze → tier → review → compare**. Read the sections in order and run the
 examples; each output below is a real run.
@@ -247,6 +248,46 @@ the reviewer's and QA's.
 
 ---
 
+## 8 · `phase-gate` — is this project open for implementation?
+
+Every other bin makes a claim about the work. This one answers a question the work depends on,
+and that used to live only in someone's head: **is this project allowed to hold application code
+right now?**
+
+A project declares its phase in `openspec/project.md`, and the gate derives the verdict from the
+tree. A real run, over a project whose phase is declared and whose tree is clean:
+
+```bash
+$ bin/phase-gate
+phase: documentation
+application-code: src/**,test/**,app/**,lib/**
+verdict: pass
+```
+
+And the run that matters — one source file appears:
+
+```bash
+$ bin/phase-gate
+phase: documentation
+application-code: src/**,test/**,app/**,lib/**
+verdict: refuse
+violating:
+  src/main.ts
+phase-gate: 1 file(s) under the declared application-code paths while the phase is documentation
+phase-gate: opening the phase is the human's decision (blocker class: decision) — this is not
+retried or worked around
+```
+
+Exit `0` pass · `1` refuse · `2` cannot assess. **An undeclared phase is not an open one**: with no
+`## Phase` block, the gate reports `cannot assess` and exits `2` — the cheap default here would be
+"implementation is fine", which is the exact defect the gate exists to close. A validated OpenSpec
+change is *necessary*, never sufficient: a complete, `apply-ready` change in a documentation-phase
+project is still refused, and `agency-next` reports `PHASE_GATED` instead of proposing
+`implement-change`. Wired into `rules/openspec.md`, `rules/coding.md`, `agents/builder.md`,
+`workflows/implement-change.md` and `rules/orchestration.md` — see `docs/phase-gate.md`.
+
+---
+
 ## The chain in a real run
 
 1. Before the review, Hermes freezes the candidate: `review-snapshot --base <base> --out …`
@@ -278,8 +319,9 @@ agency-next                                            # next step, from files
 bin/run-trace --file reports/<runId>.jsonl             # what happened in the run
 bin/change-collision --base main --a <refA> --b <refB> # parallel or sequential?
 bin/skill-registry --root ~/.hermes/skills             # what actually resolves
+bin/phase-gate                                         # is this project open for implementation?
 ```
 
-All seven are informational or evidence-bound: they surface truth, they never silently
+All eight are informational or evidence-bound: they surface truth, they never silently
 approve. The gates remain the reviewer's and QA's verdicts — and now those verdicts describe
 a tree you can point at.

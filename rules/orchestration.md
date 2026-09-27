@@ -107,6 +107,11 @@ how the situation is summarized.
 - **Unclassified defaults to `decision`** (recorded as `class: decision`). A blocker
   recorded without a class is treated as `decision` — the human is consulted, never
   silently retried or skipped by omission.
+- **A phase-gate refusal is `decision` by construction.** When `bin/phase-gate` refuses
+  implementation (exit 1) or cannot assess the phase (exit 2), the blocker is `decision`: opening
+  the phase is the human's act, and no work that depends on it advances while unanswered. It is
+  never retried, never narrowed, never reclassified, and the `## Phase` block is never edited by an
+  agent to unblock its own work.
 - In the trace (`rules/observability.md`) the same `class` values are recorded per
   blocker, so the audit surface can reproduce what response the rule selected.
 
@@ -244,6 +249,7 @@ cannot verify) before the stage advances.
   - the stage's retry limit was exhausted;
   - the defect contradicts the spec or the design (⇒ another workflow, not more patches);
   - human authorization is missing (`rules/quality.md` and the next section);
+  - the project's declared phase refuses implementation (`bin/phase-gate`, exit 1 or 2);
   - the environment prevents real verification (the gate cannot be run nor the case executed).
 - Every blocker is reported with: what was attempted, with what evidence it failed, and the concrete
   decision needed from the human.
@@ -354,6 +360,7 @@ behind it is not listed, because listing it would advertise a verdict the comman
 | `PR_STATE_UNDETERMINED` | `gh` present but unable to answer |
 | `READY_TO_MERGE` | a PR open with green checks and current evidence |
 | `ARCHIVE_PENDING` | tasks done, evidence current, change still active |
+| `PHASE_GATED` | the change is complete and apply-ready, and `bin/phase-gate` refuses implementation |
 
 **Not yet derivable, and deliberately absent from the list:** `NEEDS_FIX`, `READY_TO_QA`,
 `QA_FAILED` and `NEEDS_REVIEW` are stages of the loop the command cannot distinguish from files
@@ -368,7 +375,7 @@ Rules that hold it honest:
   "Mandatory output contract") and `pr-review`'s formal QA gate. Treating a `ready` state as proof
   that review or QA passed is a defect — the command's own output names the evidence it read.
 - **A missing input narrows the answer, never optimizes it.** An unavailable input (no run trace,
-  `gh` not installed, no remote, no review snapshot) is listed in the command's precision section
+  `gh` not installed, no remote, no review snapshot, an undeclared phase) is listed in the command's precision section
   with the transitions it left undetermined. Assuming "CI green" or "review passed" because the
   input was absent is the failure mode this refuses.
 - **One root, one change.** With several changes active it reports the ambiguity and asks for
