@@ -33,7 +33,9 @@ modify `~/.hermes/**`.
 
 ## Hard precondition
 
-OpenSpec change existing, validated and with tasks ready:
+Two gates, both blocking. The change must exist, be validated and have its tasks ready — **and**
+the project's declared phase must permit implementation. Neither substitutes for the other: a
+validated change in a documentation-phase project is not authorization.
 
 ```bash
 cd <project-root>
@@ -41,7 +43,13 @@ openspec context --json
 openspec status --change "<name>" --json
 openspec instructions apply --change "<name>" --json    # state must be ready/all_done
 openspec validate "<name>" --type change --json         # no ERROR
+bin/phase-gate                                          # exit 0 required; 1 = refused, 2 = cannot assess
 ```
+
+A `phase-gate` refusal (exit 1) or an unassessable phase (exit 2) is a `blocked` return with
+blocker class `decision`: opening the phase belongs to the human. Do not retry, do not narrow the
+change, do not reclassify the work to fit, and never edit the `## Phase` block to unblock
+yourself.
 
 If any step fails, you return `blocked`: **no code is written without a validated change**.
 
