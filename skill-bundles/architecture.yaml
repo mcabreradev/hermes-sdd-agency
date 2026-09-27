@@ -2,6 +2,7 @@ name: architecture
 skills:
 - hermes-sdd-orchestration
 - openspec-sdd
+- domain-modeling
 description: 'Design the change: boundaries, contracts, rejected alternatives, risks and ADRs in docs/decisions.'
 instruction: 'STAGE: openspec-to-architecture. Read ~/.hermes/workflows/openspec-to-architecture.md in
   full before acting and run its preflight exactly as written. Resolve the project root (pwd -P + openspec

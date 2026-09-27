@@ -76,10 +76,10 @@ openQuestions:       doubts that change design, scope or business (or [])
 |---|---|
 | discovery | inventory with evidence (paths, commands), without inventing behavior |
 | openspec (propose) | `validate` without ERROR + `ℹ INFO` read and reported |
-| architect | decisions with discarded alternatives and risks; ADR if applicable |
+| architect | decisions with discarded alternatives and risks; ADR if applicable; the recorded domain trigger evaluation, and when a signal fired, the domain model in the design plus the vocabulary in the project's `CONTEXT.md` |
 | planner | granular `tasks.md` (steps of ≤1 day), each task verifiable |
 | builder | repo build/lint/tests green + only declared files touched |
-| reviewer | findings with `severity`, `path:line`, impact and proposed fix |
+| reviewer | findings with `severity`, `path:line`, impact and proposed fix; the domain contract checks reported when the trigger fired (glossary conformance, invariants covered by tests that fail when violated, code against the declared model, trigger verdict against the diff) |
 | qa | executed cases, real result, failure evidence when it fails |
 | release | versioning and notes coherent with the diff; nothing that fails the repo gate |
 

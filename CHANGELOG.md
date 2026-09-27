@@ -9,7 +9,32 @@ coherent, reviewable increments of the system.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Public surfaces back in sync**: README, the GitHub Pages homepage (`index.html`) and
+  INSTALL now count the real tree — 7 evidence bins (`run-trace`, `change-collision`
+  added), 65 skills, 108 pinned test cases, 39 merged PRs. The homepage's loop diagram
+  runs `release` before `pr-review` (the canonical order) and `docs/evidence-bins.md`
+  documents the two new bins.
+
 ### Added
+
+- **The DDD trigger is explicit signals, and the reviewer verifies the contract** — domain-driven
+  design stops being a judgment call. The architect evaluates five objective signals on every
+  change (an invariant that must hold across operations; an entity with identity and lifecycle; a
+  term defined or redefined; a boundary between two business capabilities; vocabulary drift
+  already present) and records the evaluation **whether or not it fires**, so the skip is
+  reviewable instead of unstated. When a signal fires, the ubiquitous language lands in the
+  project's `CONTEXT.md` (glossary format, `_Avoid_` synonyms), the change's design carries a
+  `## Domain` section (vocabulary resolution, entities/aggregates with their invariants, capability
+  boundaries) and the reviewer checks it against the real diff — glossary conformance, invariants
+  covered by tests that fail when violated, code against the declared model, and trigger verdict
+  against the diff (`MAJOR` for the content violations, `BLOCKER` when the anchoring artifact is
+  missing). Verification is **review**, the mechanism the repo's own doctrine names for meaning: no
+  new bin, no dependency. Wired into `agents/architect.md`/`agents/reviewer.md`,
+  `templates/architecture.md`, `templates/adr.md`, `rules/coding.md`, `rules/quality.md`,
+  `workflows/openspec-to-architecture.md` and the `/architecture` bundle (which now loads
+  `domain-modeling`, the method its own role file requires).
 
 - **`bin/phase-gate` — the phase is now a fact in the repository, not a memory.** A project
   declares its phase in `openspec/project.md` (`## Phase`), and the gate refuses application code
