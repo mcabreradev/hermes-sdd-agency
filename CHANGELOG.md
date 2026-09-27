@@ -9,15 +9,20 @@ coherent, reviewable increments of the system.
 
 ## [Unreleased]
 
-### Fixed
-
-- **Public surfaces back in sync**: README, the GitHub Pages homepage (`index.html`) and
-  INSTALL now count the real tree — 7 evidence bins (`run-trace`, `change-collision`
-  added), 65 skills, 108 pinned test cases, 39 merged PRs. The homepage's loop diagram
-  runs `release` before `pr-review` (the canonical order) and `docs/evidence-bins.md`
-  documents the two new bins.
-
 ### Added
+
+- **`bin/phase-gate` — the phase is now a fact in the repository, not a memory.** A project
+  declares its phase in `openspec/project.md` (`## Phase`), and the gate refuses application code
+  under the declared paths while that phase is `documentation`. It closes the half of the hard rule
+  that prose could not: a project accumulated 23 source files across five increments, each one
+  carrying a validated change and a green gate — every step compliant, the outcome wrong. A
+  validated change is **necessary, never sufficient** now, and an undeclared phase reports
+  `cannot assess` (exit 2) rather than passing, because the cheap default would be "implementation
+  is fine". Wired into `rules/openspec.md`, `rules/coding.md`, `agents/builder.md`,
+  `workflows/implement-change.md` and `rules/orchestration.md` (blocker class `decision`, precise
+  state `PHASE_GATED`); `agency-next` no longer proposes `implement-change` in a documentation-phase
+  project; the project's CI is the backstop. `docs/phase-gate.md`, 12 fixture cases, and a
+  near-miss pair so a pattern widened for recall is caught.
 
 - **Homepage rebuilt as a conversion landing** — the GitHub Pages site now sells the
   outcome, not the inventory: "your AI developer, with receipts" above the fold, the

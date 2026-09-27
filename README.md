@@ -2,7 +2,7 @@
 
 > An opinionated, Spec-Driven Development orchestration system for [**Hermes Agent**](https://hermes-agent.nousresearch.com/). One orchestrator, nine agent roles, and a review chain that turns "trust me" into hashes — OpenSpec holds the requirements **inside each project's repo**.
 
-![MIT](https://img.shields.io/badge/license-MIT-purple.svg) ![OpenSpec 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg) ![for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg) ![7 evidence bins](https://img.shields.io/badge/evidence%20bins-7-teal.svg) ![65 skills](https://img.shields.io/badge/skills-65-brightgreen.svg) ![15 bundles](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![install 1 command](https://img.shields.io/badge/install-1%20command-success)
+![MIT](https://img.shields.io/badge/license-MIT-purple.svg) ![OpenSpec 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue.svg) ![for Hermes Agent](https://img.shields.io/badge/made%20for-Hermes%20Agent-orange.svg) ![7 evidence bins](https://img.shields.io/badge/evidence%20bins-8-teal.svg) ![65 skills](https://img.shields.io/badge/skills-65-brightgreen.svg) ![15 bundles](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![install 1 command](https://img.shields.io/badge/install-1%20command-success)
 
 ## 📖 Contents
 
@@ -10,7 +10,7 @@
 - [🎯 The pitch](#-the-pitch)
 - [📁 Repository layout](#-repository-layout)
 - [🔄 The loop & the gate](#-the-loop--the-gate)
-- [🔗 The evidence chain (7 bins)](#-the-evidence-chain-7-bins)
+- [🔗 The evidence chain (8 bins)](#-the-evidence-chain-8-bins)
 - [🤖 Agent roles](#-agent-roles)
 - [🎚️ Task levels](#-task-levels)
 - [🧠 Skill catalog (65 skills · 23 personas + 42 process)](#-skill-catalog-65-skills--23-personas--42-process)
@@ -25,9 +25,9 @@
 |---|---|
 | **What** | The **process** of a Spec-Driven Development agency: rules, agent contracts, workflows, templates, skills and 15 slash-command bundles — reusable in any project |
 | **Orchestrator** | Hermes is the **only bus**. Agents never talk to each other; every output returns to Hermes and is **re-verified in the repo** |
-| **The gate** | No implementation code before a **validated OpenSpec change** exists in the project |
+| **The gate** | Two conditions, both blocking: a **validated OpenSpec change** exists, **and** the project's declared phase permits implementation (`bin/phase-gate`) |
 | **Who can block** | Only the **reviewer** and **qa** — open BLOCKER/MAJOR or `qa: fail` halts the loop |
-| **Evidence** | 7 bins turn claims into hashes: a stage validates content it can point at, or it doesn't advance |
+| **Evidence** | 8 bins turn claims into hashes: a stage validates content it can point at, or it doesn't advance |
 | **Product vs process** | This repo ships **process only**; no project's requirements live here — those live in each project's own `openspec/` |
 | **Install** | `bash <(curl -fsSL …/install.sh)` — one command, guarded against overwrites |
 | **Autonomous** | `/do` runs the whole loop end-to-end and ends in a PR for your morning review |
@@ -47,9 +47,9 @@ The fix is structural: **state in files, evidence as hashes, review depth derive
 ```
 agents/         agent contracts (discovery · openspec · architect · planner ·
                 builder · reviewer · pr-reviewer · qa · release) + README
-bin/            the 7 evidence bins: no-smoke-worktree · skill-registry ·
+bin/            the 8 evidence bins: no-smoke-worktree · skill-registry ·
                 review-snapshot · review-tier · agency-next · run-trace ·
-                change-collision
+                change-collision · phase-gate
 rules/          orchestration · openspec · sdd · quality · coding · testing ·
                 project-boundaries
 workflows/      initialize-project · idea-to-openspec · openspec-to-architecture ·
@@ -59,7 +59,7 @@ templates/      final-report · review-report · qa-report · adr · spec · tas
 docs/           evidence-bins · sdd-feature-lifecycle · usage-examples · FAQ
 skill-bundles/  15 slash-command bundles: /agency /feature /do /review /qa …
 skills/         60 process skills (23 agency personas + 37 workflow skills)
-fixtures/       5 runnable test suites that pin the bins themselves
+fixtures/       8 runnable test suites that pin the bins themselves
 openspec/specs/ 7 capability specs — the agency's own requirements, versioned
 ```
 
@@ -85,9 +85,9 @@ One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the
 
 Hermes is the only orchestrator: it decides which stage runs, delegates one bounded task per agent, validates every output in the real repo, applies retries and blockers, asks the human on ambiguity, and closes with a final report. Order: `initialize-project → discovery → propose → validate → plan → apply → verify → release`.
 
-## 🔗 The evidence chain (7 bins)
+## 🔗 The evidence chain (8 bins)
 
-One principle: **an agent's report is a self-report, not a fact.** Seven small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
+One principle: **an agent's report is a self-report, not a fact.** Eight small commands read files, print hashes, and never trust memory. The chain: **freeze → tier → review → compare**. Full step-by-step guide with real outputs: [`docs/evidence-bins.md`](docs/evidence-bins.md).
 
 | Bin | Question it answers | When it runs |
 |---|---|---|
@@ -98,6 +98,7 @@ One principle: **an agent's report is a self-report, not a fact.** Seven small c
 | `run-trace` | What happened in this run — and where did it stop? | resume / audit: reads `reports/<runId>.jsonl` |
 | `change-collision` | Can these two changes run in parallel? | before dispatching two changes concurrently |
 | `skill-registry` | Which skills actually resolve — and which mis-route? | after any install/sync |
+| `phase-gate` | Is this project open for implementation yet? | before any stage that would write code |
 
 - **`no-smoke-worktree`** — content fingerprint of the working tree (tracked + untracked + ignored). Reviewer, QA and release record it; a mismatch at delivery means the evidence describes content that no longer exists. Survives rebase/amend; changes when any source changes.
 - **`review-snapshot`** — freezes the candidate **before** anything reads it (base, HEAD, fingerprint, diff hash). Findings bind to that snapshot; `--compare` at delivery is content-based, so a clean rebase matches while a real change trips the alarm.
@@ -106,8 +107,9 @@ One principle: **an agent's report is a self-report, not a fact.** Seven small c
 - **`skill-registry`** — read-only inventory: exact `SKILL.md` path, description, tags, and flags for the frontmatter defects that make a skill load but mis-route (`BLOCK-SCALAR` content-less indicator, `MISSING-DESCRIPTION`, `NO-FRONTMATTER`, `UNCLOSED-FRONTMATTER`). Pinned by its own fixture suite.
 - **`run-trace`** — reads `reports/<runId>.jsonl` (the NDJSON the loop appends at every stage) and prints the run's stages, statuses, blockers and assumed decisions — so a dead session resumes and an audit reads the same truth the runner wrote. Honest by design: an absent file or an invalid line reports that, never an optimistic "nothing happened".
 - **`change-collision`** — prints `parallelizable` / `collision` / `cannot assess` for two changes given a base: overlapping paths, or both touching a high-risk family (schema/migrations, `openspec/`, contracts/auth, dependency manifests) → `collision`; unmeasurable input → `cannot assess`, never a silent `parallelizable`. Wired into `rules/orchestration.md` ("Parallel execution of changes"): the verdict decides ordering, never approval.
+- **`phase-gate`** — the project's phase as a fact in the repository, not a memory. `pass` (0) · `refuse` (1) · `cannot assess` (2). A validated OpenSpec change is **necessary, never sufficient**: a complete, apply-ready change in a documentation-phase project is still refused, and an undeclared phase is not an open one. Wired into the implementation preflight, `rules/coding.md`, the builder brief and `rules/orchestration.md` (blocker class `decision`). Guide: [`docs/phase-gate.md`](docs/phase-gate.md).
 
-All seven are informational or evidence-bound: they surface truth, they never silently approve. The gates remain the reviewer's and QA's verdicts.
+All eight are informational or evidence-bound: they surface truth, they never silently approve. The gates remain the reviewer's and QA's verdicts.
 
 ## 🤖 Agent roles
 
@@ -233,6 +235,7 @@ The bins are pinned by **runnable suites**, not by fixtures that never run. A su
 | `fixtures/agency-next/check.sh` | the state machine (16 cases, throwaway repos) |
 | `fixtures/run-trace/check.sh` | run-log semantics — resume, statuses, blockers, `class`/`trust` (9 cases) |
 | `fixtures/change-collision/check.sh` | parallel/collision/cannot-assess verdicts over throwaway repos (7 cases) |
+| `fixtures/phase-gate/check.sh` | the phase declaration and its three verdicts — refuse, pass, cannot-assess (12 cases) |
 
 ## 📜 Operating rules
 
