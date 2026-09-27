@@ -113,18 +113,48 @@ D=$(make_repo planning-incomplete)
 scaffold "$D" "half-planned" >/dev/null 2>&1
 assert_state "planning incomplete" "$D" "working" "PLANNING_INCOMPLETE" --change "half-planned"
 
+# declare_phase <dir> <phase> <paths> — the project's phase is an input to the derived state, so a
+# fixture that exercises an implementation transition must declare a phase that permits it. A
+# fixture with no declaration is a DIFFERENT case (see "phase undetermined" below), not a default.
+# `openspec init` does not create `openspec/project.md` (that file is the Hermes convention), so the
+# helper creates it when the project has none.
+declare_phase() {
+  local dir="$1" phase="$2" paths="$3"
+  local f="$dir/openspec/project.md"
+  [ -d "$dir/openspec" ] || return 1
+  [ -f "$f" ] || printf '# Project: fixture\n\n## Purpose\nfixture\n' > "$f"
+  printf '\n## Phase\n\nphase: %s\napplication-code: %s\n' "$phase" "$paths" >> "$f"
+}
+
 # --- ready to apply (planned, nothing ticked) ------------------------------------------
 D=$(make_repo ready-apply)
 ( cd "$D" && "$OPENSPEC" init --tools hermes >/dev/null 2>&1 )
 scaffold_planned "$D" "fresh-change" >/dev/null 2>&1
+declare_phase "$D" implementation 'src/**' >/dev/null 2>&1
 assert_state "planned, no task done" "$D" "working" "READY_TO_APPLY" --change "fresh-change"
 
 # --- implementing (some tasks ticked) ---------------------------------------------------
 D=$(make_repo implementing)
 ( cd "$D" && "$OPENSPEC" init --tools hermes >/dev/null 2>&1 )
 scaffold_planned "$D" "partial-change" >/dev/null 2>&1
+declare_phase "$D" implementation 'src/**' >/dev/null 2>&1
 ( cd "$D/openspec/changes/partial-change" && sed -i.bak 's/^- \[ \] 1.1/- [x] 1.1/' tasks.md && rm -f tasks.md.bak )
 assert_state "partially implemented" "$D" "working" "IMPLEMENTING" --change "partial-change"
+
+# --- phase-gated: apply-ready change in a documentation-phase project -------------------
+# The transition the phase gate exists to withhold: complete, apply-ready, validated — and NOT
+# implementable. Proposing implement-change here is the failure this case pins.
+D=$(make_repo phase-gated)
+( cd "$D" && "$OPENSPEC" init --tools hermes >/dev/null 2>&1 )
+scaffold_planned "$D" "gated-change" >/dev/null 2>&1
+declare_phase "$D" documentation 'src/**' >/dev/null 2>&1
+assert_state "apply-ready but phase-gated" "$D" "needs-decision" "PHASE_GATED" --change "gated-change"
+
+# --- phase undetermined: the optimistic default must NOT be taken -----------------------
+D=$(make_repo phase-undeclared)
+( cd "$D" && "$OPENSPEC" init --tools hermes >/dev/null 2>&1 )
+scaffold_planned "$D" "undeclared-change" >/dev/null 2>&1
+assert_state "undeclared phase" "$D" "needs-decision" "PHASE_UNDETERMINED" --change "undeclared-change"
 
 # --- all tasks done, no review evidence -------------------------------------------------
 D=$(make_repo done-no-evidence)
