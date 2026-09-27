@@ -17,3 +17,6 @@ reports/review-snapshot*.json
 # included by bin/no-smoke-worktree's git add -A fingerprint, or the reviewer (N entries)
 # and release (N+3) fingerprints never match — rules/observability.md.
 reports/run-*.jsonl
+
+# git worktrees — agent-isolated working copies kept inside the project
+.worktrees/
