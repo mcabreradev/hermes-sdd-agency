@@ -107,16 +107,29 @@ greps for known traps (requirements without `#### Scenario:`, invented headers).
 ## Stage 3 — Architecture
 
 **Workflow:** `openspec-to-architecture.md` · **Agent:** architect (personas
-`code-architect`, `architect-reviewer`)
+`code-architect`, `architect-reviewer`; method `domain-modeling` when the DDD trigger fires)
 
 Where the change touches architecture (structural decision, contract, technology,
 data model — anything costly to revert):
 
 - Document **boundaries, contracts, rejected alternatives and risks**.
 - If warranted, an **ADR** under `docs/decisions/` via `architecture-decision-records`.
-- When the domain merits it (non-trivial business rules, entities/aggregates, bounded
-  contexts), the architect shapes it with **Domain-Driven Design** via
-  `domain-modeling`; on thin bounded behavior it proceeds without a DDD model.
+- **The DDD trigger is explicit signals, not a judgment call** (`agents/architect.md`): an
+  invariant across more than one operation, an entity with identity and lifecycle, a term
+  defined or redefined, a boundary between two business capabilities, or vocabulary drift
+  already present. Any one fires it. The evaluation is **recorded whether or not it fires** —
+  when none fires, the design names the signals it evaluated and found absent, so the skip is
+  reviewable instead of unstated.
+- When the trigger fires, the architect produces three artifacts: the change's design carries
+  a `## Domain` section (vocabulary resolution, entities/aggregates with the invariants that
+  must hold on them, and the capability boundaries), the vocabulary lands in the project's
+  `CONTEXT.md` in the `domain-modeling` glossary format (one term per concept, what it **is**,
+  the rejected synonyms under `_Avoid_`), and durable decisions become ADRs.
+- **The reviewer verifies the contract** (`agents/reviewer.md`): the terms used against the
+  glossary, every stated invariant against the test that fails when it is violated, the code
+  against the declared model, and the trigger verdict against the diff. Verification here is
+  **review** — an agent reading the diff against the contract; no executable tool is required
+  and none replaces it.
 - Decide *the solution*, not the how-to-implement. Ambiguous scope/architecture ⇒
   **ask the human** (options + impact + recommendation); the answer is written into the
   project, never into global memory.

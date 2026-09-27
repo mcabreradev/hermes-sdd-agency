@@ -247,6 +247,7 @@ The bins are pinned by **runnable suites**, not by fixtures that never run. A su
 | `quality.md` | Quality is verifiability — evidence binds to content, never to claims; frozen-candidate + review tier |
 | `coding.md` | Work-unit commits (~400-line heuristic for one reviewable delivery); scope declared and diffed |
 | `testing.md` | Behavior-bearing work is **test-first** (TDD) by hard rule; only behavior-free code is exempted with a reason |
+| `coding.md` (Domain model) | When the DDD trigger fires, the code follows the design's `## Domain` model and the terms of the project's `CONTEXT.md` |
 | `project-boundaries.md` | Strict isolation: process vs product vs `~/.hermes`; sensitive-path deny list enforced on evidence |
 
 ## 🚀 Quick start
