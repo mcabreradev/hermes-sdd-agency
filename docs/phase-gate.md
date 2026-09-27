@@ -128,6 +128,22 @@ For a project that carries no declaration, the gate reports `cannot assess` (exi
 passing — that is deliberate: a silent pass would leave every existing project silently treated as
 open for implementation. Declare the phase, then the gate has something to read.
 
+## Running it in CI (and why it needs a copy)
+
+**The agency's `bin/` is not present on a clean CI runner.** Agents resolve the bins from the
+Hermes home (`~/.hermes/bin/`), which a GitHub Actions job does not have. Two real options, and the
+trade-off is explicit:
+
+| Option | How | Cost |
+|---|---|---|
+| **Vendor the file** (recommended) | Copy `bin/phase-gate` into the project (e.g. `scripts/phase-gate`) and call that from the workflow | A second copy that can drift from the agency's — note its provenance in the file header and re-copy when the agency's changes |
+| Install the agency in CI | Clone/pin the agency repo in a setup step, then call `<agency>/bin/phase-gate` | A network dependency and a pinned ref to maintain in every project |
+
+The bin is a single self-contained bash file (bash 3.2 + `git`, no other dependency), which is what
+makes vendoring viable. The gate is honest about which copy ran — it prints the phase and the
+verdict, never a silent pass — so a vendored copy that drifts to *permissive* would still have to
+print `verdict: pass` over a tree that carries application code.
+
 ## What it is not
 
 - **Not a general policy engine.** It governs exactly one axis: whether application code is
