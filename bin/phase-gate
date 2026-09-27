@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# phase-gate — refuse application code in a project that declared a documentation phase.
+#
+# A project declares its phase in `openspec/project.md`:
+#
+#   ## Phase
+#
+#   phase: documentation
+#   application-code: src/**, test/**
+#
+# The declaration belongs to the human. This command only READS it and answers one question:
+# does the tree in front of me carry application code while the project is in a phase that
+# forbids it? It never writes the declaration, and an agent that flips it to unblock its own
+# work defeats the gate with the gate's own input.
+#
+# The verdict is derived from the RESULTING TREE, not from a diff range. Two reasons, both
+# load-bearing: a change that REMOVES the code is the correction and must pass (a diff rule
+# would refuse the very operation that fixes the project), and a diff range is a property of
+# how the work happened to be committed rather than of the state under review. The tree form
+# also makes two different readers agree on the same checkout.
+#
+# Exit status is the contract:
+#
+#   0   the phase was read and the tree respects it (including an implementation phase)
+#   1   the phase was read and the tree violates it — refusal, the paths are named
+#   2   the phase could not be assessed — NEVER a pass
+#
+# Exit 1 is a verdict; exit 2 is no verdict. A missing declaration is not equivalent to an open
+# implementation phase, and an unrecognized phase value is not permission either: both report
+# cannot-assess, the same honesty rule review-tier and agency-next hold.
+#
+# Read-only. bash 3.2 + git; no dependencies, like the rest of bin/.
+
+set -uo pipefail
+
+ROOT=""
+
+usage() {
+  cat <<'EOF'
+Usage: phase-gate [--root <dir>] [--help]
+
+  --root <dir>   the project root holding openspec/project.md
+                 (default: the git repository root, else the current directory)
+
+Reads the `## Phase` block of openspec/project.md:
+
+  phase: documentation | implementation
+  application-code: <comma-separated globs, e.g. src/**, test/**>
+
+Prints the phase, the declared paths and one verdict:
+
+  pass            the tree respects the declared phase
+  refuse          the tree carries application code the phase forbids (names the paths)
+  cannot assess   no phase, an unrecognized phase, or no declared paths
+
+Exit status: 0 pass; 1 refuse; 2 cannot assess (never a pass).
+
+The gate is a fact about the current checkout: in a documentation phase a branch that already
+carries the code is refused until the branch is corrected.
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --root) [ "$#" -ge 2 ] || { printf 'phase-gate: --root requires a directory\n' >&2; exit 2; }; ROOT="$2"; shift 2 ;;
+    --root=*) ROOT="${1#--root=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) printf 'phase-gate: unknown argument %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+not_assessed() {
+  printf 'phase: cannot assess\nreason: %s\nverdict: cannot assess\n' "$1"
+  printf 'phase-gate: could not assess the phase (%s) — this is NOT a pass\n' "$1" >&2
+  exit 2
+}
+
+if [ -z "$ROOT" ]; then
+  if command -v git >/dev/null 2>&1 && TOP=$(git rev-parse --show-toplevel 2>/dev/null); then
+    ROOT="$TOP"
+  else
+    ROOT=$(pwd)
+  fi
+fi
+[ -d "$ROOT" ] || not_assessed "root is not a directory: $ROOT"
+
+PROJECT_MD="$ROOT/openspec/project.md"
+[ -f "$PROJECT_MD" ] || not_assessed "openspec/project.md not found under $ROOT — the project has not declared a phase"
+
+# --- the declaration: two keys, parsed line-wise -------------------------------------------
+# Deliberately narrow rather than a YAML engine: a two-key block does not justify a general
+# parser, and `bin/` stays bash + zero dependencies.
+PHASE=""
+PATHS_RAW=""
+IN_BLOCK=0
+while IFS= read -r line; do
+  case "$line" in
+    '## Phase'*) IN_BLOCK=1; continue ;;
+    '## '*) [ "$IN_BLOCK" -eq 1 ] && IN_BLOCK=0; continue ;;
+  esac
+  [ "$IN_BLOCK" -eq 1 ] || continue
+  case "$line" in
+    phase:*) PHASE=$(printf '%s' "${line#phase:}" | tr -d '[:space:]') ;;
+    application-code:*) PATHS_RAW="${line#application-code:}" ;;
+  esac
+done < "$PROJECT_MD"
+
+[ -n "$PHASE" ] || not_assessed "no 'phase:' key inside the '## Phase' block of openspec/project.md"
+[ -n "$PATHS_RAW" ] || not_assessed "no 'application-code:' key inside the '## Phase' block of openspec/project.md"
+
+# Normalize the glob list into one pattern per line. `tr -d '[:space:]'` cannot be used to trim:
+# newline IS a space character, so deleting whitespace deletes the separators just created and
+# fuses `src/**, test/**` into one impossible pattern. Trim per line instead.
+PATTERNS=$(printf '%s' "$PATHS_RAW" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep .)
+[ -n "$PATTERNS" ] || not_assessed "the 'application-code:' key declares no path"
+
+case "$PHASE" in
+  documentation|implementation) ;;
+  *) not_assessed "unrecognized phase '$PHASE' — the gate implements 'documentation' and 'implementation', and an unknown phase is not permission to implement" ;;
+esac
+
+printf 'phase: %s\n' "$PHASE"
+printf 'application-code: %s\n' "$(printf '%s' "$PATTERNS" | paste -sd ',' - 2>/dev/null || printf '%s' "$PATTERNS" | tr '\n' ',')"
+
+# The implementation phase adds no constraint of its own: the change gate is the only one.
+if [ "$PHASE" = "implementation" ]; then
+  printf 'verdict: pass\n'
+  printf 'phase-gate: implementation phase — no phase constraint applies\n' >&2
+  exit 0
+fi
+
+# --- glob to ERE ----------------------------------------------------------------------------
+# '**' crosses directories, '*' does not, '?' is one non-slash character. Everything else is
+# escaped, so a declared path can never smuggle regex metacharacters into the match.
+glob_to_regex() {
+  local pat="$1" out="" i=0 len c nxt
+  len=${#pat}
+  while [ "$i" -lt "$len" ]; do
+    c="${pat:$i:1}"
+    case "$c" in
+      '*')
+        nxt="${pat:$((i+1)):1}"
+        if [ "$nxt" = "*" ]; then
+          out="${out}.*"
+          i=$((i+2))
+          continue
+        fi
+        out="${out}[^/]*"
+        ;;
+      '?') out="${out}[^/]" ;;
+      [a-zA-Z0-9_-]) out="${out}${c}" ;;
+      *) out="${out}\\${c}" ;;
+    esac
+    i=$((i+1))
+  done
+  printf '%s' "$out"
+}
+
+# A bare directory name (`src`, `src/`) means everything under it.
+normalize() {
+  local p="$1"
+  case "$p" in
+    *'*'*) printf '%s' "$p" ;;
+    */) printf '%s**' "$p" ;;
+    *.*) printf '%s' "$p" ;;
+    *) printf '%s/**' "$p" ;;
+  esac
+}
+
+# --- the tree -------------------------------------------------------------------------------
+# Resolve both sides physically: `git rev-parse --show-toplevel` returns the physical path while
+# a caller may hold the symlinked one, and the two must compare equal for the same directory.
+phys() { (cd "$1" 2>/dev/null && pwd -P); }
+
+GIT_TOP=""
+if command -v git >/dev/null 2>&1; then
+  GIT_TOP=$(git -C "$ROOT" rev-parse --show-toplevel 2>/dev/null || true)
+fi
+
+# `ls-files` is only the project's tree when ROOT *is* that repository. A fixture (or any
+# directory) sitting inside a larger checkout resolves the enclosing repo's toplevel instead, and
+# its index describes files that are not this project's — so the walk is what answers here.
+if [ -n "$GIT_TOP" ] && [ "$(phys "$GIT_TOP")" = "$(phys "$ROOT")" ]; then
+  # Tracked files, so a gitignored `.worktrees/` copy is not read as the project's state.
+  FILES=$(git -C "$ROOT" ls-files 2>/dev/null || true)
+else
+  # Untracked by design: this root is not its own repository, so there is no index to trust.
+  FILES=$(cd "$ROOT" && find . \( -name .git -o -name .worktrees -o -name node_modules \) -prune -o -type f -print 2>/dev/null | sed 's|^\./||')
+fi
+
+VIOLATIONS=""
+while IFS= read -r pattern; do
+  [ -n "$pattern" ] || continue
+  norm=$(normalize "$pattern")
+  re="^$(glob_to_regex "$norm")$"
+  hit=$(printf '%s\n' "$FILES" | grep -E -m 20 "$re" || true)
+  [ -n "$hit" ] || continue
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    VIOLATIONS="${VIOLATIONS}${f}
+"
+  done <<EOF
+$hit
+EOF
+done <<EOF
+$PATTERNS
+EOF
+
+if [ -n "$VIOLATIONS" ]; then
+  printf 'verdict: refuse\n'
+  printf 'violating:\n'
+  printf '%s' "$VIOLATIONS" | grep . | sed 's/^/  /'
+  printf 'phase-gate: %s file(s) under the declared application-code paths while the phase is documentation\n' "$(printf '%s' "$VIOLATIONS" | grep -c .)" >&2
+  printf 'phase-gate: opening the phase is the human'"'"'s decision (blocker class: decision) — this is not retried or worked around\n' >&2
+  exit 1
+fi
+
+printf 'verdict: pass\n'
+exit 0
