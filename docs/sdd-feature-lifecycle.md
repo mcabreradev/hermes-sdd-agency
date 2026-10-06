@@ -72,7 +72,7 @@ The mandatory gateway: without this marker nothing starts
 
 ## Stage 1 — Idea / Discovery → PRD
 
-**Workflow:** `idea-to-openspec.md` · **Agent:** discovery (personas `codebase-explorer`, `prd`)
+**Workflow:** `initialize-project.md` (creates `docs/PRD.md`) · Stage 1's `idea-to-openspec.md` runs the `prd` persona to keep the intent current · **Agent:** discovery (personas `codebase-explorer`, `prd`)
 
 The problem/feature is analyzed before any planning or code:
 

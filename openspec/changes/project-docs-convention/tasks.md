@@ -15,7 +15,7 @@
 ## 3. The agency ships no product content, and no stale guide
 
 - [x] 3.1 No product document exists in this repository: no `docs/PRD.md` and no `docs/ARCHITECTURE.md` — verifies: `test ! -f docs/PRD.md && test ! -f docs/ARCHITECTURE.md`
-- [x] 3.2 README and INSTALL reflect the change where they already list the project structure — verifies: `grep -qi 'PRD' README.md`
+- [x] 3.2 README and INSTALL reflect the change where they already list the project structure — verifies: `grep -qi 'PRD' README.md && grep -qi 'PRD' INSTALL.md`
 - [x] 3.3 The repository's own lifecycle guide reflects the declared home: `docs/sdd-feature-lifecycle.md` names `docs/PRD.md` at Stage 0 — verifies: `grep -q 'docs/PRD.md' docs/sdd-feature-lifecycle.md`
 
 ## 4. The change closes cleanly

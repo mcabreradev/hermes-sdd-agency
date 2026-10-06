@@ -70,8 +70,11 @@ than restate its facts, so one fact has one home.
 ### Requirement: The producer of each document is the stage that owns it
 
 Each document MUST have exactly one producing stage, and the convention MUST name it, so a document
-is never authored by an unowned process. The PRD's producer is discovery (`initialize-project`); the
-architecture overview's producer is the `architect` stage.
+is never authored by an unowned process. The PRD's producer is `initialize-project`, the project's
+initialization stage, which creates its home at `docs/PRD.md`; the architecture overview's producer
+is the `architect` stage. The `discovery` persona fills the PRD's content — in `initialize-project`
+and, when the intent changes later, in `idea-to-openspec` — but the **producing stage** that owns the
+document is the one that creates its home and is named here.
 
 #### Scenario: A document with no declared producer
 
