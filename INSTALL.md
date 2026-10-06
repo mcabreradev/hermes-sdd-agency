@@ -2,13 +2,13 @@
 
 > Get the whole agency running on another Hermes in minutes — one command, guarded against accidental overwrites, idempotent.
 
-![install: 1 command](https://img.shields.io/badge/install-1%20command-success) ![bundles: 15](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![skills: 65](https://img.shields.io/badge/skills-65-brightgreen.svg) ![OpenSpec: 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue)
+![install: 1 command](https://img.shields.io/badge/install-1%20command-success) ![bundles: 15](https://img.shields.io/badge/bundles-15-blueviolet.svg) ![skills: 68](https://img.shields.io/badge/skills-68-brightgreen.svg) ![OpenSpec: 1.13+](https://img.shields.io/badge/OpenSpec-1.13+-blue)
 
 ## ⚡ TL;DR
 
 | | |
 |---|---|
-| **One command** | `bash <(curl -fsSL …/install.sh)` → process tree, 65 skills, 15 bundles into `~/.hermes` |
+| **One command** | `bash <(curl -fsSL …/install.sh)` → process tree, 68 skills, 15 bundles into `~/.hermes` |
 | **Guarded** | never overwrites existing config without an explicit **Yes**; idempotent — safe to re-run |
 | **Interactive** | arrow-key menu in a terminal; **piped/CI runs skip the menu** and use defaults |
 | **`/feature` ready?** | install the 4 discovery skills once (`superpowers:brainstorming` + mattpocock's 3) |

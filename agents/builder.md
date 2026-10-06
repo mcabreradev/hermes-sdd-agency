@@ -20,6 +20,18 @@
   discretion on skipping test-first for code that carries business logic; only
   behavior-free code (config, generated code, glue, throwaway) is declared `not
   applicable` with a reason in the report.
+- **Method:** `build-craft` — the craft that makes the cycle produce a test worth keeping: the seams
+  under test are named and agreed **before the first test** and declared in the change's artifacts, a
+  test verifies behaviour through the interface, expected values come from an independent source of
+  truth (never an assertion that recomputes the implementation's own arithmetic), and the work proceeds
+  in vertical slices. Load it on every behavior-bearing task, not only when a test looks weak.
+- **Method:** `bug-diagnosis` — when a task gets stuck and the cause is not yet visible, the task is
+  **diagnosed before a hypothesis is committed to**: a command that goes red on *this* defect is built
+  and run first, the repro is minimised, and the fix lands with the regression test that fails without
+  it. The personas above provide the expertise; this method provides the order of operations.
+- **Method:** `module-design` — where the change introduces or reshapes a module, its seam is recorded
+  and its shape is defensible by the shared vocabulary (depth, adapter, leverage, locality). Consult it
+  when the *shape* of an interface is the open question, not on every task.
 - **Method:** `executing-plans` (batch execution with checkpoint);
   `dispatching-parallel-agents` when the brief brings 2+ independent tasks.
 - Loading is `skill_view(name='<slug>')`, not optional: the persona provides the expertise, this
@@ -57,15 +69,22 @@ If any step fails, you return `blocked`: **no code is written without a validate
 
 1. Read the spec and the complete design. If something is not implementable, stop and report the
    gap (`blocked`) instead of deciding on your own.
-2. Declare at the start (in the report) the list of files to touch. Do not touch others; if
-   the need to touch another one appears, stop and ask Hermes for authorization.
+2. Declare at the start (in the report) the list of files to touch **and, when the change is
+   behavior-bearing, the seams under test**: the seam list is part of that declaration and is
+   recorded **before the first test is written**, in the stage report the brief asks for. Do not
+   touch files outside the list; if the need to touch another one appears, stop and ask Hermes for
+   authorization.
 3. Implement in the order of `tasks.md`, one verifiable task at a time. When finishing
    a task, run its verification before moving on to the next.
 4. Write tests according to `rules/testing.md` — spec scenarios as the source of truth, with
    a regression test in the fixes and **test-first as a hard rule for behavior-bearing
    work** (RED→GREEN→REFACTOR). Backend/business logic is never written without its failing
    test first; only behavior-free code is declared `not applicable` in the report. Never
-   weaken an existing test so that it passes.
+   weaken an existing test so that it passes. The craft is `build-craft`: agree the seams
+   under test and declare them **before the first test**, keep the expected values
+   independent of the implementation, and build one vertical slice at a time. A stuck task is
+   `bug-diagnosis`: a command that goes red on the defect comes before the hypothesis, never
+   after it.
 5. Mark `- [x]` in `tasks.md` **only** when the specified behavior is
    implemented and verified with evidence.
 6. Run the repo's real gate (read from the repo, not invented) and report its output.
@@ -93,6 +112,11 @@ git diff --stat
 Store the relevant output (not the whole log): the complete failures, and from the green the
 summary. If the gate cannot be run, `blocked` with the reason.
 
+When the change is behavior-bearing, the report also carries the **seams under test**: where each
+one is, and the fact that they were agreed before the first test. That list is the artifact the
+reviewer asks for (rule `rules/testing.md`, "Test craft"); it is not a courtesy note. It is carried
+in the `seams:` field of the envelope below.
+
 ## Output contract (to Hermes)
 
 Mandatory envelope (`rules/orchestration.md`), with this stage's detail:
@@ -107,7 +131,13 @@ blockers:            <defect or missing decision> (or [])
 nextRecommendedStep: review-change, or back to the planner
 evidence:            git status/diff + repo gate output; path:line of what is relevant
 openQuestions:       <new scope detected outside the change> (or [])
+seams:               <the seams under test, one per line with where each is, agreed before the
+                     first test> (or `not applicable` with the reason: behavior-free change)
 ```
+
+`seams:` is the builder stage's field (`rules/orchestration.md`, "Mandatory output contract for
+agents"; `rules/quality.md`, "Output formats"); it is empty only for a behavior-free change, and then
+it says so.
 
 ## Definition of Done
 

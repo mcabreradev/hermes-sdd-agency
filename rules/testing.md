@@ -51,6 +51,32 @@ with why there is nothing to test. If there is any behavior to pin, test-first a
 - Tests that were not run are not declared green.
 - Tests from another project are not copied as a content template; only the form.
 
+## Test craft
+
+The cycle above is the obligation. What makes the cycle produce a test **worth keeping** is the craft.
+It is owned by **`build-craft`**, which is where each rule below is stated in full; this section is the
+short form the stage reads in the rule file, and it deliberately states no rule twice:
+
+- **Seams are agreed and declared before the first test** — `build-craft`, "The seam comes first".
+- **Expected values come from an independent source of truth** — `build-craft`, "The three
+  anti-patterns".
+- **A test verifies behaviour through the interface** — `build-craft`, "A good test".
+- **One vertical slice at a time** — `build-craft`, "The loop".
+
+The full vocabulary for a module's shape — depth, seam, adapter, leverage, locality — is in
+`module-design`, which is what a structural disagreement is settled against.
+
+## Diagnosis before a fix
+
+A defect whose cause is not yet visible is **diagnosed before a hypothesis is committed to**. The
+discipline is owned by **`bug-diagnosis`**, which states each rule in full; the rule file keeps only the
+obligation and the one sentence a stage can fail on:
+
+- A fix whose cause was not yet visible ships the command that went **red on this defect** — run at
+  least once, with its invocation and output recorded — together with the regression test that fails
+  without the fix. Reading code to build a theory before that command exists is the failure this rule
+  exists to prevent; the loop, the minimisation and the ranking of hypotheses are `bug-diagnosis`.
+
 ## Execution
 
 - The repo's real gate is run, as the repo declares it, not an invented command

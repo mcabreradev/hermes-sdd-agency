@@ -10,7 +10,8 @@ only after preflight enables it.
   written without its failing test first, and only behavior-free code is declared `not
   applicable` in the report.
 - **Output:** code + tests for the change, tasks marked `- [x]` with evidence.
-- **Personas/method:** `fullstack-developer` / `typescript-pro` · **`test-driven-development` (hard rule)** · `executing-plans` (batches with checkpoint) · `dispatching-parallel-agents` if there are independent tasks · `debugger`/`error-detective` when a task gets stuck.
+- **Personas/method:** `fullstack-developer` / `typescript-pro` · **`test-driven-development` (hard rule)** · **`build-craft`** (the craft: seams agreed before the first test, values independent of the implementation, vertical slices) · **`bug-diagnosis`** (a command that goes red on the defect before the hypothesis) · `module-design` when the change reshapes a module · `executing-plans` (batches with checkpoint) · `dispatching-parallel-agents` if there are independent tasks · `debugger`/`error-detective` when a task gets stuck.
+- **Deliverable besides the code:** when the change is behavior-bearing, the stage report carries the **seams under test** (where each one is, agreed before the first test). It is the artifact the reviewer asks for; the builder declares it in the report rather than writing it into `design.md`, which it never authors.
 
 ## 0. Preflight (Hermes) — blocking
 

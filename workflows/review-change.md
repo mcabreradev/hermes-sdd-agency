@@ -6,7 +6,7 @@ correct: it decides whether the implementation can move on to QA.
 - **Agents:** `reviewer` (and `builder` for the fixes)
 - **Rules:** `rules/quality.md`, `rules/coding.md`, `rules/testing.md`, `rules/openspec.md`
 - **Output:** review report (`templates/review-report.md`) + verdict.
-- **Personas/method:** `code-reviewer` + `code-simplifier` · `code-review-checklist` · `supply-chain-security` if the diff touches dependencies.
+- **Personas/method:** `code-reviewer` + `code-simplifier` · `code-review-checklist` · `module-design` for a structural dispute (the vocabulary the finding names) · `supply-chain-security` if the diff touches dependencies.
 
 ## 0. Preflight (Hermes)
 

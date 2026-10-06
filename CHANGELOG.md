@@ -13,11 +13,29 @@ coherent, reviewable increments of the system.
 
 - **Public surfaces back in sync**: README, the GitHub Pages homepage (`index.html`) and
   INSTALL now count the real tree — 7 evidence bins (`run-trace`, `change-collision`
-  added), 65 skills, 108 pinned test cases, 39 merged PRs. The homepage's loop diagram
+  added), 68 skills, 108 pinned test cases, 39 merged PRs. The homepage's loop diagram
   runs `release` before `pr-review` (the canonical order) and `docs/evidence-bins.md`
   documents the two new bins.
 
 ### Added
+
+- **The build stage gains its craft — `build-craft`, `bug-diagnosis`, `module-design`.** The agency
+  enforced test-first as a hard rule and never said what makes a test worth keeping, where a test
+  belongs, or how to find a bug whose cause is not yet visible. Three process skills close the gap,
+  each loaded by the stage that needs it: `build-craft` (seams named and agreed **before the first
+  test** — an undeclared seam is not written at; the three anti-patterns: implementation-coupled,
+  **tautological** — the assertion recomputes the expected value the way the code does, so it passes
+  by construction — and horizontal slicing; one vertical slice at a time), `bug-diagnosis` (a command
+  that goes **red on this bug** before any hypothesis, a minimised repro, falsifiable predictions, and
+  the fix landing at a seam that exercises the real pattern) and `module-design` (the vocabulary a
+  structural dispute is settled against — module, interface, depth, seam, adapter, leverage, locality
+  — plus the deletion test and "the interface is the test surface"). `rules/testing.md` keeps the
+  obligation and now carries the craft in two new sections ("Test craft", "Diagnosis before a fix");
+  `agents/builder.md` loads the three methods, `agents/reviewer.md` checks them against the real diff
+  (tautological / implementation-coupled / horizontal slicing / a regression test that passes without
+  the fix = `MAJOR`; an undeclared seam or a pass-through module = `MINOR`), and `rules/quality.md`
+  carries both rows. No new bin, no dependency: the checks are **review** — an agent reading the diff
+  against the contract.
 
 - **The DDD trigger is explicit signals, and the reviewer verifies the contract** — domain-driven
   design stops being a judgment call. The architect evaluates five objective signals on every
@@ -206,6 +224,14 @@ The sensitive-path deny list, the skill registry and the work-unit/budget guidan
 from [Gentleman-Programming/gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (MIT)
 under the same rule: only host-agnostic ideas, no binary, no runtime and no third-party state
 machine ported.
+
+The build craft (`build-craft`, `bug-diagnosis`, `module-design`) was adapted from
+[mattpocock/skills](https://github.com/mattpocock/skills) (MIT) under the same rule. Distilled in:
+three host-agnostic disciplines — the craft that makes test-first produce a test worth keeping, the
+diagnosis loop that precedes a fix, and the vocabulary for a module's shape. **Not** taken: no
+router skill, no `/setup-*` command that would write a second source of truth for where a repo's
+decisions live, no slash commands duplicating this agency's bundles, no host runtime, no installer,
+no dependency — the three files are prose and the checks they enable are review.
 
 
 ## [0.1.0] - 2026-09-17

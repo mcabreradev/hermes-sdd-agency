@@ -60,6 +60,8 @@ blockers:            what prevents finishing + what decision is needed (or [])
 nextRecommendedStep: proposed next step (Hermes decides)
 evidence:            commands + relevant output; path:line
 openQuestions:       doubts that change design, scope or business (or [])
+seams:               the builder stage only: the seams under test, agreed before the first test
+                     (or `not applicable` with the reason)
 ```
 
 - `done` requires evidence for **each** objective of the brief. An objective without evidence
@@ -78,8 +80,8 @@ openQuestions:       doubts that change design, scope or business (or [])
 | openspec (propose) | `validate` without ERROR + `ℹ INFO` read and reported |
 | architect | decisions with discarded alternatives and risks; ADR if applicable; the recorded domain trigger evaluation, and when a signal fired, the domain model in the design plus the vocabulary in the project's `CONTEXT.md` |
 | planner | granular `tasks.md` (steps of ≤1 day), each task verifiable |
-| builder | repo build/lint/tests green + only declared files touched |
-| reviewer | findings with `severity`, `path:line`, impact and proposed fix; the domain contract checks reported when the trigger fired (glossary conformance, invariants covered by tests that fail when violated, code against the declared model, trigger verdict against the diff) |
+| builder | repo build/lint/tests green + only declared files touched; the craft the tests are held to (`rules/testing.md`, "Test craft"): the seams under test agreed and declared, and no assertion whose expected value recomputes the implementation |
+| reviewer | findings with `severity`, `path:line`, impact and proposed fix; the domain contract checks reported when the trigger fired (glossary conformance, invariants covered by tests that fail when violated, code against the declared model, trigger verdict against the diff); and the build craft checks reported: a **tautological** assertion, a test coupled to internals, tests written before the implementation they exercise, a regression test that does not fail without the fix (all `MAJOR`), a seam neither agreed nor declared and a pass-through module (`MINOR`, naming the `module-design` term) |
 | qa | executed cases, real result, failure evidence when it fails |
 | release | versioning and notes coherent with the diff; nothing that fails the repo gate |
 
