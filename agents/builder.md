@@ -135,8 +135,9 @@ seams:               <the seams under test, one per line with where each is, agr
                      first test> (or `not applicable` with the reason: behavior-free change)
 ```
 
-`seams:` is the change's addition to the envelope (`rules/quality.md`, "Test craft"); it is empty
-only for a behavior-free change, and then it says so.
+`seams:` is the builder stage's field (`rules/orchestration.md`, "Mandatory output contract for
+agents"; `rules/quality.md`, "Output formats"); it is empty only for a behavior-free change, and then
+it says so.
 
 ## Definition of Done
 

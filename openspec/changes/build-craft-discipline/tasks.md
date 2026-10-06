@@ -57,7 +57,7 @@
   workflows/implement-change.md
   workflows/review-change.md
   ```
-- [x] 5.9 The authored-lines budget is measured and the delivery strategy recorded against the measurement (design.md, "Delivery strategy") — verifies: `git add -A && test "$(git diff --cached --numstat main | awk '{s+=$1+$2} END{print s}')" = "1093" && test "$(git diff --cached --numstat main -- . ':(exclude)openspec/changes/build-craft-discipline' | awk '{s+=$1+$2} END{print s}')" = "520"` and the two figures recorded in `design.md` agree with those prints (over the 400 advisory ⇒ the chosen strategy is `single-pr` with the two rejected ones named)
+- [x] 5.9 The authored-lines budget is measured and the delivery strategy recorded against the measurement (design.md, "Delivery strategy") — verifies: `git add -A && test "$(git diff --cached --numstat main | awk '{s+=$1+$2} END{print s}')" = "1107" && test "$(git diff --cached --numstat main -- . ':(exclude)openspec/changes/build-craft-discipline' | awk '{s+=$1+$2} END{print s}')" = "535"` and the two figures recorded in `design.md` agree with those prints (over the 400 advisory ⇒ the chosen strategy is `single-pr` with the two rejected ones named)
 
 ## 6. Archive and sync (separate follow-up PR — left unticked)
 

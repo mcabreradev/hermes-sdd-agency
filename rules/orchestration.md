@@ -54,6 +54,18 @@ evidence:
 openQuestions:
 ```
 
+The **builder** stage adds one further field, mandatory for it and for its stage
+report's consumer (`rules/testing.md`, "Test craft"):
+
+```
+seams:
+```
+
+It carries the seams under test — one per line with where each is, agreed before the first test
+— or `not applicable` with the reason when the change carries no behavior to prove. Other
+stages write `not applicable` when it does not apply to them: the field is present on every
+builder report, never omitted.
+
 With the trace log (`rules/observability.md`), **every brief and every entry of a run
 also carries `runId`** — the run id (`run-<UTC ISO-8601 compact>`) minted once at the
 workflow's preflight and threaded through every stage brief, so a run's trace entries
