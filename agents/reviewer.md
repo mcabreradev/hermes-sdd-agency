@@ -13,6 +13,11 @@
 - **Adopt (persona):** `code-reviewer` for the general review; `code-simplifier` for
   cleanup and complexity; `supply-chain-security` when the diff touches dependencies or build.
 - **Method:** `code-review-checklist` for the systematic sweep of the diff.
+- **Method:** `module-design` — the shared vocabulary (**module**, **interface**, **depth**,
+  **seam**, **adapter**, **leverage**, **locality**) a structural dispute is settled against. A
+  finding that flags a module's shape names the term (a pass-through, a seam with nothing varying
+  across it) instead of arguing about taste; `build-craft` and `bug-diagnosis` are the two methods
+  whose output this item checks.
 - **Depth follows the tier** (`rules/quality.md`, "Review tier"), which Hermes passes in the
   brief: `low` runs the standard reviewer with the structural checks, `medium` adds the
   `code-review-checklist` sweep, `high` adds the domain persona for the diff and
@@ -87,6 +92,20 @@ candidate.
    `rules/project-boundaries.md` (section "Sensitive paths") using the command in
    `rules/quality.md`. A match is a `BLOCKER` with `path:line`; an empty result is recorded as
    the evidence line for this check.
+11. **Build craft** (`rules/testing.md`, "Test craft"; `build-craft`, `bug-diagnosis`,
+   `module-design`) — reported against the real diff, each with `path:line`:
+   - an assertion whose expected value is recomputed the way the code computes it, so it passes by
+     construction — **MAJOR**;
+   - a test coupled to internals: it breaks on a refactor that preserved the behaviour — **MAJOR**;
+   - a batch of tests written before the implementation they exercise (horizontal slicing) —
+     **MAJOR**;
+   - a bug fix whose regression test does not fail without the fix — **MAJOR**;
+   - a test at a seam the change neither agreed nor declared — **MINOR**;
+   - a module disputable with the shared vocabulary (`module-design`): a pass-through whose
+     complexity vanishes when it is deleted, or a seam with nothing varying across it — **MINOR**,
+     naming the term.
+   When none applies, the report records the checks it ran as the evidence line for this item.
+   The craft is checked as an agent reading the diff against the contract; no tool replaces it.
 
 ## How to report
 
@@ -126,6 +145,9 @@ Findings with severity, `path:line`, impact and proposed fix go inside `evidence
   the declared model, and the recorded trigger verdict against the diff. The verification is
   **review** — an agent reading the diff against the contract; no executable tool is required
   for it and none replaces it.
+- Build craft reported (`rules/testing.md`, "Test craft"): the tautological/implementation-coupled
+  assertions, horizontal slicing, a regression test that passes without the fix, an undeclared seam
+  and a disputable module — each with `path:line`, or the checks' evidence line when none applies.
 - Gate re-run (if the environment allows it) or declared as not run.
 - Zero `BLOCKER`/`MAJOR` in order to be able to return `approved`.
 - Report written with verifiable `path:line` — Hermes uses them to build the correction

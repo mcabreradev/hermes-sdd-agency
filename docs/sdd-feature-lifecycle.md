@@ -168,6 +168,15 @@ Breaks the change into **granular tasks in `tasks.md`**:
 - Each task writes **its test** (spec scenarios as source of truth; a fix carries a
   regression test that fails without the fix). **No line without a validated spec** —
   `rules/coding.md`.
+- **The craft the cycle is held to** (`rules/testing.md`, "Test craft"; skills `build-craft`,
+  `bug-diagnosis`, `module-design`): the seams under test are named, agreed and declared
+  **before the first test**; expected values come from a source independent of the
+  implementation (a tautological assertion that recomputes the code's own arithmetic passes by
+  construction); a test verifies behaviour through the interface and survives a behaviour-preserving
+  refactor; and the work proceeds in vertical slices, one test at a time. A defect whose cause is
+  not visible is **diagnosed before a hypothesis**: a command that goes red on *this* defect comes
+  first, the repro is minimised, and the fix lands with the regression test that fails without it.
+  The reviewer checks each of these against the real diff (`agents/reviewer.md`).
 - Reports in the 9-field envelope with real evidence.
 
 ## Stage 6 — Review
