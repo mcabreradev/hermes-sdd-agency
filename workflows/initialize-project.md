@@ -7,7 +7,7 @@ OpenSpec. It is the **first workflow** of every project: its absence blocks the 
 - **Agents:** `discovery` (optional, if the repo already has code) · `openspec`
 - **Rules:** `rules/project-boundaries.md`, `rules/orchestration.md`, `rules/openspec.md`
 - **Creates (inside the project):** `openspec/` if missing · `openspec/project.md` ·
-  `docs/architecture/` · `docs/decisions/` · `reports/` ·
+  `docs/architecture/` · `docs/decisions/` · `docs/PRD.md` · `reports/` ·
   `reports/initialize-project.md`
 - **Never creates:** implementation code, nor agents/workflows copied from Hermes.
 - **Personas/method:** `codebase-explorer` + `prd` (discovery) · `sdd-spec-writer` (openspec) · `context-architecture` to leave the repo legible to agents.
@@ -127,6 +127,24 @@ mkdir -p docs/architecture && touch docs/architecture/.gitkeep     # if it was e
 - No architecture is written here: that is the `architect` agent's job during
   `workflows/openspec-to-architecture.md`. This step creates the place, not the content.
 
+## 5b. Create `docs/PRD.md` — the product document
+
+The project's PRD lives at `docs/PRD.md` and nowhere else; a root-level `PRD.md` is not the project's
+PRD (`project-docs`, `rules/project-boundaries.md`).
+
+```bash
+test -f docs/PRD.md || printf '# PRD: %s\n\nPending: <what we are building and why>\n' "$(basename "$PWD")" > docs/PRD.md
+```
+
+- The PRD answers *what the product is and why*; it is **derived from** the product context the
+  human declared in `openspec/project.md` and points at it rather than restating its facts — one fact,
+  one home.
+- It is written at discovery, before any change proposes application code: a project in a
+  documentation phase whose PRD is missing or `Pending` does not advance to implementation
+  (`project-docs`, `rules/openspec.md`).
+- The `prd` persona (discovery) fills it; this step creates the home and the placeholder, never
+  invents product content.
+
 ## 6. Create `docs/decisions/` if missing
 
 Project ADR directory (template: `~/.hermes/templates/adr.md`):
@@ -200,6 +218,7 @@ step.
 
 - [ ] `openspec/project.md` exists in the current project.
 - [ ] `docs/architecture/` exists.
+- [ ] `docs/PRD.md` exists (the product document's declared home).
 - [ ] `docs/decisions/` exists.
 - [ ] `reports/initialize-project.md` exists.
 - [ ] No product feature implementation was created.
@@ -210,7 +229,7 @@ step.
 
 ```bash
 cd <project-root>
-test -f openspec/project.md && test -d docs/architecture && test -d docs/decisions \
+test -f openspec/project.md && test -d docs/architecture && test -f docs/PRD.md && test -d docs/decisions \
   && test -f reports/initialize-project.md && echo "OK initialization"
 openspec context --json
 openspec validate --all --json | jq -c '.summary.totals'
@@ -225,7 +244,7 @@ Mandatory envelope (`rules/orchestration.md`):
 status:              done | blocked | needs-context
 summary:             one line: project initialized with OpenSpec
 projectRoot:         verified absolute path
-filesCreated:        openspec/project.md, docs/architecture/, docs/decisions/, reports/, reports/initialize-project.md (or [])
+filesCreated:        openspec/project.md, docs/architecture/, docs/PRD.md, docs/decisions/, reports/, reports/initialize-project.md (or [])
 filesModified:       <paths> (or [])
 blockers:            <doubtful root, wrong repo, missing inputs that block> (or [])
 nextRecommendedStep: idea-to-openspec (or the workflow that applies)

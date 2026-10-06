@@ -46,6 +46,11 @@ knowledge is useful for only one project, it lives in that project.
     is written, nothing is read from another project, the blocker is reported.
 11. **Hermes never stores client or product requirements in global agent files**
     (rules, workflows, agents, templates, global memory).
+12. **Product documents have one declared home in the project, never the repository root.**
+    A project's PRD lives at `docs/PRD.md` and its architecture overview at `docs/ARCHITECTURE.md`
+    (`project-docs`); the repository root is where the *process's* entry points live
+    (README, INSTALL, LICENSE), so a root-level `PRD.md`/`ARCHITECTURE.md` is a defect, not a home.
+    The PRD **derives from** `openspec/project.md` and points at it instead of restating its facts.
 
 ## Sensitive paths (deny list)
 

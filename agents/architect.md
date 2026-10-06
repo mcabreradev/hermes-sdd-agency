@@ -6,7 +6,10 @@
   `templates/architecture.md`, `templates/adr.md`, the project's OpenSpec change and the
   existing code.
 - **Writes:** the change's `design.md` (if that stage exists), architecture documents and
-  the project's ADRs, at the paths declared by the brief.
+  the project's ADRs, at the paths declared by the brief. It **owns the project's architecture
+  overview at `docs/ARCHITECTURE.md`** — the durable record of the system's shape as built, distinct
+  from the per-change `design.md` and from an ADR — and updates it when the architecture changes
+  (`project-docs`).
 - **Never:** writes product code; never changes the scope of the OpenSpec change.
 
 ## Persona and method
