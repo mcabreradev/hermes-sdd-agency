@@ -1,6 +1,6 @@
 ---
 name: bug-diagnosis
-description: "Use when something is broken, failing, slow or intermittent. Diagnose before fixing: build a loop that goes red on this bug first, minimise the repro, rank falsifiable hypotheses."
+description: "Use when something is broken, failing or intermittent. Diagnose before fixing: a command that goes red on this bug first, then falsifiable hypotheses."
 ---
 
 # Bug diagnosis

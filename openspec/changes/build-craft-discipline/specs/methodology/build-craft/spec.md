@@ -16,13 +16,14 @@ executable tool is required for it and none replaces it.
 The seams under test MUST be named and agreed before any test is written, and a test MUST NOT be
 written at an unconfirmed seam. A seam is the boundary at which a test observes a behaviour without
 reaching inside it — the location of a module's interface, not its implementation. The agreed list MUST
-be **declared in the build stage's report**, together with the declaration of the files to touch, since
-the builder never authors `design.md` and the list is the artifact the reviewer asks for.
+be **declared in the `seams:` field of the build stage's report**, together with the declaration of the
+files to touch, since the builder never authors `design.md` and the list is the artifact the reviewer
+asks for.
 
 #### Scenario: The seams are declared before the first test
 
 - **WHEN** the builder prepares to write the first test of a behavior-bearing change
-- **THEN** the stage report already carries the seams under test, each with where it is, before any test is written
+- **THEN** the stage report already carries the `seams:` field, one seam per line with where each is, before any test is written
 
 #### Scenario: A test is proposed at an unconfirmed seam
 

@@ -130,8 +130,8 @@ Measured before the commit with `git add -A && git diff --cached --numstat main 
 loop* — and the measurement below decides the shape:
 
 ```
-total (authored, incl. this change's artifacts)         1083
-total excluding openspec/changes/build-craft-discipline  512
+total (authored, incl. this change's artifacts)         1093
+total excluding openspec/changes/build-craft-discipline  520
 ```
 
 Both figures are against the advisory ~400-line budget in `rules/coding.md`, so the strategy is
@@ -139,7 +139,7 @@ Both figures are against the advisory ~400-line budget in `rules/coding.md`, so 
 
 | Strategy | When | Chosen? |
 |---|---|---|
-| `single-pr` | the excess is small and the reviewer accepts one larger diff | **yes** — 512 authored lines of prose across seven files, each with one concern, plus the change's own artifacts. The merged precedent is comparable or larger: the DDD contract change (`818bf4d`) measured 561, the phase gate (`ce96db9`) 1214, both delivered as a single PR. |
+| `single-pr` | the excess is small and the reviewer accepts one larger diff | **yes** — 520 authored lines of prose across seven files, each with one concern, plus the change's own artifacts. The merged precedent is comparable or larger: the DDD contract change (`818bf4d`) measured 561, the phase gate (`ce96db9`) 1214, both delivered as a single PR. |
 | `chained-pr` | the change is one behaviour delivered in slices | rejected — there is **no slice boundary** at which the gate passes and the behaviour is usable: a skill with no rule pointing at it is dead prose, and the reviewer item without the skill has nothing to name. Three slices would deliver three non-behaviours. |
 | `split-change` | the excess is independent work | rejected — the excess is this change's own craft, not unrelated work. |
 

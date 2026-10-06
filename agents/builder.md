@@ -114,7 +114,8 @@ summary. If the gate cannot be run, `blocked` with the reason.
 
 When the change is behavior-bearing, the report also carries the **seams under test**: where each
 one is, and the fact that they were agreed before the first test. That list is the artifact the
-reviewer asks for (rule `rules/testing.md`, "Test craft"); it is not a courtesy note.
+reviewer asks for (rule `rules/testing.md`, "Test craft"); it is not a courtesy note. It is carried
+in the `seams:` field of the envelope below.
 
 ## Output contract (to Hermes)
 
@@ -130,7 +131,12 @@ blockers:            <defect or missing decision> (or [])
 nextRecommendedStep: review-change, or back to the planner
 evidence:            git status/diff + repo gate output; path:line of what is relevant
 openQuestions:       <new scope detected outside the change> (or [])
+seams:               <the seams under test, one per line with where each is, agreed before the
+                     first test> (or `not applicable` with the reason: behavior-free change)
 ```
+
+`seams:` is the change's addition to the envelope (`rules/quality.md`, "Test craft"); it is empty
+only for a behavior-free change, and then it says so.
 
 ## Definition of Done
 

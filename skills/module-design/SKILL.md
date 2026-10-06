@@ -1,6 +1,6 @@
 ---
 name: module-design
-description: "Use when designing or disputing a module's shape: depth, seam, adapter, leverage, locality. Deep modules — a lot of behaviour behind a small interface, at a clean seam."
+description: "Use when designing or disputing a module's shape. Deep modules — a lot of behaviour behind a small interface, at a clean seam; the vocabulary for depth, seam, adapter, leverage, locality."
 ---
 
 # Module design

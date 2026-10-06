@@ -60,6 +60,8 @@ blockers:            what prevents finishing + what decision is needed (or [])
 nextRecommendedStep: proposed next step (Hermes decides)
 evidence:            commands + relevant output; path:line
 openQuestions:       doubts that change design, scope or business (or [])
+seams:               the builder stage only: the seams under test, agreed before the first test
+                     (or `not applicable` with the reason)
 ```
 
 - `done` requires evidence for **each** objective of the brief. An objective without evidence
