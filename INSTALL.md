@@ -177,8 +177,12 @@ differs from a full profile copy.
 ## 🚫 What must NOT go into a project
 
 `rules/`, `agents/`, `workflows/`, `templates/`, `docs/` are **global process** — they belong
-under `~/.hermes/`, never inside a project repo (`rules/project-boundaries.md`). The only
-project-level entry is OpenSpec's own `openspec/`, created by `workflows/initialize-project.md`.
+under `~/.hermes/`, never inside a project repo (`rules/project-boundaries.md`). The project-level
+entries are OpenSpec's own `openspec/` and the project's **own** product documents at their declared
+homes (`project-docs`): `docs/PRD.md` is created by `workflows/initialize-project.md` at discovery,
+`docs/ARCHITECTURE.md` is created and maintained by the `architect` during
+`workflows/openspec-to-architecture.md`, and `docs/decisions/` holds the project's ADRs. The agency's
+own `docs/` (its evidence guides, lifecycle notes) is process and never enters a project.
 
 ## 🔄 Keeping the export in sync
 

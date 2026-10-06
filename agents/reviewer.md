@@ -106,6 +106,16 @@ candidate.
      naming the term.
    When none applies, the report records the checks it ran as the evidence line for this item.
    The craft is checked as an agent reading the diff against the contract; no tool replaces it.
+12. **Product docs at their declared homes** (`project-docs`), verified against the real
+   diff and the tree:
+   - a product document at a path other than its declared home — in particular a **root-level
+     `PRD.md` or `ARCHITECTURE.md`** — is **MINOR**, naming the declared home (`docs/PRD.md`,
+     `docs/ARCHITECTURE.md`); the repository root is where the process's entry points live;
+   - a fact stated in both `docs/PRD.md` and `openspec/project.md` with divergent values is **MINOR**
+     — the PRD derives from `project.md` and points at it, so one fact has one home;
+   - a product document that no declared stage produced (the PRD by `initialize-project`, the
+     overview by `architect`) is **MINOR**, naming the stage that should own it.
+   When no product document is in play, the report records the check it ran as the evidence line.
 
 ## How to report
 

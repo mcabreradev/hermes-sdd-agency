@@ -60,10 +60,10 @@ docs/           evidence-bins · sdd-feature-lifecycle · usage-examples · FAQ
 skill-bundles/  15 slash-command bundles: /agency /feature /do /review /qa …
 skills/         60 process skills (23 agency personas + 37 workflow skills)
 fixtures/       8 runnable test suites that pin the bins themselves
-openspec/specs/ 7 capability specs — the agency's own requirements, versioned
+openspec/specs/ 14 capability specs — the agency's own requirements, versioned
 ```
 
-One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the process; the project provides the product.** Global instructions are reusable and never carry a product requirement; product knowledge lives in the project's repo.
+One principle, everywhere (`rules/project-boundaries.md`): **Hermes provides the process; the project provides the product.** Global instructions are reusable and never carry a product requirement; product knowledge lives in the project's repo — including its **product documents**, which have one declared home in the project: the PRD at `docs/PRD.md` and the architecture overview at `docs/ARCHITECTURE.md` (`project-docs`), never a root-level file.
 
 ## 🔄 The loop & the gate
 

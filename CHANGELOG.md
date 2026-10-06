@@ -37,6 +37,23 @@ coherent, reviewable increments of the system.
   carries both rows. No new bin, no dependency: the checks are **review** — an agent reading the diff
   against the contract.
 
+- **Product documents get one declared home — the PRD at `docs/PRD.md`, the architecture overview at
+  `docs/ARCHITECTURE.md`.** The loop scaffolded `openspec/project.md` and a `docs/architecture/`
+  directory but never said where a project's *PRD* or its *architecture overview* live, so a run
+  filled the gap with root-level `PRD.md` and `ARCHITECTURE.md` that no workflow produced, no stage
+  reviewed and no gate read — and whose content had already drifted from the repo. The new
+  `project-docs` capability declares one home and one producer per document
+  (`initialize-project` writes the PRD at discovery, the `architect` owns the overview and updates it
+  as the system changes) and the boundary against `openspec/project.md`: the PRD **derives from** it
+  and points at it rather than restating its facts, so one fact has one home. A root-level product
+  document is a documented defect the reviewer raises (`MINOR`) — a check stated in `agents/reviewer.md`
+  and `rules/quality.md`, not a deny-list entry. The agency ships the convention only: no product
+  content enters this repository. Wired into `workflows/initialize-project.md` (PRD step),
+  `workflows/openspec-to-architecture.md` (the architect maintains the overview), `agents/architect.md`,
+  `rules/project-boundaries.md`, the preflight of `rules/openspec.md` + `workflows/implement-change.md`
+  (a documentation phase does not open without its PRD — the documented preflight, not a new bin),
+  and `docs/sdd-feature-lifecycle.md`, README and INSTALL.
+
 - **The DDD trigger is explicit signals, and the reviewer verifies the contract** — domain-driven
   design stops being a judgment call. The architect evaluates five objective signals on every
   change (an invariant that must hold across operations; an entity with identity and lifecycle; a

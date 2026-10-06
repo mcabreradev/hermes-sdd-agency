@@ -69,6 +69,11 @@ openspec validate "<name>" --type change --json          # must pass
 Enabling criterion for implementing (all):
 
 - [ ] The project's declared phase permits implementation: `bin/phase-gate` exits 0 (see "Hard rule").
+- [ ] In a **documentation** phase, the project's PRD exists at `docs/PRD.md` and is not `Pending`
+      (`test -f docs/PRD.md && ! grep -qiE '^Pending' docs/PRD.md`): a documentation phase does not
+      open with its product document missing (`project-docs`; `rules/project-boundaries.md` "Hard
+      rules" #12). The PRD's home and producer are declarations, not suggestions — where the check
+      runs, it runs as this preflight line, never as an invented bin.
 - [ ] `openspec/changes/<name>/` exists, created by the CLI (`openspec new change`), never by hand.
 - [ ] `applyRequires` complete (`tasks` as a minimum).
 - [ ] `validate` passes without `ERROR`. The `ℹ [INFO]` are read, not ignored.

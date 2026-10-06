@@ -34,6 +34,12 @@ Skill `openspec-explore` with the `openspec` agent. Objective: narrow down the p
 the boundaries and the edge cases, without deciding implementation. It may write artifacts within
 a confirmed scope; never code.
 
+The **PRD's producer is `initialize-project`** (Stage 0), not this workflow: this stage runs the
+`prd` persona to keep the intent current, and the product document lives at `docs/PRD.md`
+(`project-docs`) — created at initialization, derived from `openspec/project.md`. If the PRD does not
+exist yet, it is `initialize-project` that creates its home; a product document authored by an
+undeclared stage has no producer.
+
 Gate: the scope is made explicit in one sentence ("change X does Y for Z"), with what
 is left out enumerated.
 
