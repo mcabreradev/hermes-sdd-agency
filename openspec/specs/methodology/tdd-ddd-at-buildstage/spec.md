@@ -22,14 +22,14 @@ The builder MUST implement behavior-bearing work test-first — write a failing 
 
 ### Requirement: Domain-driven modeling when the domain merits it
 
-The architect MUST model the change's domain with Domain-Driven Design when the business rules justify it — explicit entities/aggregates, a shared vocabulary, and bounded contexts — and the builder MUST follow that model instead of embedding domain rules implicitly in code.
+The architect MUST model the change's domain with Domain-Driven Design whenever a signal of `methodology/ddd-domain-discipline` fires, applying that capability's trigger, artifacts and vocabulary rules; and the builder MUST follow the resulting model instead of embedding domain rules implicitly in code. The trigger is not redefined here: the signal list, the recorded verdict and the review of the domain contract are owned by `methodology/ddd-domain-discipline`.
 
 #### Scenario: Architect applies DDD to a domain-rich change
 
-- **WHEN** the change carries non-trivial business rules with entities, aggregates or bounded contexts
-- **THEN** the architect shapes the domain model with DDD and the builder implements following that model
+- **WHEN** at least one signal of `methodology/ddd-domain-discipline` fires on the change
+- **THEN** the architect shapes the domain model as that capability specifies — the vocabulary resolution and the domain model in the change's design, the glossary in the project's `CONTEXT.md` — and the builder implements following that model
 
 #### Scenario: Skip DDD on thin behavior
 
-- **WHEN** the change is a bounded behavior without a meaningful domain structure
-- **THEN** the architect and builder proceed without a DDD model, and no domain modeling is forced
+- **WHEN** the change is a bounded behavior without a meaningful domain structure and no signal fires
+- **THEN** the architect and builder proceed without a DDD model, the architect records the signals it evaluated and found absent, and no domain modeling is forced
