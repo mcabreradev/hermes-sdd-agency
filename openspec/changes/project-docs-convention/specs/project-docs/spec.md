@@ -58,11 +58,14 @@ than restate its facts, so one fact has one home.
 - **THEN** the PRD references `project.md` for that fact instead of duplicating it, and a fact stated
   in both with divergent values is a defect
 
-#### Scenario: The PRD is written before implementation
+#### Scenario: A documentation phase does not open without its PRD
 
-- **WHEN** the project is in a documentation phase and its PRD does not exist yet
-- **THEN** the PRD is authored at discovery, before any change proposes application code, and no
-  implementation proceeds while the PRD is missing or `Pending`
+- **WHEN** a project declares the **documentation** phase and its PRD is missing, or still carries
+  `Pending` content
+- **THEN** `workflows/implement-change.md`'s preflight does not enable implementation — the
+  `rules/openspec.md` preflight criterion fails — and the PRD is authored at discovery before that
+  phase opens. Enforcement is the documented preflight, named in `rules/openspec.md`; it is not a
+  new bin, and the scenario is not satisfied by prose alone
 
 ### Requirement: The producer of each document is the stage that owns it
 

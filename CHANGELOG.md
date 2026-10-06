@@ -48,8 +48,11 @@ coherent, reviewable increments of the system.
   and points at it rather than restating its facts, so one fact has one home. A root-level product
   document is a documented defect the reviewer raises (`MINOR`) — a check stated in `agents/reviewer.md`
   and `rules/quality.md`, not a deny-list entry. The agency ships the convention only: no product
-  content enters this repository. Wired into `workflows/initialize-project.md`, `agents/architect.md`,
-  `rules/project-boundaries.md`, README and INSTALL.
+  content enters this repository. Wired into `workflows/initialize-project.md` (PRD step),
+  `workflows/openspec-to-architecture.md` (the architect maintains the overview), `agents/architect.md`,
+  `rules/project-boundaries.md`, the preflight of `rules/openspec.md` + `workflows/implement-change.md`
+  (a documentation phase does not open without its PRD — the documented preflight, not a new bin),
+  and `docs/sdd-feature-lifecycle.md`, README and INSTALL.
 
 - **The DDD trigger is explicit signals, and the reviewer verifies the contract** — domain-driven
   design stops being a judgment call. The architect evaluates five objective signals on every

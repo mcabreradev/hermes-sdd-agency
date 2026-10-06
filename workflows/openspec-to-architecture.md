@@ -6,7 +6,10 @@ code".
 
 - **Agents:** `architect`
 - **Rules:** `rules/openspec.md`, `rules/coding.md`, `rules/quality.md`
-- **Output:** the change's `design.md` and/or architecture docs + ADRs in the project.
+- **Output:** the change's `design.md` and/or architecture docs + ADRs in the project, and the
+  project's **architecture overview at `docs/ARCHITECTURE.md`** — the durable record of the system's
+  shape as built, which the architect **owns and updates** as the architecture changes
+  (`project-docs`). The per-change `design.md` and an ADR are distinct from it.
 - **Personas/method:** `code-architect` + `architect-reviewer` · `architecture-decision-records` when recording each ADR · `domain-modeling` when the DDD trigger fires (the signal list in `agents/architect.md`).
 
 ## 0. Preflight (Hermes)
@@ -48,6 +51,12 @@ The agent produces, at minimum:
 
 It is written into the project: `openspec/changes/<name>/design.md` (structure from
 `templates/architecture.md`) and one ADR per lasting decision (`templates/adr.md`).
+
+The architect also **maintains the project's architecture overview at `docs/ARCHITECTURE.md`**
+(`project-docs`): the durable, system-wide record of the shape as built. It creates it when the
+project has none and updates it whenever the change alters the architecture, so the overview tracks
+the system rather than freezing at initialization. The per-change `design.md` carries the change's
+decisions; the overview carries the result the whole system now has.
 
 ## 2. Design validation (Hermes)
 

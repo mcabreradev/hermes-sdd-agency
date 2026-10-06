@@ -35,9 +35,12 @@ live must be a fact in the repository, not an improvisation per run.
 
 ## Impact
 
-- `workflows/initialize-project.md` (declares the PRD step), `agents/architect.md` (owns the
-  overview), `rules/project-boundaries.md` (the product-doc boundary), `rules/quality.md` and
-  `agents/reviewer.md` (the root-level-doc check), README + INSTALL + CHANGELOG.
+- `workflows/initialize-project.md` (declares the PRD step), `workflows/openspec-to-architecture.md`
+  (the architect maintains the overview), `agents/architect.md` (owns the overview),
+  `rules/project-boundaries.md` (the product-doc boundary), `rules/openspec.md` (the preflight
+  criterion), `rules/quality.md` and `agents/reviewer.md` (the root-level-doc check),
+  `workflows/implement-change.md` (the preflight line), `docs/sdd-feature-lifecycle.md`, README.md,
+  INSTALL.md, CHANGELOG.md.
 - Each consuming project gains a `docs/PRD.md` and a `docs/ARCHITECTURE.md` at the declared homes.
   The agency ships the convention; the project writes its own documents — no product content is
   added to this repo.

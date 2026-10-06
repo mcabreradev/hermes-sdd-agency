@@ -20,6 +20,7 @@ cd <project-root>
 test -f openspec/project.md                 # if missing → initialize-project (blocking)
 openspec context --json                     # root.path == <project-root>
 bin/phase-gate                              # exit 0 required: the declared phase must permit implementation
+test -f docs/PRD.md && ! grep -qiE '^Pending' docs/PRD.md   # only when phase-gate reports 'documentation' (project-docs)
 openspec status --change "<name>" --json
 openspec validate "<name>" --type change --json            # without ERROR
 openspec instructions apply --change "<name>" --json       # state: ready | all_done

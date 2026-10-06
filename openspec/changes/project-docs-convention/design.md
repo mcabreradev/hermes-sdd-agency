@@ -92,8 +92,8 @@ Conflating the two would put a documentation slip in the same class as a leaked 
 `single-pr`. The change is one convention delivered as prose across the files that already own the
 relevant stages; there is no slice boundary at which the behavior is usable alone (a home declared
 without the producer, or the producer without the check, is half a convention). The authored-line
-figure is measured before the final commit and recorded here; it is expected to be under the
-advisory ~400-line budget (`rules/coding.md`), so no larger strategy is forced.
+figure measured before the final commit is **354 insertions / 9 deletions across 13 files** against
+the advisory ~400-line budget (`rules/coding.md`); it is under it, so no larger strategy is forced.
 
 ## Domain — trigger evaluation
 

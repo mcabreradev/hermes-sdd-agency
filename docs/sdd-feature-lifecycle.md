@@ -65,7 +65,8 @@ two that can block progress (`rules/orchestration.md`).
 
 If the repo does not yet have `openspec/project.md` (the marker that it entered the
 loop), this runs first. Creates `openspec/`, `project.md` with the product description,
-`docs/architecture`, `docs/decisions`, `reports/` and the initialization report.
+`docs/architecture`, `docs/PRD.md` (the product document's declared home), `docs/decisions`,
+`reports/` and the initialization report.
 The mandatory gateway: without this marker nothing starts
 (`rules/project-boundaries.md`).
 
@@ -79,7 +80,8 @@ The problem/feature is analyzed before any planning or code:
   today, what it would touch.
 - It produces the **PRD** via the `prd` persona ("Generate a comprehensive Product
   Requirements Document"): what the product must do, for whom, success criteria.
-  This captures *intent* before any spec.
+  This captures *intent* before any spec. The PRD is written to its declared home,
+  `docs/PRD.md` (`project-docs`), created at Stage 0 and derived from `openspec/project.md`.
 - If the idea arrives vague, `requirements-clarity` runs first to bound the scope.
 
 > The PRD is product, so it lives in the repo, never in `~/.hermes/`
